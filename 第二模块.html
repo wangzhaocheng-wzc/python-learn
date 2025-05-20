@@ -1,0 +1,1587 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python学习之旅 - 模块二：程序控制结构</title>
+    <!-- 引入外部资源 -->
+    <link rel="stylesheet" href="https://cdn.staticfile.org/tailwindcss/2.2.19/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@latest/dist/mermaid.min.js"></script>
+    <style>
+        /* 基础样式设置 */
+        :root {
+            --primary-color: #3B82F6;
+            --primary-dark: #2563EB;
+            --secondary-color: #10B981;
+            --accent-color: #8B5CF6;
+            --text-color: #1F2937;
+            --text-light: #4B5563;
+            --bg-color: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --border-color: #E5E7EB;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --highlight-bg: #EFF6FF;
+            --highlight-border: #DBEAFE;
+        }
+
+        .dark {
+            --primary-color: #60A5FA;
+            --primary-dark: #3B82F6;
+            --secondary-color: #34D399;
+            --accent-color: #A78BFA;
+            --text-color: #F9FAFB;
+            --text-light: #E5E7EB;
+            --bg-color: #0F172A; /* 更深的背景色 */
+            --bg-secondary: #1E293B; /* 更深的次要背景色 */
+            --border-color: #475569;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --highlight-bg: #0D2150; /* 更深的高亮背景色 */
+            --highlight-border: #3B82F6;
+        }
+        
+        /* 深色模式下的文本颜色增强 */
+        .dark .text-gray-600 {
+            color: #D1D5DB !important; /* 提高灰色文本在深色背景下的可见度 */
+        }
+        
+        .dark .text-gray-700 {
+            color: #E5E7EB !important;
+        }
+        
+        .dark .text-gray-800 {
+            color: #F3F4F6 !important;
+        }
+        
+        /* 深色模式下的卡片和背景增强 */
+        .dark .card {
+            background-color: #1F2937 !important;
+            border-color: #374151 !important;
+            border: 1px solid #374151 !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        /* 安装Python解释器的三个环境模块 */
+        .dark .installation-section {
+            background-color: #1F2937 !important;
+            color: #F8FAFC !important;
+            border: 1px solid #374151 !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        /* Python开发工具模块 */
+        .dark .tools-section {
+            background-color: #1F2937 !important;
+            color: #F8FAFC !important;
+            border: 1px solid #374151 !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        .dark #IDLE {
+            background-color: #1F2937 !important;
+            color: #F8FAFC !important;
+            border: 1px solid #374151 !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        .dark #IPython, .dark #PyCharm, .dark .practice-section, .dark .windows-section, .dark .linux-section, .dark .macos-section {
+            background-color: #1F2937 !important;
+            color: #F8FAFC !important;
+            border: 1px solid #374151 !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        /* 练习模块 */
+        .dark .practice-section {
+            background-color: var(--bg-secondary);
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .dark .practice-section h3, 
+        .dark .practice-section h4, 
+        .dark .practice-section p, 
+        .dark .practice-section li {
+            color: #F8FAFC !important;
+        }
+        
+        .dark .practice-section code {
+            background-color: #1E293B !important;
+            color: #F8FAFC !important;
+        }
+        
+        .dark .practice-section pre {
+            background-color: var(--bg-secondary);
+            border-left: 4px solid var(--primary-color);
+        }
+        /* 深色模式下的内容区域增强 */
+        .dark .module-section {
+            background-color: #1F2937 !important;
+            border-radius: 0.5rem;
+            border: 1px solid #E5E7EB;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .dark .module-section h3, .dark .module-section h4, .dark .module-section p, .dark .module-section li {
+            color: #F8FAFC !important;
+        }
+        
+        .dark .text-gray-700 {
+            color: #E5E7EB !important;
+        }
+        
+        .dark .text-gray-800 {
+            color: #F3F4F6 !important;
+        }
+        
+        /* 深色模式下的卡片和背景增强 */
+        .dark .card {
+            background-color: var(--bg-color);
+            border-radius: 0.5rem;
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        /* 确保所有深色模式下的文本有足够对比度 */
+        .dark p, .dark li, .dark h3, .dark h4, .dark span {
+            color: #F8FAFC !important; /* 更亮的文本颜色，提高对比度 */
+        }
+        
+        /* 深色模式下的标题增强 */
+        .dark h1, .dark h2 {
+            color: #F8FAFC !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* 深色模式下的代码块增强 */
+        .dark pre {
+            background-color: #0D1829 !important;
+            border-left: 4px solid #60A5FA !important;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            margin: 1.5rem 0;
+            padding: 1.25rem;
+        }
+        
+        .dark code {
+            background-color: #1E293B !important;
+            color: #F8FAFC !important;
+            font-weight: 500;
+        }
+        
+        .dark pre code {
+            background-color: transparent !important;
+            color: #F8FAFC !important;
+            font-weight: normal;
+        }
+                /* 进度条 */
+        .progress-container {
+            width: 100%;
+            height: 4px;
+            background: rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+        
+        /* 深色模式下的表格增强 */
+        .dark table th {
+            background-color: #0D1829 !important;
+            color: #F8FAFC !important;
+            border-color: #374151 !important;
+            font-weight: 600;
+        }
+        
+        .dark table td {
+            background-color: #1E293B !important;
+            border-color: #374151 !important;
+            color: #F1F5F9 !important;
+        }
+        
+        .dark table tr:nth-child(odd) td {
+            background-color: #172033 !important;
+        }
+        
+        /* 深色模式下的引用和提示框增强 */
+        .dark blockquote {
+            background-color: #0D1829 !important;
+            border-color: #60A5FA !important;
+            color: #F8FAFC !important;
+            padding: 1.25rem !important;
+            border-radius: 0.375rem !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+            border-left: 4px solid #60A5FA !important;
+            margin: 1.5rem 0 !important;
+        }
+        
+        /* Hero区域按钮深色模式增强 */
+        .dark a.bg-white {
+            background-color: #2563EB !important;
+            color: #FFFFFF !important;
+            border: 1px solid #60A5FA !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+            font-weight: 600;
+        }
+        
+        .dark .hover\:bg-blue-50:hover {
+            background-color: #1D4ED8 !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4) !important;
+            color: #FFFFFF !important;
+        }
+        
+        /* 深色模式下的Hero区域增强 */
+        .dark .bg-gradient-to-r {
+            background: linear-gradient(to right, #1E3A8A, #5B21B6) !important;
+            border: 1px solid #2D3748;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* 深色模式下的导航链接增强 */
+        .dark .nav-link {
+            color: #E2E8F0 !important;
+            transition: all 0.2s ease;
+        }
+        
+        .dark .nav-link:hover {
+            color: #7DD3FC !important;
+            background-color: #0D1829 !important;
+            border-radius: 0.375rem;
+            padding-left: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        
+        .dark .nav-link.active {
+            color: #38BDF8 !important;
+            font-weight: 600;
+            background-color: #0D1829 !important;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            border-left: 3px solid #60A5FA;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', Tahoma, Arial, Roboto, "Droid Sans", "Helvetica Neue", "Droid Sans Fallback", "Heiti SC", "Hiragino Sans GB", Simsun, sans-serif;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* 排版样式 */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Noto Serif SC', serif;
+            font-weight: 600;
+            line-height: 1.3;
+            margin-bottom: 0.75em;
+            color: var(--text-color);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        h2 {
+            font-size: 2rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        h4 {
+            font-size: 1.25rem;
+            margin-top: 1.25rem;
+        }
+
+        p {
+            margin-bottom: 1.25rem;
+            line-height: 1.7;
+        }
+
+        /* 首字下沉效果 */
+        .first-letter::first-letter {
+            font-size: 3.5em;
+            font-weight: 700;
+            float: left;
+            line-height: 0.8;
+            margin-right: 0.1em;
+            color: var(--primary-color);
+        }
+
+        /* 链接样式 */
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        /* 代码样式 */
+        pre {
+            background-color: var(--bg-secondary);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        code {
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+            background-color: var(--bg-secondary);
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+            color: var(--text-color);
+        }
+
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: inherit;
+            font-size: 1em;
+            line-height: 1.6;
+        }
+
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--bg-secondary);
+            font-weight: 600;
+        }
+
+        /* 引用样式 */
+        blockquote {
+            border-left: 4px solid var(--accent-color);
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+            color: var(--text-light);
+        }
+
+        /* 列表样式 */
+        ul, ol {
+            margin: 1.25rem 0;
+            padding-left: 1.5rem;
+        }
+
+        ul {
+            list-style-type: disc;
+        }
+
+        ol {
+            list-style-type: decimal;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background-color: var(--bg-color);
+            border-radius: 0.5rem;
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 高亮区域 */
+        .highlight {
+            background-color: var(--highlight-bg);
+            border: 1px solid var(--highlight-border);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        /* 导航样式 */
+        .nav-link {
+            display: block;
+            padding: 0.5rem 0;
+            color: var(--text-light);
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+            transform: translateX(5px);
+            text-decoration: none;
+        }
+
+        .nav-link.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        /* 目录样式 */
+        .toc-container {
+            position: fixed;
+            top: 5rem;
+            bottom: 2rem;
+            width: 280px;
+            overflow-y: auto;
+            padding-right: 1rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) var(--bg-secondary);
+        }
+
+        .toc-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .toc-container::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        .toc-container::-webkit-scrollbar-thumb {
+            background-color: var(--primary-color);
+            border-radius: 3px;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 1023px) {
+            .toc-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: auto;
+                width: 100%;
+                height: 100%;
+                z-index: 50;
+                background-color: var(--bg-color);
+                padding: 2rem;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .toc-container.show {
+                transform: translateX(0);
+            }
+
+            .toc-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 40;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+            }
+
+            .toc-overlay.show {
+                opacity: 1;
+                pointer-events: auto;
+            }
+        }
+
+        /* 进度条样式 */
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        /* 主题切换按钮 */
+        .theme-toggle {
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--bg-secondary);
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* 代码高亮 */
+        .token.comment,
+        .token.prolog,
+        .token.doctype,
+        .token.cdata {
+            color: #6B7280;
+        }
+
+        .token.punctuation {
+            color: #6B7280;
+        }
+
+        .token.namespace {
+            opacity: 0.7;
+        }
+
+        .token.property,
+        .token.tag,
+        .token.boolean,
+        .token.number,
+        .token.constant,
+        .token.symbol {
+            color: #EA580C;
+        }
+
+        .token.selector,
+        .token.attr-name,
+        .token.string,
+        .token.char,
+        .token.builtin {
+            color: #059669;
+        }
+
+        .token.operator,
+        .token.entity,
+        .token.url,
+        .language-css .token.string,
+        .style .token.string {
+            color: #9333EA;
+        }
+
+        .token.atrule,
+        .token.attr-value,
+        .token.keyword {
+            color: #2563EB;
+        }
+
+        .token.function,
+        .token.class-name {
+            color: #D97706;
+        }
+
+        .token.regex,
+        .token.important,
+        .token.variable {
+            color: #EC4899;
+        }
+
+        .token.important,
+        .token.bold {
+            font-weight: bold;
+        }
+
+        .token.italic {
+            font-style: italic;
+        }
+
+        .token.entity {
+            cursor: help;
+        }
+
+        /* 深色模式代码高亮调整 */
+        .dark .token.comment,
+        .dark .token.prolog,
+        .dark .token.doctype,
+        .dark .token.cdata {
+            color: #94A3B8; /* 更亮的注释颜色 */
+        }
+
+        .dark .token.punctuation {
+            color: #E2E8F0; /* 更亮的标点符号 */
+        }
+        
+        /* 深色模式下的页面背景增强 */
+        .dark body {
+            background-color: #0A1120; /* 更深的页面背景 */
+        }
+        
+        /* 深色模式下的顶部导航栏增强 */
+        .dark header {
+            background-color: #0D1829 !important;
+            border-bottom: 1px solid #1E293B;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .dark .token.property,
+        .dark .token.tag,
+        .dark .token.boolean,
+        .dark .token.number,
+        .dark .token.constant,
+        .dark .token.symbol {
+            color: #FB923C; /* 更亮的属性颜色 */
+        }
+
+        .dark .token.selector,
+        .dark .token.attr-name,
+        .dark .token.string,
+        .dark .token.char,
+        .dark .token.builtin {
+            color: #34D399; /* 更亮的字符串颜色 */
+        }
+
+        .dark .token.operator,
+        .dark .token.entity,
+        .dark .token.url,
+        .dark .language-css .token.string,
+        .dark .style .token.string {
+            color: #C4B5FD; /* 更亮的运算符颜色 */
+        }
+
+        .dark .token.atrule,
+        .dark .token.attr-value,
+        .dark .token.keyword {
+            color: #93C5FD; /* 更亮的关键字颜色 */
+        }
+
+        .dark .token.function,
+        .dark .token.class-name {
+            color: #FCD34D; /* 更亮的函数名颜色 */
+        }
+
+        .dark .token.regex,
+        .dark .token.important,
+        .dark .token.variable {
+            color: #F9A8D4; /* 更亮的变量颜色 */
+        }
+        
+        /* 深色模式下的卡片内容增强 */
+        .dark .card h3, .dark .card h4 {
+            color: #BAE6FD !important; /* 更亮的蓝色标题 */
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .dark .card a {
+            color: #38BDF8 !important;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+        
+        .dark .card a:hover {
+            color: #7DD3FC !important; /* 更亮的悬停颜色 */
+            text-decoration: none;
+        }
+        
+        /* 深色模式下的内容区域增强 */
+.dark main section {
+    background-color: #0D1829;
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #1E293B;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* 练习模块深色模式样式 */
+.dark .bg-gray-50 {
+    background-color: #1F2937 !important;
+    color: #F8FAFC !important;
+}
+
+.dark .bg-gray-50 h4,
+.dark .bg-gray-50 p,
+.dark .bg-gray-50 li {
+    color: #F8FAFC !important;
+}
+
+.dark .bg-gray-50 code {
+    background-color: #1E293B !important;
+    color: #F8FAFC !important;
+}
+
+.dark .bg-gray-50 pre {
+    background-color: #0D1829 !important;
+    border-left: 4px solid #60A5FA !important;
+}
+        
+        /* 深色模式下的内容文本增强 */
+        .dark main section p {
+            color: #F8FAFC !important;
+            line-height: 1.8;
+        }
+        
+        /* 深色模式下的列表项增强 */
+        .dark main section li {
+            color: #F8FAFC !important;
+            margin-bottom: 0.75rem;
+        }
+        
+        /* 深色模式下的内容块增强 */
+        .dark .highlight {
+            background-color: #0D2150 !important;
+            border: 1px solid #1E40AF !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+        <div class="progress-container no-print">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <!-- 顶部导航栏 -->
+        <header class="sticky top-0 z-30 bg-white dark:bg-gray-900 shadow-md">
+            <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fab fa-python text-3xl text-blue-500"></i>
+                    <h1 class="text-xl font-bold m-0">Python学习之旅</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="toc-toggle" class="lg:hidden p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                        <i class="fas fa-bars text-gray-600 dark:text-gray-300"></i>
+                    </button>
+                    <div class="theme-toggle" id="theme-toggle">
+                        <i class="fas fa-sun text-yellow-500 dark:hidden"></i>
+                        <i class="fas fa-moon text-blue-300 hidden dark:block"></i>
+                    </div>
+                </div>
+            </div>
+        </header>
+    <!-- 主要内容区域 -->
+    <div class="container mx-auto px-4 py-8 flex flex-col lg:flex-row">
+        <!-- 目录区域 -->
+        <aside class="lg:w-1/4 lg:pr-8">
+            <div class="toc-container hidden lg:block">
+                <h2 class="text-lg font-bold mb-4 flex items-center">
+                    <i class="fas fa-list-ul mr-2 text-blue-500"></i>目录
+                </h2>
+                <nav id="toc" class="space-y-1">
+                    <!-- 目录内容将通过JavaScript动态生成 -->
+                </nav>
+            </div>
+        </aside>
+
+        <!-- 移动端目录覆盖层 -->
+        <div class="toc-overlay" id="toc-overlay"></div>
+        <div class="toc-container lg:hidden" id="mobile-toc">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold flex items-center">
+                    <i class="fas fa-list-ul mr-2 text-blue-500"></i>目录
+                </h2>
+                <button id="close-toc" class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <i class="fas fa-times text-gray-600 dark:text-gray-300"></i>
+                </button>
+            </div>
+            <nav class="space-y-1">
+                <!-- 移动端目录内容将通过JavaScript动态复制 -->
+            </nav>
+        </div>
+           <!-- 内容区域 -->
+        <main class="lg:w-3/4 animate-fade-in" id="content">
+    <!-- Hero 区域 -->
+            <section class="mb-12 relative overflow-hidden rounded-xl">
+                <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-8 md:p-12 rounded-xl shadow-lg">
+                        <div class="relative z-10">
+                        <h1 class="text-4xl md:text-5xl font-bold mb-6 leading-tight">Python程序控制结构</h1>
+                        <p class="text-xl md:text-2xl mb-8 opacity-90">掌握分支、循环与程序逻辑，构建智能化程序的基石</p>
+                        <div class="flex flex-wrap justify-center gap-4">
+                        <a href="#module-1" class="btn bg-white text-blue-600 hover:bg-blue-50 transition duration-300 rounded-lg px-6 py-3 shadow-md">
+                        <i class="fas fa-code-branch mr-2"></i>分支结构
+                        </a>
+                        <a href="#module-2" class="btn bg-white text-blue-600 hover:bg-blue-50 transition duration-300 rounded-lg px-6 py-3 shadow-md">
+                        <i class="fas fa-sync-alt mr-2"></i>循环结构
+                        </a>
+                        <a href="#module-3" class="btn bg-white text-blue-600 hover:bg-blue-50 transition duration-300 rounded-lg px-6 py-3 shadow-md">
+                        <i class="fas fa-puzzle-piece mr-2"></i>构造程序逻辑
+                    </a>
+                </div>
+            </div>
+             <!-- 装饰性元素 -->
+             <div class="absolute right-0 top-0 h-full w-1/3 opacity-20">
+                <div class="absolute right-0 top-1/4 transform rotate-45">
+                    <i class="fab fa-python text-9xl"></i>
+                </div>
+                <div class="absolute right-20 bottom-1/4 transform -rotate-12">
+                    <i class="fas fa-terminal text-7xl"></i>
+                </div>
+            </div>
+         </div>
+        </section>
+
+                <!-- 模块介绍 -->
+                <section class="mb-12">
+                    <div class="card p-6 mb-8">
+                        <h2 class="text-2xl font-bold mb-4 flex items-center">
+                            <i class="fas fa-info-circle mr-2 text-primary-color"></i>模块介绍
+                        </h2>
+                        <p class="first-letter-drop mb-4">在Python编程的世界中，控制结构是构建程序逻辑的基础。<br>本模块将带您深入了解Python中的分支结构、循环结构以及如何构造程序逻辑。通过这些知识，您将能够编写更加灵活、高效的Python程序，解决各种实际问题。</p>
+                        <p class="mb-4">在学习了Python的基础语法后，掌握程序的控制流是迈向编程能力提升的关键一步。本模块将通过大量实例和练习，帮助您牢固掌握这些重要概念。</p>
+                        <div class="highlight">
+                            <p class="font-medium"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>学习提示</p>
+                            <p>编程能力的提升需要大量实践。在学习每个概念后，请尝试修改示例代码或自己编写新的程序来巩固所学知识。</p>
+                        </div>
+                    </div>
+                    
+                </section>
+
+                <!-- 模块1：分支结构 -->
+                <section id="module-1" class="mb-16">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="bg-blue-500 text-white rounded-full w-10 h-10 flex items-center justify-center">
+                            <i class="fas fa-code-branch"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold">分支结构</h2>
+                    </div>
+
+                    <div class="card p-6 mb-8">
+                        <h3 id="section-1-1" class="text-2xl font-bold mb-4">应用场景</h3>
+                        <p class="mb-4">迄今为止，我们写的Python代码都是一条一条语句顺序执行，这种代码结构通常称之为顺序结构。<br>然而仅有顺序结构并不能解决所有的问题，比如我们设计一个游戏，<br>游戏第一关的通关条件是玩家获得1000分，那么在完成本局游戏后，我们要根据玩家得到分数来决定究竟是进入第二关，还是告诉玩家"Game Over"，<br>这里就会产生两个分支，而且这两个分支只有一个会被执行。<br>类似的场景还有很多，我们将这种结构称之为"分支结构"或"选择结构"。</p>
+                    </div>
+
+                    <div class="card p-6 mb-8">
+                        <h3 id="section-1-2" class="text-2xl font-bold mb-4">if语句的使用</h3>
+                        <p class="mb-4">在Python中，要构造分支结构可以使用<code>if</code>、<code>elif</code>和<code>else</code>关键字。<br>所谓<strong>关键字</strong>就是有特殊含义的单词，像<code>if</code>和<code>else</code>就是专门用于构造分支结构的关键字，<br>很显然你不能够使用它作为变量名（事实上，用作其他的标识符也是不可以）。<br>下面的例子中演示了如何构造一个分支结构。</p>
+                        
+                        <pre><code>"""
+用户身份验证
+
+Version: 0.1
+Author: Wik
+"""
+username = input('请输入用户名: ')
+password = input('请输入口令: ')
+# 用户名是admin且密码是123456则身份验证成功否则身份验证失败
+if username == 'admin' and password == '123456':
+    print('身份验证成功!')
+else:
+    print('身份验证失败!')</code> </pre>
+                        
+                        <p class="mb-4">需要说明的是和C/C++、Java等语言不同，Python中没有用花括号来构造代码块而是<strong>使用了缩进的方式来表示代码的层次结构</strong>，<br>如果<code>if</code>条件成立的情况下需要执行多条语句，只要保持多条语句具有相同的缩进就可以了。<br>换句话说<strong>连续的代码如果又保持了相同的缩进那么它们属于同一个代码块</strong>，相当于是一个执行的整体。<br><strong>缩进</strong>可以使用任意数量的空格，但<strong>通常使用4个空格</strong>，建议大家<strong>不要使用制表键</strong>或者<strong>设置你的代码编辑工具自动将制表键变成4个空格</strong>。</p>
+                        
+                        <p class="mb-4">当然如果要构造出更多的分支，可以使用<code>if...elif...else...</code>结构或者嵌套的<code>if...else...</code>结构，下面的代码演示了如何利用多分支结构实现分段函数求值。</p>
+                        
+                        <pre><code>"""
+分段函数求值
+
+        3x - 5  (x > 1)
+f(x) =  x + 2   (-1 <= x <= 1)
+        5x + 3  (x < -1)
+
+Version: 0.1
+Author: Wik
+"""
+
+x = float(input('x = '))
+if x > 1:
+    y = 3 * x - 5
+elif x >= -1:
+    y = x + 2
+else:
+    y = 5 * x + 3
+print('f(%.2f) = %.2f' % (x, y))</code> </pre>
+                        
+                        <p class="mb-4">当然根据实际开发的需要，分支结构是可以嵌套的，<br>例如判断是否通关以后还要根据你获得的宝物或者道具的数量对你的表现给出等级（比如点亮两颗或三颗星星），<br>那么我们就需要在<code>if</code>的内部构造出一个新的分支结构，同理<code>elif</code>和<code>else</code>中也可以再构造新的分支，<br>我们称之为嵌套的分支结构，也就是说上面的代码也可以写成下面的样子。</p>
+                        
+                        <pre><code>"""
+分段函数求值
+        3x - 5  (x > 1)
+f(x) =  x + 2   (-1 <= x <= 1)
+        5x + 3  (x < -1)
+
+Version: 0.1
+Author: Wik
+"""
+
+x = float(input('x = '))
+if x > 1:
+    y = 3 * x - 5
+else:
+    if x >= -1:
+        y = x + 2
+    else:
+        y = 5 * x + 3
+print('f(%.2f) = %.2f' % (x, y))</code> </pre>
+                        
+                        <div class="highlight">
+                            <p class="font-medium"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>说明</p>
+                            <p>大家可以自己感受一下这两种写法到底是哪一种更好。<br>在之前我们提到的Python之禅中有这么一句话"Flat is better than nested."，<br>之所以提倡代码"扁平化"是因为嵌套结构的嵌套层次多了之后会严重的影响代码的可读性，<br>所以能使用扁平化的结构时就不要使用嵌套。</p>
+                        </div>
+                    </div>
+
+                    <div class="card p-6 mb-8">
+                        <h3 id="section-1-3" class="text-2xl font-bold mb-4">练习</h3>
+                        
+                        <h4 class="text-xl font-semibold mb-3">练习1：英制单位英寸与公制单位厘米互换</h4>
+                        <pre><code>"""
+英制单位英寸和公制单位厘米互换
+
+Version: 0.1
+Author: Wik
+"""
+value = float(input('请输入长度: '))
+unit = input('请输入单位: ')
+if unit == 'in' or unit == '英寸':
+    print('%f英寸 = %f厘米' % (value, value * 2.54))
+elif unit == 'cm' or unit == '厘米':
+    print('%f厘米 = %f英寸' % (value, value / 2.54))
+else:
+    print('请输入有效的单位')</code> </pre>
+                        
+                        <h4 class="text-xl font-semibold mb-3 mt-6">练习2：百分制成绩转换为等级制成绩</h4>
+                        <p class="mb-2"><strong>要求</strong>：如果输入的成绩在90分以上（含90分）输出A；80分-90分（不含90分）输出B；70分-80分（不含80分）输出C；60分-70分（不含70分）输出D；60分以下输出E。</p>
+                        <pre><code>"""
+百分制成绩转换为等级制成绩
+
+Version: 0.1
+Author: Wik
+"""
+score = float(input('请输入成绩: '))
+if score >= 90:
+    grade = 'A'
+elif score >= 80:
+    grade = 'B'
+elif score >= 70:
+    grade = 'C'
+elif score >= 60:
+    grade = 'D'
+else:
+    grade = 'E'
+print('对应的等级是:', grade)</code> </pre>
+                        
+                        <h4 class="text-xl font-semibold mb-3 mt-6">练习3：输入三条边长，如果能构成三角形就计算周长和面积</h4>
+                        <pre><code>"""
+判断输入的边长能否构成三角形，如果能则计算出三角形的周长和面积
+
+Version: 0.1
+Author: Wik
+"""
+a = float(input('a = '))
+b = float(input('b = '))
+c = float(input('c = '))
+if a + b > c and a + c > b and b + c > a:
+    print('周长: %f' % (a + b + c))
+    p = (a + b + c) / 2
+    area = (p * (p - a) * (p - b) * (p - c)) ** 0.5
+    print('面积: %f' % (area))
+else:
+    print('不能构成三角形')</code> </pre>
+                        
+                        <div class="highlight mt-4">
+                            <p class="font-medium"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>说明</p>
+                            <p>上面使用的通过边长计算三角形面积的公式叫做海伦公式。</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 模块2：循环结构 -->
+                <section id="module-2" class="mb-16">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="bg-green-500 text-white rounded-full w-10 h-10 flex items-center justify-center">
+                            <i class="fas fa-sync-alt"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold">循环结构</h2>
+                    </div>
+
+                    <div class="card p-6 mb-8">
+                        <h3 id="section-2-1" class="text-2xl font-bold mb-4">应用场景</h3>
+                        <p class="mb-4">我们在写程序的时候，一定会遇到需要重复执行某条或某些指令的场景。<br>例如用程序控制机器人踢足球，如果机器人持球而且还没有进入射门范围，那么我们就要一直发出让机器人向球门方向移动的指令。<br>在这个场景中，让机器人向球门方向移动就是一个需要重复的动作，<br>当然这里还会用到上一课讲的分支结构来判断机器人是否持球以及是否进入射门范围。<br>再举一个简单的例子，如果要实现每隔1秒中在屏幕上打印一次"hello, world"并持续打印一个小时，<br>我们肯定不能够直接把<code>print('hello, world')</code>这句代码写3600遍，<br>这里同样需要循环结构。</p>
+                        <p class="mb-4">循环结构就是程序中控制某条或某些指令重复执行的结构。<br>在Python中构造循环结构有两种做法，一种是<code>for-in</code>循环，一种是<code>while</code>循环。</p>
+                    </div>
+
+                    <div class="card p-6 mb-8">
+                        <h3 id="section-2-2" class="text-2xl font-bold mb-4">for-in循环</h3>
+                        <p class="mb-4">如果明确的知道循环执行的次数或者要对一个容器进行迭代（后面会讲到），<br>那么我们推荐使用<code>for-in</code>循环，例如下面代码中计算1~100求和的结果（$\sum \limits_{n=1}^{100}n$）。</p>
+                        
+                        <pre><code>"""
+用for循环实现1~100求和
+
+Version: 0.1
+Author: Wik
+"""
+
+sum = 0
+for x in range(101):
+    sum += x
+print(sum)</code> </pre>
+                        
+                        <p class="mb-4">需要说明的是上面代码中的<code>range(1, 101)</code>可以用来构造一个从1到100的范围，<br>当我们把这样一个范围放到<code>for-in</code>循环中，就可以通过前面的循环变量<code>x</code>依次取出从1到100的整数。当然，<code>range</code>的用法非常灵活，下面给出了一个例子：</p>
+                        
+                        <ul class="list-disc pl-6 mb-4 space-y-2">
+                            <li><code>range(101)</code>：可以用来产生0到100范围的整数，需要注意的是取不到101。</li>
+                            <li><code>range(1, 101)</code>：可以用来产生1到100范围的整数，相当于前面是闭区间后面是开区间。</li>
+                            <li><code>range(1, 101, 2)</code>：可以用来产生1到100的奇数，其中2是步长，即每次数值递增的值。</li>
+                            <li><code>range(100, 0, -2)</code>：可以用来产生100到1的偶数，其中-2是步长，即每次数字递减的值。</li>
+                        </ul>
+                        
+                        <p class="mb-4">知道了这一点，我们可以用下面的代码来实现1~100之间的偶数求和。</p>
+                        
+                        <pre><code>"""
+用for循环实现1~100之间的偶数求和
+
+Version: 0.1
+Author: Wik
+"""
+
+sum = 0
+for x in range(2, 101, 2):
+    sum += x
+print(sum)</code> </pre>
+                        
+                        <p class="mb-4">当然，也可以通过在循环中使用分支结构的方式来实现相同的功能，代码如下所示。</p>
+                        
+                        <pre><code>"""
+用for循环实现1~100之间的偶数求和
+
+Version: 0.1
+Author: Wik
+"""
+
+sum = 0
+for x in range(1, 101):
+    if x % 2 == 0:
+        sum += x
+print(sum)</code> </pre>
+                        
+                        <div class="highlight">
+                            <p class="font-medium"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>说明</p>
+                            <p>相较于上面直接跳过奇数的做法，下面这种做法很明显并不是很好的选择。</p>
+                        </div>
+                    </div>
+
+                    <div class="card p-6 mb-8">
+                        <h3 id="section-2-3" class="text-2xl font-bold mb-4">while循环</h3>
+                        <p class="mb-4">如果要构造不知道具体循环次数的循环结构，我们推荐使用<code>while</code>循环。<br><code>while</code>循环通过一个能够产生或转换出<code>bool</code>值的表达式来控制循环，表达式的值为<code>True</code>则继续循环；表达式的值为<code>False</code>则结束循环。</p>
+                        
+                        <p class="mb-4">下面我们通过一个"猜数字"的小游戏来看看如何使用<code>while</code>循环。<br>猜数字游戏的规则是：计算机出一个1到100之间的随机数，玩家输入自己猜的数字，<br>计算机给出对应的提示信息（大一点、小一点或猜对了），如果玩家猜中了数字，计算机提示用户一共猜了多少次，游戏结束，否则游戏继续。</p>
+                        
+                        <pre><code>"""
+猜数字游戏
+
+Version: 0.1
+Author: Wik
+"""
+import random
+
+answer = random.randint(1, 100)
+counter = 0
+while True:
+    counter += 1
+    number = int(input('请输入: '))
+    if number < answer:
+        print('大一点')
+    elif number > answer:
+        print('小一点')
+    else:
+        print('恭喜你猜对了!')
+        break
+print('你总共猜了%d次' % counter)
+if counter > 7:
+    print('你的智商余额明显不足')</code> </pre>
+                        
+                        <p class="mb-4">上面的代码中使用了<code>break</code>关键字来提前终止循环，需要注意的是<code>break</code>只能终止它所在的那个循环，<br>这一点在使用嵌套的循环结构（下面会讲到）需要引起注意。除了<code>break</code>之外，还有另一个关键字是<code>continue</code>，<br>它可以用来放弃本次循环后续的代码直接让循环进入下一轮。</p>
+                        
+                        <p class="mb-4">和分支结构一样，循环结构也是可以嵌套的，也就是说在循环中还可以构造循环结构。<br>下面的例子演示了如何通过嵌套的循环来输出一个九九乘法表。</p>
+                        
+                        <pre><code>"""
+输出乘法口诀表(九九表)
+
+Version: 0.1
+Author: Wik
+"""
+
+for i in range(1, 10):
+    for j in range(1, i + 1):
+        print('%d*%d=%d' % (i, j, i * j), end='\t')
+    print()</code> </pre>
+                    </div>
+
+                    <div class="card p-6 mb-8">
+                        <h3 id="section-2-4" class="text-2xl font-bold mb-4">练习</h3>
+                        
+                        <h4 class="text-xl font-semibold mb-3">练习1：输入一个正整数判断是不是素数</h4>
+                        <p class="mb-2"><strong>提示</strong>：素数指的是只能被1和自身整除的大于1的整数。</p>
+                        <pre><code>"""
+输入一个正整数判断它是不是素数
+
+Version: 0.1
+Author: Wik
+Date: 2018-03-01
+"""
+from math import sqrt
+
+num = int(input('请输入一个正整数: '))
+end = int(sqrt(num))
+is_prime = True
+for x in range(2, end + 1):
+    if num % x == 0:
+        is_prime = False
+        break
+if is_prime and num != 1:
+    print('%d是素数' % num)
+else:
+    print('%d不是素数' % num)</code> </pre>
+                        
+                        <h4 class="text-xl font-semibold mb-3 mt-6">练习2：输入两个正整数，计算它们的最大公约数和最小公倍数</h4>
+                        <p class="mb-2"><strong>提示</strong>：两个数的最大公约数是两个数的公共因子中最大的那个数；两个数的最小公倍数则是能够同时被两个数整除的最小的那个数。</p>
+                        <pre><code>"""
+输入两个正整数计算它们的最大公约数和最小公倍数
+
+Version: 0.1
+Author: Wik
+Date: 2018-03-01
+"""
+
+x = int(input('x = '))
+y = int(input('y = '))
+# 如果x大于y就交换x和y的值
+if x > y:
+    # 通过下面的操作将y的值赋给x, 将x的值赋给y
+    x, y = y, x
+# 从两个数中较的数开始做递减的循环
+for factor in range(x, 0, -1):
+    if x % factor == 0 and y % factor == 0:
+        print('%d和%d的最大公约数是%d' % (x, y, factor))
+        print('%d和%d的最小公倍数是%d' % (x, y, x * y // factor))
+        break</code> </pre>
+                        
+                        <h4 class="text-xl font-semibold mb-3 mt-6">练习3：打印如下所示的三角形图案</h4>
+                        <pre><code>*
+**
+***
+****
+*****</code></pre>
+                        <pre><code>    *
+   **
+  ***
+ ****
+*****</code></pre>
+                        <pre><code>    *
+   ***
+  *****
+ *******
+*********</code></pre>
+                        
+                        <pre><code>"""
+打印三角形图案
+
+Version: 0.1
+Author: Wik
+"""
+
+row = int(input('请输入行数: '))
+for i in range(row):
+    for _ in range(i + 1):
+        print('*', end='')
+    print()
+
+
+for i in range(row):
+    for j in range(row):
+        if j < row - i - 1:
+            print(' ', end='')
+        else:
+            print('*', end='')
+    print()
+
+for i in range(row):
+    for _ in range(row - i - 1):
+        print(' ', end='')
+    for _ in range(2 * i + 1):
+        print('*', end='')
+    print()</code> </pre>
+                    </div>
+                </section>
+
+                <!-- 模块3：构造程序逻辑 -->
+                <section id="module-3" class="mb-16">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="bg-purple-500 text-white rounded-full w-10 h-10 flex items-center justify-center">
+                            <i class="fas fa-puzzle-piece"></i>
+                        </div>
+                        <h2 class="text-3xl font-bold">构造程序逻辑</h2>
+                    </div>
+
+                    <div class="card p-6 mb-8">
+                        <p class="first-letter-drop mb-4">学完前面的几个章节后，我觉得有必要在这里带大家做一些练习来巩固之前所学的知识，<br>虽然迄今为止我们学习的内容只是Python的冰山一角，但是这些内容已经足够我们来构建程序中的逻辑。<br>对于编程语言的初学者来说，在学习了Python的核心语言元素（变量、类型、运算符、表达式、分支结构、循环结构等）之后，<br>必须做的一件事情就是尝试用所学知识去解决现实中的问题，换句话说就是锻炼自己把用人类自然语言描述的算法（解决问题的方法和步骤）翻译成Python代码的能力，而这件事情必须通过大量的练习才能达成。</p>
+                        <p class="mb-4">我们在本章为大家整理了一些经典的案例和习题，希望通过这些例子，一方面帮助大家巩固之前所学的Python知识，另一方面帮助大家了解如何建立程序中的逻辑以及如何运用一些简单的算法解决现实中的问题。</p>
+                    </div>
+
+                    <div class="card p-6 mb-8">
+                        <h3 id="section-3-1" class="text-2xl font-bold mb-4">经典案例</h3>
+                        
+                        <h4 class="text-xl font-semibold mb-3">1. 寻找水仙花数</h4>
+                        <p class="mb-2"><strong>说明</strong>：水仙花数也被称为超完全数字不变数、自恋数、自幂数、阿姆斯特朗数，它是一个3位数，该数字每个位上数字的立方之和正好等于它本身，例如：$1^3 + 5^3+ 3^3=153$。</p>
+                        <pre><code>"""
+找出所有水仙花数
+
+Version: 0.1
+Author: Wik
+"""
+
+for num in range(100, 1000):
+    low = num % 10
+    mid = num // 10 % 10
+    high = num // 100
+    if num == low ** 3 + mid ** 3 + high ** 3:
+        print(num)</code> </pre>
+                        
+                        <p class="mb-4">在上面的代码中，我们通过整除和求模运算分别找出了一个三位数的个位、十位和百位，这种小技巧在实际开发中还是常用的。用类似的方法，我们还可以实现将一个正整数反转，例如：将12345变成54321，代码如下所示。</p>
+                        
+                        <pre><code>"""
+正整数的反转
+
+Version: 0.1
+Author: Wik
+"""
+
+num = int(input('num = '))
+reversed_num = 0
+while num > 0:
+    reversed_num = reversed_num * 10 + num % 10
+    num //= 10
+print(reversed_num)</code> </pre>
+                        
+                        <h4 class="text-xl font-semibold mb-3 mt-6">2. 百钱百鸡问题</h4>
+                        <p class="mb-2"><strong>说明</strong>：百钱百鸡是我国古代数学家张丘建在《算经》一书中提出的数学问题：鸡翁一值钱五，鸡母一值钱三，鸡雏三值钱一。百钱买百鸡，问鸡翁、鸡母、鸡雏各几何？翻译成现代文是：公鸡5元一只，母鸡3元一只，小鸡1元三只，用100块钱买一百只鸡，问公鸡、母鸡、小鸡各有多少只？</p>
+                        <pre><code>"""
+《百钱百鸡》问题
+
+Version: 0.1
+Author: Wik
+"""
+
+for x in range(0, 20):
+    for y in range(0, 33):
+        z = 100 - x - y
+        if 5 * x + 3 * y + z / 3 == 100:
+            print('公鸡: %d只, 母鸡: %d只, 小鸡: %d只' % (x, y, z))</code> </pre>
+                        
+                        <p class="mb-4">上面使用的方法叫做<strong>穷举法</strong>，也称为<strong>暴力搜索法</strong>，这种方法通过一项一项的列举备选解决方案中所有可能的候选项并检查每个候选项是否符合问题的描述，最终得到问题的解。<br>这种方法看起来比较笨拙，但对于运算能力非常强大的计算机来说，通常都是一个可行的甚至是不错的选择，而且问题的解如果存在，这种方法一定能够找到它。</p>
+                        
+                        <h4 class="text-xl font-semibold mb-3 mt-6">3. CRAPS赌博游戏</h4>
+                        <p class="mb-2"><strong>说明</strong>：CRAPS又称花旗骰，是美国拉斯维加斯非常受欢迎的一种的桌上赌博游戏。<br>该游戏使用两粒骰子，玩家通过摇两粒骰子获得点数进行游戏。<br>简单的规则是：玩家第一次摇骰子如果摇出了7点或11点，玩家胜；<br>玩家第一次如果摇出2点、3点或12点，庄家胜；其他点数玩家继续摇骰子，<br>如果玩家摇出了7点，庄家胜；如果玩家摇出了第一次摇的点数，玩家胜；<br>其他点数，玩家继续要骰子，直到分出胜负。</p>
+                        <pre><code>"""
+Craps赌博游戏
+我们设定玩家开始游戏时有1000元的赌注
+游戏结束的条件是玩家输光所有的赌注
+
+Version: 0.1
+Author: Wik
+"""
+from random import randint
+
+money = 1000
+while money > 0:
+    print('你的总资产为:', money)
+    needs_go_on = False
+    while True:
+        debt = int(input('请下注: '))
+        if 0 < debt <= money:
+            break
+    first = randint(1, 6) + randint(1, 6)
+    print('玩家摇出了%d点' % first)
+    if first == 7 or first == 11:
+        print('玩家胜!')
+        money += debt
+    elif first == 2 or first == 3 or first == 12:
+        print('庄家胜!')
+        money -= debt
+    else:
+        needs_go_on = True
+    while needs_go_on:
+        needs_go_on = False
+        current = randint(1, 6) + randint(1, 6)
+        print('玩家摇出了%d点' % current)
+        if current == 7:
+            print('庄家胜')
+            money -= debt
+        elif current == first:
+            print('玩家胜')
+            money += debt
+        else:
+            needs_go_on = True
+print('你破产了, 游戏结束!')</code> </pre>
+                    </div>
+
+                    <div class="card p-6 mb-8">
+                        <h3 id="section-3-2" class="text-2xl font-bold mb-4">进阶练习</h3>
+                        
+                        <h4 class="text-xl font-semibold mb-3">1. 生成斐波那契数列的前20个数</h4>
+                        <p class="mb-2"><strong>说明</strong>：斐波那契数列（Fibonacci sequence），又称黄金分割数列，是意大利数学家莱昂纳多·斐波那契（Leonardoda Fibonacci）<br>在《计算之书》中提出一个在理想假设条件下兔子成长率的问题而引入的数列，所以这个数列也被戏称为"兔子数列"。<br>斐波那契数列的特点是数列的前两个数都是1，从第三个数开始，每个数都是它前面两个数的和，形如：1, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, ...。<br>斐波那契数列在现代物理、准晶体结构、化学等领域都有直接的应用。</p>
+                        
+                        <h4 class="text-xl font-semibold mb-3 mt-6">2. 找出10000以内的完美数</h4>
+                        <p class="mb-2"><strong>说明</strong>：完美数又称为完全数或完备数，它的所有的真因子（即除了自身以外的因子）的和（即因子函数）恰好等于它本身。例如：6（$6=1+2+3$）和28（$28=1+2+4+7+14$）就是完美数。完美数有很多神奇的特性，有兴趣的可以自行了解。</p>
+                        
+                        <h4 class="text-xl font-semibold mb-3 mt-6">3. 输出100以内所有的素数</h4>
+                        <p class="mb-2"><strong>说明</strong>：素数指的是只能被1和自身整除的正整数（不包括1）。</p>
+                        
+                        <div class="highlight mt-4">
+                            <p class="font-medium"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>说明</p>
+                            <p>上面练习的参考答案在本章对应的代码目录中，如果需要帮助请读者自行查看参考答案。</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 模块总结 -->
+                <section id="summary" class="mb-16">
+                    <div class="card p-6">
+                        <h2 class="text-2xl font-bold mb-4 flex items-center">
+                            <i class="fas fa-flag-checkered mr-2 text-primary-color"></i>模块总结
+                        </h2>
+                        <p class="mb-4">在本模块中，我们学习了Python中的分支结构、循环结构以及如何构造程序逻辑。这些是编程的基础，掌握了这些知识，我们就能够编写出更加复杂和实用的程序。</p>
+                        
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-6">
+                            <div class="bg-black-100 dark:bg-black-900 p-4 rounded-lg">
+                                <h3 class="font-bold text-lg mb-2 flex items-center text-black dark:text-black">
+                                    <i class="fas fa-code-branch mr-2 text-blue-500"></i>分支结构
+                                </h3>
+                                <p class="text-black dark:text-black">使用if-elif-else构造分支，根据条件执行不同的代码块，实现程序的选择能力。</p>
+                            </div>
+                            <div class="bg-black-100 dark:bg-black-900 p-4 rounded-lg">
+                                <h3 class="font-bold text-lg mb-2 flex items-center text-black dark:text-black">
+                                    <i class="fas fa-sync-alt mr-2 text-green-500"></i>循环结构
+                                </h3>
+                                <p class="text-black dark:text-black">使用for-in和while循环重复执行代码块，提高代码复用性和效率。</p>
+                            </div>
+                            <div class="bg-black-100 dark:bg-black-900 p-4 rounded-lg">
+                                <h3 class="font-bold text-lg mb-2 flex items-center text-black dark:text-black">
+                                    <i class="fas fa-puzzle-piece mr-2 text-purple-500"></i>程序逻辑
+                                </h3>
+                                <p class="text-black dark:text-black">通过实际案例练习，学习如何将问题转化为算法和代码，培养编程思维。</p>
+                            </div>
+                        </div>
+                        
+                        <div class="highlight mt-6">
+                            <p class="font-medium"><i class="fas fa-lightbulb text-yellow-500 mr-2"></i>学习建议</p>
+                            <p>编程能力的提升需要不断实践。尝试修改本模块中的示例代码，或者自己编写新的程序来解决实际问题。只有通过大量的练习，才能真正掌握编程的精髓。</p>
+                        </div>
+                    </div>
+                </section>
+
+
+    <!-- 页脚 -->
+    <footer class="bg-black-100 dark:bg-gaay-900 text-gray-700 dark:text-gray-300 py-6">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-wrap justify-center items-center">
+                <div class="text-sm">
+                    © 2025 Python学习之旅. 保留所有权利。
+                </div>
+                <div class="flex space-x-4">
+                        <a href="#" class="text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="#" class="text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                    </div>
+                <div class="text-sm">
+                </div>
+                </div>
+            </div>
+
+    </footer>
+    </main>
+</div>
+
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" class="fixed bottom-8 right-8 bg-blue-500 text-white p-3 rounded-full shadow-lg opacity-0 transition-opacity duration-300 hover:bg-blue-600 focus:outline-none">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+    <!-- JavaScript -->
+    <!-- JavaScript -->
+    <script>
+        // 初始化Mermaid
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default'
+        });
+        
+        // DOM元素
+        const body = document.body;
+        const themeToggle = document.getElementById('theme-toggle');
+        const tocToggle = document.getElementById('toc-toggle');
+        const closeToc = document.getElementById('close-toc');
+        const tocOverlay = document.getElementById('toc-overlay');
+        const mobileToc = document.getElementById('mobile-toc');
+        const backToTop = document.getElementById('back-to-top');
+        const content = document.getElementById('content');
+        const toc = document.getElementById('toc');
+        const progressBar = document.getElementById('progressBar');
+        
+        // 主题切换
+        function setTheme(isDark) {
+            if (isDark) {
+                body.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                mermaid.initialize({ theme: 'dark' });
+            } else {
+                body.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                mermaid.initialize({ theme: 'default' });
+            }
+        }
+        
+        // 检查用户偏好
+        const userPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const savedTheme = localStorage.getItem('theme');
+        
+        if (savedTheme === 'dark' || (!savedTheme && userPrefersDark)) {
+            setTheme(true);
+        }
+        
+        // 主题切换事件
+        themeToggle.addEventListener('click', () => {
+            const isDark = body.classList.contains('dark');
+            setTheme(!isDark);
+        });
+        
+        // 移动端目录切换
+        tocToggle.addEventListener('click', () => {
+            mobileToc.classList.add('show');
+            tocOverlay.classList.add('show');
+        });
+        
+        closeToc.addEventListener('click', () => {
+            mobileToc.classList.remove('show');
+            tocOverlay.classList.remove('show');
+        });
+        
+        tocOverlay.addEventListener('click', () => {
+            mobileToc.classList.remove('show');
+            tocOverlay.classList.remove('show');
+        });
+        
+        // 返回顶部按钮
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTop.style.opacity = '1';
+            } else {
+                backToTop.style.opacity = '0';
+            }
+            // 更新进度条
+            const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+            const clientHeight = document.documentElement.clientHeight || window.innerHeight;
+            const scrollPercentage = (scrollTop / (scrollHeight - clientHeight)) * 100;
+            progressBar.style.width = scrollPercentage + '%';
+ 
+        });
+        
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        // 生成目录
+        function generateTOC() {
+            const headings = content.querySelectorAll('h2, h3, h4');
+            let tocHTML = '';
+            
+            headings.forEach(heading => {
+                const id = heading.id || heading.textContent.toLowerCase().replace(/\s+/g, '-');
+                heading.id = id;
+                
+                const level = parseInt(heading.tagName.substring(1)) - 2;
+                const indent = level > 0 ? `ml-${level * 4}` : '';
+                
+                tocHTML += `<a href="#${id}" class="nav-link ${indent}">${heading.textContent}</a>`;
+            });
+            
+            toc.innerHTML = tocHTML;
+            
+            // 复制到移动端目录
+            document.querySelector('#mobile-toc nav').innerHTML = tocHTML;
+            
+            // 添加目录点击事件
+            const tocLinks = document.querySelectorAll('.nav-link');
+            tocLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    // 在移动端点击链接后关闭目录
+                    if (window.innerWidth < 1024) {
+                        mobileToc.classList.remove('show');
+                        tocOverlay.classList.remove('show');
+                    }
+                });
+            });
+        }
+        
+        // 页面加载完成后生成目录
+        document.addEventListener('DOMContentLoaded', generateTOC);
+
+        // 学习进度模拟（仅作演示）
+        const progressBars = {
+            basic: document.querySelector('.progress-basic'),
+            advanced: document.querySelector('.progress-advanced'),
+            pro: document.querySelector('.progress-pro')
+        };
+        
+        // 模拟进度更新
+        function simulateProgress() {
+            let basicProgress = 0;
+            let advancedProgress = 0;
+            let proProgress = 0;
+            
+            const interval = setInterval(() => {
+                if (basicProgress < 75) {
+                    basicProgress += 1;
+                    progressBars.basic.style.width = `${basicProgress}%`;
+                    progressBars.basic.parentElement.previousElementSibling.lastElementChild.textContent = `${basicProgress}%`;
+                }
+                
+                if (basicProgress > 30 && advancedProgress < 45) {
+                    advancedProgress += 1;
+                    progressBars.advanced.style.width = `${advancedProgress}%`;
+                    progressBars.advanced.parentElement.previousElementSibling.lastElementChild.textContent = `${advancedProgress}%`;
+                }
+                
+                if (advancedProgress > 20 && proProgress < 20) {
+                    proProgress += 1;
+                    progressBars.pro.style.width = `${proProgress}%`;
+                    progressBars.pro.parentElement.previousElementSibling.lastElementChild.textContent = `${proProgress}%`;
+                }
+                
+                if (basicProgress >= 75 && advancedProgress >= 45 && proProgress >= 20) {
+                    clearInterval(interval);
+                }
+            }, 50);
+        }
+        
+        // 页面加载后延迟启动进度模拟
+        setTimeout(simulateProgress, 1500);
+    </script>
+</body>
+</html>

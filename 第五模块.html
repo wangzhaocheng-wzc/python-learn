@@ -1,0 +1,1483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python学习之旅 - 模块五：文件与异常处理教程</title>
+    <!-- 引入外部资源 -->
+    <link rel="stylesheet" href="https://cdn.staticfile.org/tailwindcss/2.2.19/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@latest/dist/mermaid.min.js"></script>
+    <style>
+        /* 基础样式设置 */
+        :root {
+            --primary-color: #3B82F6;
+            --primary-dark: #2563EB;
+            --secondary-color: #10B981;
+            --accent-color: #8B5CF6;
+            --text-color: #1F2937;
+            --text-light: #4B5563;
+            --bg-color: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --border-color: #E5E7EB;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --highlight-bg: #EFF6FF;
+            --highlight-border: #DBEAFE;
+        }
+
+        .dark {
+            --primary-color: #60A5FA;
+            --primary-dark: #3B82F6;
+            --secondary-color: #34D399;
+            --accent-color: #A78BFA;
+            --text-color: #F9FAFB;
+            --text-light: #E5E7EB;
+            --bg-color: #0F172A; /* 更深的背景色 */
+            --bg-secondary: #1E293B; /* 更深的次要背景色 */
+            --border-color: #475569;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --highlight-bg: #0D2150; /* 更深的高亮背景色 */
+            --highlight-border: #3B82F6;
+        }
+        
+        /* 深色模式下的文本颜色增强 */
+        .dark .text-gray-600 {
+            color: #D1D5DB !important; /* 提高灰色文本在深色背景下的可见度 */
+        }
+        
+        .dark .text-gray-700 {
+            color: #E5E7EB !important;
+        }
+        
+        .dark .text-gray-800 {
+            color: #F3F4F6 !important;
+        }
+        
+        /* 深色模式下的卡片和背景增强 */
+        .dark .card {
+            background-color: #1F2937 !important;
+            border-color: #374151 !important;
+            border: 1px solid #374151 !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        /* 安装Python解释器的三个环境模块 */
+        .dark .installation-section {
+            background-color: #1F2937 !important;
+            color: #F8FAFC !important;
+            border: 1px solid #374151 !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        /* Python开发工具模块 */
+        .dark .tools-section {
+            background-color: #1F2937 !important;
+            color: #F8FAFC !important;
+            border: 1px solid #374151 !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        .dark #IDLE {
+            background-color: #1F2937 !important;
+            color: #F8FAFC !important;
+            border: 1px solid #374151 !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        .dark #IPython, .dark #PyCharm, .dark .practice-section, .dark .windows-section, .dark .linux-section, .dark .macos-section {
+            background-color: #1F2937 !important;
+            color: #F8FAFC !important;
+            border: 1px solid #374151 !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        /* 练习模块 */
+        .dark .practice-section {
+            background-color: var(--bg-secondary);
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .dark .practice-section h3, 
+        .dark .practice-section h4, 
+        .dark .practice-section p, 
+        .dark .practice-section li {
+            color: #F8FAFC !important;
+        }
+        
+        .dark .practice-section code {
+            background-color: #1E293B !important;
+            color: #F8FAFC !important;
+        }
+        
+        .dark .practice-section pre {
+            background-color: var(--bg-secondary);
+            border-left: 4px solid var(--primary-color);
+        }
+        /* 深色模式下的内容区域增强 */
+        .dark .module-section {
+            background-color: #1F2937 !important;
+            border-radius: 0.5rem;
+            border: 1px solid #E5E7EB;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .dark .module-section h3, .dark .module-section h4, .dark .module-section p, .dark .module-section li {
+            color: #F8FAFC !important;
+        }
+        
+        .dark .text-gray-700 {
+            color: #E5E7EB !important;
+        }
+        
+        .dark .text-gray-800 {
+            color: #F3F4F6 !important;
+        }
+        
+        /* 深色模式下的卡片和背景增强 */
+        .dark .card {
+            background-color: var(--bg-color);
+            border-radius: 0.5rem;
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        /* 确保所有深色模式下的文本有足够对比度 */
+        .dark p, .dark li, .dark h3, .dark h4, .dark span {
+            color: #F8FAFC !important; /* 更亮的文本颜色，提高对比度 */
+        }
+        
+        /* 深色模式下的标题增强 */
+        .dark h1, .dark h2 {
+            color: #F8FAFC !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* 深色模式下的代码块增强 */
+        .dark pre {
+            background-color: #0D1829 !important;
+            border-left: 4px solid #60A5FA !important;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            margin: 1.5rem 0;
+            padding: 1.25rem;
+        }
+        
+        .dark code {
+            background-color: #1E293B !important;
+            color: #F8FAFC !important;
+            font-weight: 500;
+        }
+        
+        .dark pre code {
+            background-color: transparent !important;
+            color: #F8FAFC !important;
+            font-weight: normal;
+        }
+                /* 进度条 */
+        .progress-container {
+            width: 100%;
+            height: 4px;
+            background: rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+        
+        /* 深色模式下的表格增强 */
+        .dark table th {
+            background-color: #0D1829 !important;
+            color: #F8FAFC !important;
+            border-color: #374151 !important;
+            font-weight: 600;
+        }
+        
+        .dark table td {
+            background-color: #1E293B !important;
+            border-color: #374151 !important;
+            color: #F1F5F9 !important;
+        }
+        
+        .dark table tr:nth-child(odd) td {
+            background-color: #172033 !important;
+        }
+        
+        /* 深色模式下的引用和提示框增强 */
+        .dark blockquote {
+            background-color: #0D1829 !important;
+            border-color: #60A5FA !important;
+            color: #F8FAFC !important;
+            padding: 1.25rem !important;
+            border-radius: 0.375rem !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+            border-left: 4px solid #60A5FA !important;
+            margin: 1.5rem 0 !important;
+        }
+        
+        /* Hero区域按钮深色模式增强 */
+        .dark a.bg-white {
+            background-color: #2563EB !important;
+            color: #FFFFFF !important;
+            border: 1px solid #60A5FA !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+            font-weight: 600;
+        }
+        
+        .dark .hover\:bg-blue-50:hover {
+            background-color: #1D4ED8 !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4) !important;
+            color: #FFFFFF !important;
+        }
+        
+        /* 深色模式下的Hero区域增强 */
+        .dark .bg-gradient-to-r {
+            background: linear-gradient(to right, #1E3A8A, #5B21B6) !important;
+            border: 1px solid #2D3748;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* 深色模式下的导航链接增强 */
+        .dark .nav-link {
+            color: #E2E8F0 !important;
+            transition: all 0.2s ease;
+        }
+        
+        .dark .nav-link:hover {
+            color: #7DD3FC !important;
+            background-color: #0D1829 !important;
+            border-radius: 0.375rem;
+            padding-left: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        
+        .dark .nav-link.active {
+            color: #38BDF8 !important;
+            font-weight: 600;
+            background-color: #0D1829 !important;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            border-left: 3px solid #60A5FA;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', Tahoma, Arial, Roboto, "Droid Sans", "Helvetica Neue", "Droid Sans Fallback", "Heiti SC", "Hiragino Sans GB", Simsun, sans-serif;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* 排版样式 */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Noto Serif SC', serif;
+            font-weight: 600;
+            line-height: 1.3;
+            margin-bottom: 0.75em;
+            color: var(--text-color);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        h2 {
+            font-size: 2rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        h4 {
+            font-size: 1.25rem;
+            margin-top: 1.25rem;
+        }
+
+        p {
+            margin-bottom: 1.25rem;
+            line-height: 1.7;
+        }
+
+        /* 首字下沉效果 */
+        .first-letter::first-letter {
+            font-size: 3.5em;
+            font-weight: 700;
+            float: left;
+            line-height: 0.8;
+            margin-right: 0.1em;
+            color: var(--primary-color);
+        }
+
+        /* 链接样式 */
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        /* 代码样式 */
+        pre {
+            background-color: var(--bg-secondary);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        code {
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+            background-color: var(--bg-secondary);
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+            color: var(--text-color);
+        }
+
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: inherit;
+            font-size: 1em;
+            line-height: 1.6;
+        }
+
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--bg-secondary);
+            font-weight: 600;
+        }
+
+        /* 引用样式 */
+        blockquote {
+            border-left: 4px solid var(--accent-color);
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+            color: var(--text-light);
+        }
+
+        /* 列表样式 */
+        ul, ol {
+            margin: 1.25rem 0;
+            padding-left: 1.5rem;
+        }
+
+        ul {
+            list-style-type: disc;
+        }
+
+        ol {
+            list-style-type: decimal;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background-color: var(--bg-color);
+            border-radius: 0.5rem;
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 高亮区域 */
+        .highlight {
+            background-color: var(--highlight-bg);
+            border: 1px solid var(--highlight-border);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        /* 导航样式 */
+        .nav-link {
+            display: block;
+            padding: 0.5rem 0;
+            color: var(--text-light);
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+            transform: translateX(5px);
+            text-decoration: none;
+        }
+
+        .nav-link.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        /* 目录样式 */
+        .toc-container {
+            position: fixed;
+            top: 5rem;
+            bottom: 2rem;
+            width: 280px;
+            overflow-y: auto;
+            padding-right: 1rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) var(--bg-secondary);
+        }
+
+        .toc-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .toc-container::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        .toc-container::-webkit-scrollbar-thumb {
+            background-color: var(--primary-color);
+            border-radius: 3px;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 1023px) {
+            .toc-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: auto;
+                width: 100%;
+                height: 100%;
+                z-index: 50;
+                background-color: var(--bg-color);
+                padding: 2rem;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .toc-container.show {
+                transform: translateX(0);
+            }
+
+            .toc-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 40;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+            }
+
+            .toc-overlay.show {
+                opacity: 1;
+                pointer-events: auto;
+            }
+        }
+
+        /* 进度条样式 */
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        /* 主题切换按钮 */
+        .theme-toggle {
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--bg-secondary);
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* 代码高亮 */
+        .token.comment,
+        .token.prolog,
+        .token.doctype,
+        .token.cdata {
+            color: #6B7280;
+        }
+
+        .token.punctuation {
+            color: #6B7280;
+        }
+
+        .token.namespace {
+            opacity: 0.7;
+        }
+
+        .token.property,
+        .token.tag,
+        .token.boolean,
+        .token.number,
+        .token.constant,
+        .token.symbol {
+            color: #EA580C;
+        }
+
+        .token.selector,
+        .token.attr-name,
+        .token.string,
+        .token.char,
+        .token.builtin {
+            color: #059669;
+        }
+
+        .token.operator,
+        .token.entity,
+        .token.url,
+        .language-css .token.string,
+        .style .token.string {
+            color: #9333EA;
+        }
+
+        .token.atrule,
+        .token.attr-value,
+        .token.keyword {
+            color: #2563EB;
+        }
+
+        .token.function,
+        .token.class-name {
+            color: #D97706;
+        }
+
+        .token.regex,
+        .token.important,
+        .token.variable {
+            color: #EC4899;
+        }
+
+        .token.important,
+        .token.bold {
+            font-weight: bold;
+        }
+
+        .token.italic {
+            font-style: italic;
+        }
+
+        .token.entity {
+            cursor: help;
+        }
+
+        /* 深色模式代码高亮调整 */
+        .dark .token.comment,
+        .dark .token.prolog,
+        .dark .token.doctype,
+        .dark .token.cdata {
+            color: #94A3B8; /* 更亮的注释颜色 */
+        }
+
+        .dark .token.punctuation {
+            color: #E2E8F0; /* 更亮的标点符号 */
+        }
+        
+        /* 深色模式下的页面背景增强 */
+        .dark body {
+            background-color: #0A1120; /* 更深的页面背景 */
+        }
+        
+        /* 深色模式下的顶部导航栏增强 */
+        .dark header {
+            background-color: #0D1829 !important;
+            border-bottom: 1px solid #1E293B;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .dark .token.property,
+        .dark .token.tag,
+        .dark .token.boolean,
+        .dark .token.number,
+        .dark .token.constant,
+        .dark .token.symbol {
+            color: #FB923C; /* 更亮的属性颜色 */
+        }
+
+        .dark .token.selector,
+        .dark .token.attr-name,
+        .dark .token.string,
+        .dark .token.char,
+        .dark .token.builtin {
+            color: #34D399; /* 更亮的字符串颜色 */
+        }
+
+        .dark .token.operator,
+        .dark .token.entity,
+        .dark .token.url,
+        .dark .language-css .token.string,
+        .dark .style .token.string {
+            color: #C4B5FD; /* 更亮的运算符颜色 */
+        }
+
+        .dark .token.atrule,
+        .dark .token.attr-value,
+        .dark .token.keyword {
+            color: #93C5FD; /* 更亮的关键字颜色 */
+        }
+
+        .dark .token.function,
+        .dark .token.class-name {
+            color: #FCD34D; /* 更亮的函数名颜色 */
+        }
+
+        .dark .token.regex,
+        .dark .token.important,
+        .dark .token.variable {
+            color: #F9A8D4; /* 更亮的变量颜色 */
+        }
+        
+        /* 深色模式下的卡片内容增强 */
+        .dark .card h3, .dark .card h4 {
+            color: #BAE6FD !important; /* 更亮的蓝色标题 */
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .dark .card a {
+            color: #38BDF8 !important;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+        
+        .dark .card a:hover {
+            color: #7DD3FC !important; /* 更亮的悬停颜色 */
+            text-decoration: none;
+        }
+        
+        /* 深色模式下的内容区域增强 */
+.dark main section {
+    background-color: #0D1829;
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #1E293B;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* 练习模块深色模式样式 */
+.dark .bg-gray-50 {
+    background-color: #1F2937 !important;
+    color: #F8FAFC !important;
+}
+
+.dark .bg-gray-50 h4,
+.dark .bg-gray-50 p,
+.dark .bg-gray-50 li {
+    color: #F8FAFC !important;
+}
+
+.dark .bg-gray-50 code {
+    background-color: #1E293B !important;
+    color: #F8FAFC !important;
+}
+
+.dark .bg-gray-50 pre {
+    background-color: #0D1829 !important;
+    border-left: 4px solid #60A5FA !important;
+}
+        
+        /* 深色模式下的内容文本增强 */
+        .dark main section p {
+            color: #F8FAFC !important;
+            line-height: 1.8;
+        }
+        
+        /* 深色模式下的列表项增强 */
+        .dark main section li {
+            color: #F8FAFC !important;
+            margin-bottom: 0.75rem;
+        }
+        
+        /* 深色模式下的内容块增强 */
+        .dark .highlight {
+            background-color: #0D2150 !important;
+            border: 1px solid #1E40AF !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="progress-container no-print">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <!-- 顶部导航栏 -->
+    <header class="sticky top-0 z-30  bg-black-100 dark:bg-black-800 shadow-md">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fab fa-python text-3xl text-blue-500"></i>
+                <h1 class="text-xl font-bold m-0">Python学习之旅</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="toc-toggle" class="lg:hidden p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <i class="fas fa-bars text-gray-600 dark:text-gray-300"></i>
+                </button>
+                <div class="theme-toggle" id="theme-toggle">
+                    <i class="fas fa-sun text-yellow-500 dark:hidden"></i>
+                    <i class="fas fa-moon text-blue-300 hidden dark:block"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容区域 -->
+    <div class="container mx-auto px-4 py-8 flex flex-col lg:flex-row">
+        <!-- 目录区域 -->
+        <aside class="lg:w-1/4 lg:pr-8">
+            <div class="toc-container hidden lg:block">
+                <h2 class="text-lg font-bold mb-4 flex items-center">
+                    <i class="fas fa-list-ul mr-2 text-blue-500"></i>目录
+                </h2>
+                <nav id="toc" class="space-y-1">
+                    <!-- 目录内容将通过JavaScript动态生成 -->
+                </nav>
+            </div>
+        </aside>
+
+        <!-- 移动端目录覆盖层 -->
+        <div class="toc-overlay" id="toc-overlay"></div>
+        <div class="toc-container lg:hidden" id="mobile-toc">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold flex items-center">
+                    <i class="fas fa-list-ul mr-2 text-blue-500"></i>目录
+                </h2>
+                <button id="close-toc" class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <i class="fas fa-times text-gray-600 dark:text-gray-300"></i>
+                </button>
+            </div>
+            <nav class="space-y-1">
+                <!-- 移动端目录内容将通过JavaScript动态复制 -->
+            </nav>
+        </div>
+
+        <main class="lg:w-3/4 animate-fade-in" id="content">
+        <!-- Hero 区域 -->
+        <!-- 主要内容区域 -->
+            <section class="mb-12 relative overflow-hidden rounded-xl">
+                <div class="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-8 md:p-12 rounded-xl shadow-lg">
+                <div class="relative z-10">
+                <h1 class="text-4xl md:text-5xl font-bold mb-6 leading-tight">Python 文件与异常处理</h1>
+                <p class="text-xl md:text-2xl mb-8 opacity-90">掌握数据持久化与健壮编程的核心技术</p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="#intro" class="btn bg-white text-blue-600 hover:bg-blue-50 transition duration-300 rounded-lg px-6 py-3 shadow-md">
+                        <i class="fas fa-file-alt mr-2"></i>文件操作
+                    </a>
+                    <a href="#exceptions" class="btn bg-white text-blue-600 hover:bg-blue-50 transition duration-300 rounded-lg px-6 py-3 shadow-md">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>异常处理
+                    </a>
+                    <a href="#json" class="btn bg-white text-blue-600 hover:bg-blue-50 transition duration-300 rounded-lg px-6 py-3 shadow-md">
+                        <i class="fas fa-code mr-2"></i>JSON处理
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+                    <!-- Introduction -->
+                    <section id="intro" class="mb-16">
+                        <h2 class="text-3xl font-bold mb-6">文件与异常处理</h2>
+                        <p class="mb-4 first-letter-drop">
+                            实际开发中常常会遇到对数据进行持久化操作的场景，而实现数据持久化最直接简单的方式就是将数据保存到文件中。
+                        </p>
+                        <p>
+                            说到"文件"这个词，可能需要先科普一下关于文件系统的知识，但是这里我们并不浪费笔墨介绍这个概念，请大家自行通过维基百科进行了解。
+                        </p>
+                    </section>
+
+                        <!-- File Modes -->
+                        <section id="file-modes" class="mb-16">
+                            <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100 serif">文件操作模式</h2>
+                            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                                在Python中实现文件的读写操作其实非常简单，通过Python内置的<code>open</code>函数，我们可以指定文件名、操作模式、编码信息等来获得操作文件的对象，接下来就可以对文件进行读写操作了。<br>这里所说的操作模式是指要打开什么样的文件（字符文件还是二进制文件）以及做什么样的操作（读、写还是追加）。
+                            </p>
+                            
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full  bg-black-100 dark:bg-black-800 rounded-lg overflow-hidden mb-6">
+                                    <thead class="bg-gray-100 dark:bg-gray-700">
+                                        <tr>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">操作模式</th>
+                                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">具体含义</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600 dark:text-blue-400">'r'</td>
+                                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">读取 （默认）</td>
+                                        </tr>
+                                        <tr class="bg-gray-50 dark:bg-gray-800">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600 dark:text-blue-400">'w'</td>
+                                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">写入（会先截断之前的内容）</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600 dark:text-blue-400">'x'</td>
+                                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">写入，如果文件已经存在会产生异常</td>
+                                        </tr>
+                                        <tr class="bg-gray-50 dark:bg-gray-800">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600 dark:text-blue-400">'a'</td>
+                                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">追加，将内容写入到已有文件的末尾</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600 dark:text-blue-400">'b'</td>
+                                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">二进制模式</td>
+                                        </tr>
+                                        <tr class="bg-gray-50 dark:bg-gray-800">
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600 dark:text-blue-400">'t'</td>
+                                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">文本模式（默认）</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-blue-600 dark:text-blue-400">'+'</td>
+                                            <td class="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">更新（既可以读又可以写）</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <!-- Text Files -->
+                        <section id="text-files" class="mb-16">
+                            <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100 serif">读写文本文件</h2>
+                            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                                读取文本文件时，需要在使用<code>open</code>函数时指定好带路径的文件名（可以使用相对路径或绝对路径）并将文件模式设置为<code>'r'</code>（如果不指定，默认值也是<code>'r'</code>），<br>然后通过<code>encoding</code>参数指定编码（如果不指定，默认值是None，那么在读取文件时使用的是操作系统默认的编码），如果不能保证保存文件时使用的编码方式与encoding参数指定的编码方式是一致的，那么就可能因无法解码字符而导致读取失败。
+                            </p>
+                            
+                            <div class="code-block  bg-black-100 dark:bg-black-800 rounded-lg mb-6">
+                                <button class="copy-btn  bg-black-100 dark:bg-black-800 text-gray-700 dark:text-gray-300 px-2 py-1 rounded text-xs" onclick="copyCode(this)">
+                                    <i class="fas fa-copy mr-1"></i>复制
+                                </button>
+                                <pre class="p-4 overflow-x-auto"><code class="language-python">def main():
+    f = open('致橡树.txt', 'r', encoding='utf-8')
+    print(f.read())
+    f.close()
+
+
+if __name__ == '__main__':
+    main()</code></pre>
+                            </div>
+                            
+                            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                                请注意上面的代码，如果<code>open</code>函数指定的文件并不存在或者无法打开，那么将引发异常状况导致程序崩溃。<br>为了让代码有一定的健壮性和容错性，我们可以使用Python的异常机制对可能在运行时发生状况的代码进行适当的处理。
+                            </p>
+                            
+                            <div class="code-block  bg-black-100 dark:bg-black-800 rounded-lg mb-6">
+                                <button class="copy-btn  bg-black-100 dark:bg-black-800 text-gray-700 dark:text-gray-300 px-2 py-1 rounded text-xs" onclick="copyCode(this)">
+                                    <i class="fas fa-copy mr-1"></i>复制
+                                </button>
+                                <pre class="p-4 overflow-x-auto"><code class="language-python">def main():
+    f = None
+    try:
+        f = open('致橡树.txt', 'r', encoding='utf-8')
+        print(f.read())
+    except FileNotFoundError:
+        print('无法打开指定的文件!')
+    except LookupError:
+        print('指定了未知的编码!')
+    except UnicodeDecodeError:
+        print('读取文件时解码错误!')
+    finally:
+        if f:
+            f.close()
+
+
+if __name__ == '__main__':
+    main()</code></pre>
+                            </div>
+                            
+                            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                                在Python中，我们可以将那些在运行时可能会出现状况的代码放在<code>try</code>代码块中，在<code>try</code>代码块的后面可以跟上一个或多个<code>except</code>来捕获可能出现的异常状况。<br>例如在上面读取文件的过程中，文件找不到会引发<code>FileNotFoundError</code>，指定了未知的编码会引发<code>LookupError</code>，而如果读取文件时无法按指定方式解码会引发<code>UnicodeDecodeError</code>，我们在<code>try</code>后面跟上了三个<code>except</code>分别处理这三种不同的异常状况。
+                            </p>
+                            
+                            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                                最后我们使用<code>finally</code>代码块来关闭打开的文件，释放掉程序中获取的外部资源，由于<code>finally</code>块的代码不论程序正常还是异常都会执行到（甚至是调用了<code>sys</code>模块的<code>exit</code>函数退出Python环境，<br><code>finally</code>块都会被执行，因为<code>exit</code>函数实质上是引发了<code>SystemExit</code>异常），因此我们通常把<code>finally</code>块称为"总是执行代码块"，它最适合用来做释放外部资源的操作。
+                            </p>
+                            
+                            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                                如果不愿意在<code>finally</code>代码块中关闭文件对象释放资源，也可以使用上下文语法，通过<code>with</code>关键字指定文件对象的上下文环境并在离开上下文环境时自动释放文件资源。
+                            </p>
+                            
+                            <div class="code-block  bg-black-100 dark:bg-black-800 rounded-lg mb-6">
+                                <button class="copy-btn  bg-black-100 dark:bg-black-800 text-gray-700 dark:text-gray-300 px-2 py-1 rounded text-xs" onclick="copyCode(this)">
+                                    <i class="fas fa-copy mr-1"></i>复制
+                                </button>
+                                <pre class="p-4 overflow-x-auto"><code class="language-python">def main():
+    try:
+        with open('致橡树.txt', 'r', encoding='utf-8') as f:
+            print(f.read())
+    except FileNotFoundError:
+        print('无法打开指定的文件!')
+    except LookupError:
+        print('指定了未知的编码!')
+    except UnicodeDecodeError:
+        print('读取文件时解码错误!')
+
+
+if __name__ == '__main__':
+    main()</code></pre>
+                            </div>
+                            
+                            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                                除了使用文件对象的<code>read</code>方法读取文件之外，还可以使用<code>for-in</code>循环逐行读取或者用<code>readlines</code>方法将文件按行读取到一个列表容器中。
+                            </p>
+                            
+                            <div class="code-block  bg-black-100 dark:bg-black-800 rounded-lg mb-6">
+                                <button class="copy-btn  bg-black-100 dark:bg-black-800 text-gray-700 dark:text-gray-300 px-2 py-1 rounded text-xs" onclick="copyCode(this)">
+                                    <i class="fas fa-copy mr-1"></i>复制
+                                </button>
+                                <pre class="p-4 overflow-x-auto"><code class="language-python">import time
+
+
+def main():
+    # 一次性读取整个文件内容
+    with open('致橡树.txt', 'r', encoding='utf-8') as f:
+        print(f.read())
+
+    # 通过for-in循环逐行读取
+    with open('致橡树.txt', mode='r') as f:
+        for line in f:
+            print(line, end='')
+            time.sleep(0.5)
+    print()
+
+    # 读取文件按行读取到列表中
+    with open('致橡树.txt') as f:
+        lines = f.readlines()
+    print(lines)
+    
+
+if __name__ == '__main__':
+    main()</code></pre>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                                要将文本信息写入文件文件也非常简单，在使用`open`函数时指定好文件名并将文件模式设置为`'w'`即可。注意如果需要对文件内容进行追加式写入，应该将模式设置为`'a'`。如果要写入的文件不存在会自动创建文件而不是引发异常。下面的例子演示了如何将1-9999之间的素数分别写入三个文件中（1-99之间的素数保存在a.txt中，100-999之间的素数保存在b.txt中，1000-9999之间的素数保存在c.txt中）。
+                            </p>
+                            
+                            <div class="code-block  bg-black-100 dark:bg-black-800 rounded-lg mb-6">
+                                <button class="copy-btn  bg-black-100 dark:bg-black-800 text-gray-700 dark:text-gray-300 px-2 py-1 rounded text-xs" onclick="copyCode(this)">
+                                    <i class="fas fa-copy mr-1"></i>复制
+                                </button>
+                                <pre class="p-4 overflow-x-auto"><code class="language-python">
+from math import sqrt
+
+
+def is_prime(n):
+    """判断素数的函数"""
+    assert n > 0
+    for factor in range(2, int(sqrt(n)) + 1):
+        if n % factor == 0:
+            return False
+    return True if n != 1 else False
+
+
+def main():
+    filenames = ('a.txt', 'b.txt', 'c.txt')
+    fs_list = []
+    try:
+        for filename in filenames:
+            fs_list.append(open(filename, 'w', encoding='utf-8'))
+        for number in range(1, 10000):
+            if is_prime(number):
+                if number < 100:
+                    fs_list[0].write(str(number) + '\n')
+                elif number < 1000:
+                    fs_list[1].write(str(number) + '\n')
+                else:
+                    fs_list[2].write(str(number) + '\n')
+    except IOError as ex:
+        print(ex)
+        print('写文件时发生错误!')
+    finally:
+        for fs in fs_list:
+            fs.close()
+    print('操作完成!')
+
+
+if __name__ == '__main__':
+    main()</code></pre>
+                            </div>
+                        </section>
+
+                        <!-- Binary Files -->
+                        <section id="binary-files" class="mb-16">
+                            <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100 serif">读写二进制文件</h2>
+                            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                                知道了如何读写文本文件要读写二进制文件也就很简单了，下面的代码实现了复制图片文件的功能。
+                            </p>
+                            
+                            <div class="code-block  bg-black-100 dark:bg-black-800 rounded-lg mb-6">
+                                <button class="copy-btn  bg-black-100 dark:bg-black-800 text-gray-700 dark:text-gray-300 px-2 py-1 rounded text-xs" onclick="copyCode(this)">
+                                    <i class="fas fa-copy mr-1"></i>复制
+                                </button>
+                                <pre class="p-4 overflow-x-auto"><code class="language-python">def main():
+    try:
+        with open('guido.jpg', 'rb') as fs1:
+            data = fs1.read()
+            print(type(data))  # &lt;class 'bytes'&gt;
+        with open('吉多.jpg', 'wb') as fs2:
+            fs2.write(data)
+    except FileNotFoundError as e:
+        print('指定的文件无法打开.')
+    except IOError as e:
+        print('读写文件时出现错误.')
+    print('程序执行结束.')
+
+
+if __name__ == '__main__':
+    main()</code></pre>
+                            </div>
+                        </section>
+
+                        <section id="binary-files" class="mb-16">
+                            <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100 serif">读写JSON文件</h2>
+                            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                                通过上面的讲解，我们已经知道如何将文本数据和二进制数据保存到文件中，那么这里还有一个问题，如果希望把一个列表或者一个字典中的数据保存到文件中又该怎么做呢？答案是将数据以JSON格式进行保存。JSON是“JavaScript Object Notation”的缩写，它本来是JavaScript语言中创建对象的一种字面量语法，现在已经被广泛的应用于跨平台跨语言的数据交换，原因很简单，因为JSON也是纯文本，任何系统任何编程语言处理纯文本都是没有问题的。目前JSON基本上已经取代了XML作为异构系统间交换数据的事实标准。关于JSON的知识，更多的可以参考[JSON的官方网站](http://json.org)，从这个网站也可以了解到每种语言处理JSON数据格式可以使用的工具或三方库，下面是一个JSON的简单例子
+                            </p>
+                            
+                            <div class="code-block  bg-black-100 dark:bg-black-800 rounded-lg mb-6">
+                                <button class="copy-btn  bg-black-100 dark:bg-black-800 text-gray-700 dark:text-gray-300 px-2 py-1 rounded text-xs" onclick="copyCode(this)">
+                                    <i class="fas fa-copy mr-1"></i>复制
+                                </button>
+                                <pre class="p-4 overflow-x-auto"><code class="language-python">
+{
+    "name": "Wik",
+    "age": 38,
+    "qq": 957658,
+    "friends": ["王大锤", "白元芳"],
+    "cars": [
+        {"brand": "BYD", "max_speed": 180},
+        {"brand": "Audi", "max_speed": 280},
+        {"brand": "Benz", "max_speed": 320}
+    ]
+}</code></pre>
+                            </div>
+                            
+                        </section>
+                        <!-- Exceptions -->
+ 
+
+                        <!-- JSON -->
+                        <section id="json" class="mb-16">
+                            <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100 serif">JSON数据处理</h2>
+                            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                                可能大家已经注意到了，上面的JSON跟Python中的字典其实是一样一样的，事实上JSON的数据类型和Python的数据类型是很容易找到对应关系的。
+                            </p>
+                            
+                            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                                <div class=" bg-black-100 dark:bg-black-800 rounded-lg shadow overflow-hidden">
+                                    <div class="px-4 py-3  bg-black-100 dark:bg-black-800 border-b border-gray-200 dark:border-gray-600">
+                                        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-300">JSON</h3>
+                                    </div>
+                                    <div class="px-4 py-4">
+                                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                                <tr>
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm font-mono text-blue-600 dark:text-blue-400">object</td>
+                                                    <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">dict</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm font-mono text-blue-600 dark:text-blue-400">array</td>
+                                                    <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">list</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm font-mono text-blue-600 dark:text-blue-400">string</td>
+                                                    <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">str</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm font-mono text-blue-600 dark:text-blue-400">number (int / real)</td>
+                                                    <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">int / float</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm font-mono text-blue-600 dark:text-blue-400">true / false</td>
+                                                    <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">True / False</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm font-mono text-blue-600 dark:text-blue-400">null</td>
+                                                    <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">None</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <div class=" bg-black-100 dark:bg-black-800 rounded-lg shadow overflow-hidden">
+                                    <div class="px-4 py-3  bg-black-100 dark:bg-black-800 border-b border-gray-200 dark:border-gray-600">
+                                        <h3 class="text-sm font-medium text-gray-500 dark:text-gray-300">Python</h3>
+                                    </div>
+                                    <div class="px-4 py-4">
+                                        <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                            <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                                                <tr>
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm font-mono text-blue-600 dark:text-blue-400">dict</td>
+                                                    <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">object</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm font-mono text-blue-600 dark:text-blue-400">list, tuple</td>
+                                                    <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">array</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm font-mono text-blue-600 dark:text-blue-400">str</td>
+                                                    <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">string</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm font-mono text-blue-600 dark:text-blue-400">int, float, int- & float-derived Enums</td>
+                                                    <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">number</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm font-mono text-blue-600 dark:text-blue-400">True / False</td>
+                                                    <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">true / false</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="px-4 py-2 whitespace-nowrap text-sm font-mono text-blue-600 dark:text-blue-400">None</td>
+                                                    <td class="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">null</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                                我们使用Python中的<code>json</code>模块就可以将字典或列表以JSON格式保存到文件中。
+                            </p>
+                            
+                            <div class="code-block  bg-black-100 dark:bg-black-800 rounded-lg mb-6">
+                                <button class="copy-btn  bg-black-100 dark:bg-black-800 text-gray-700 dark:text-gray-300 px-2 py-1 rounded text-xs" onclick="copyCode(this)">
+                                    <i class="fas fa-copy mr-1"></i>复制
+                                </button>
+                                <pre class="p-4 overflow-x-auto"><code class="language-python">import json
+
+
+def main():
+    mydict = {
+        'name': 'Wik',
+        'age': 38,
+        'qq': 957658,
+        'friends': ['王大锤', '白元芳'],
+        'cars': [
+            {'brand': 'BYD', 'max_speed': 180},
+            {'brand': 'Audi', 'max_speed': 280},
+            {'brand': 'Benz', 'max_speed': 320}
+        ]
+    }
+    try:
+        with open('data.json', 'w', encoding='utf-8') as fs:
+            json.dump(mydict, fs)
+    except IOError as e:
+        print(e)
+    print('保存数据完成!')
+
+
+if __name__ == '__main__':
+    main()</code></pre>
+                            </div>
+                            
+                            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                                json模块主要有四个比较重要的函数，分别是：
+                            </p>
+                            
+                            <ul class="list-disc pl-6 mb-6 text-gray-600 dark:text-gray-400 space-y-2">
+                                <li><code>dump</code> - 将Python对象按照JSON格式序列化到文件中</li>
+                                <li><code>dumps</code> - 将Python对象处理成JSON格式的字符串</li>
+                                <li><code>load</code> - 将文件中的JSON数据反序列化成对象</li>
+                                <li><code>loads</code> - 将字符串的内容反序列化成Python对象</li>
+                            </ul>
+                            
+                            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                                这里出现了两个概念，一个叫序列化，一个叫反序列化。<br>自由的百科全书维基百科上对这两个概念是这样解释的："序列化（serialization）在计算机科学的数据处理中，是指将数据结构或对象状态转换为可以存储或传输的形式，这样在需要的时候能够恢复到原先的状态，而且通过序列化的数据重新获取字节时，可以利用这些字节来产生原始对象的副本（拷贝）。<br>与这个过程相反的动作，即从一系列字节中提取数据结构的操作，就是反序列化（deserialization）"。
+                            </p>
+                            
+                            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                                目前绝大多数网络数据服务（或称之为网络API）都是基于HTTP协议提供JSON格式的数据，关于HTTP协议的相关知识，可以看看阮一峰老师的《HTTP协议入门》，如果想了解国内的网络数据服务，可以看看聚合数据和阿凡达数据等网站，国外的可以看看{API}Search网站。<br>下面的例子演示了如何使用requests模块（封装得足够好的第三方网络访问模块）访问网络API获取国内新闻，如何通过json模块解析JSON数据并显示新闻标题，这个例子使用了天行数据提供的国内新闻数据接口，其中的APIKey需要自己到该网站申请。
+                            </p>
+                            
+                            <div class="code-block  bg-black-100 dark:bg-black-800 rounded-lg mb-6">
+                                <button class="copy-btn  bg-black-100 dark:bg-black-800 text-gray-700 dark:text-gray-300 px-2 py-1 rounded text-xs" onclick="copyCode(this)">
+                                    <i class="fas fa-copy mr-1"></i>复制
+                                </button>
+                                <pre class="p-4 overflow-x-auto"><code class="language-python">import requests
+import json
+
+
+def main():
+    resp = requests.get('http://api.tianapi.com/guonei/?key=APIKey&num=10')
+    data_model = json.loads(resp.text)
+    for news in data_model['newslist']:
+        print(news['title'])
+
+
+if __name__ == '__main__':
+    main()</code></pre>
+                            </div>
+                        </section>
+
+                        <!-- Serialization -->
+                        <section id="serialization" class="mb-16">
+                            <h2 class="text-3xl font-bold mb-6 text-gray-800 dark:text-gray-100 serif">序列化与反序列化</h2>
+                            <p class="text-gray-600 dark:text-gray-400 mb-6">
+                                在Python中要实现序列化和反序列化除了使用json模块之外，还可以使用pickle和shelve模块，但是这两个模块是使用特有的序列化协议来序列化数据，因此序列化后的数据只能被Python识别。关于这两个模块的相关知识可以自己看看网络上的资料。
+                            </p>
+                        </section>
+
+
+                        <section id="exceptions" class="mb-16">
+
+                            <div class=" bg-black-100 dark:bg-black-800 dark:bg-opacity-30 border-l-4 border-blue-500 p-4 mb-6 rounded-r">
+                                <div class="flex">
+                                    <div class="ml-3">
+                                        <h3 class="text-sm font-medium text-blue-800 dark:text-blue-200">最佳实践</h3>
+                                        <div class="mt-2 text-sm text-blue-700 dark:text-blue-300">
+                                            <p>
+                                                关于更多的关于Python异常机制的知识，可以看看segmentfault上面的文章《总结：Python中的异常处理》，这篇文章不仅介绍了Python中异常机制的使用，还总结了一系列的最佳实践，很值得一读。
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+            <!-- 页脚 -->
+            <footer class="mt-12 py-8 border-t border-gray-200 dark:border-gray-800">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <div class="mb-4 md:mb-0">
+                        <p class="text-sm text-gray-600 dark:text-gray-400">© 2025 Python学习之旅. 保留所有权利。</p>
+                    </div>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="#" class="text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                    </div>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" class="fixed bottom-8 right-8 bg-blue-500 text-white p-3 rounded-full shadow-lg opacity-0 transition-opacity duration-300 hover:bg-blue-600 focus:outline-none">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- JavaScript -->
+    <script>
+        // 初始化Mermaid
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default'
+        });
+        
+        // DOM元素
+        const body = document.body;
+        const themeToggle = document.getElementById('theme-toggle');
+        const tocToggle = document.getElementById('toc-toggle');
+        const closeToc = document.getElementById('close-toc');
+        const tocOverlay = document.getElementById('toc-overlay');
+        const mobileToc = document.getElementById('mobile-toc');
+        const backToTop = document.getElementById('back-to-top');
+        const content = document.getElementById('content');
+        const toc = document.getElementById('toc');
+        const progressBar = document.getElementById('progressBar');
+        
+        // 主题切换
+        function setTheme(isDark) {
+            if (isDark) {
+                body.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                mermaid.initialize({ theme: 'dark' });
+            } else {
+                body.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                mermaid.initialize({ theme: 'default' });
+            }
+        }
+        
+        // 检查用户偏好
+        const userPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const savedTheme = localStorage.getItem('theme');
+        
+        if (savedTheme === 'dark' || (!savedTheme && userPrefersDark)) {
+            setTheme(true);
+        }
+        
+        // 主题切换事件
+        themeToggle.addEventListener('click', () => {
+            const isDark = body.classList.contains('dark');
+            setTheme(!isDark);
+        });
+        
+        // 移动端目录切换
+        tocToggle.addEventListener('click', () => {
+            mobileToc.classList.add('show');
+            tocOverlay.classList.add('show');
+        });
+        
+        closeToc.addEventListener('click', () => {
+            mobileToc.classList.remove('show');
+            tocOverlay.classList.remove('show');
+        });
+        
+        tocOverlay.addEventListener('click', () => {
+            mobileToc.classList.remove('show');
+            tocOverlay.classList.remove('show');
+        });
+        
+        // 返回顶部按钮
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTop.style.opacity = '1';
+            } else {
+                backToTop.style.opacity = '0';
+            }
+            // 更新进度条
+            const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+            const clientHeight = document.documentElement.clientHeight || window.innerHeight;
+            const scrollPercentage = (scrollTop / (scrollHeight - clientHeight)) * 100;
+            progressBar.style.width = scrollPercentage + '%';
+ 
+        });
+        
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        // 生成目录
+        function generateTOC() {
+            const headings = content.querySelectorAll('h2, h3, h4');
+            let tocHTML = '';
+            
+            headings.forEach(heading => {
+                const id = heading.id || heading.textContent.toLowerCase().replace(/\s+/g, '-');
+                heading.id = id;
+                
+                const level = parseInt(heading.tagName.substring(1)) - 2;
+                const indent = level > 0 ? `ml-${level * 4}` : '';
+                
+                tocHTML += `<a href="#${id}" class="nav-link ${indent}">${heading.textContent}</a>`;
+            });
+            
+            toc.innerHTML = tocHTML;
+            
+            // 复制到移动端目录
+            document.querySelector('#mobile-toc nav').innerHTML = tocHTML;
+            
+            // 添加目录点击事件
+            const tocLinks = document.querySelectorAll('.nav-link');
+            tocLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    // 在移动端点击链接后关闭目录
+                    if (window.innerWidth < 1024) {
+                        mobileToc.classList.remove('show');
+                        tocOverlay.classList.remove('show');
+                    }
+                });
+            });
+        }
+        
+        // 页面加载完成后生成目录
+        document.addEventListener('DOMContentLoaded', generateTOC);
+
+        // 学习进度模拟（仅作演示）
+        const progressBars = {
+            basic: document.querySelector('.progress-basic'),
+            advanced: document.querySelector('.progress-advanced'),
+            pro: document.querySelector('.progress-pro')
+        };
+        
+        // 模拟进度更新
+        function simulateProgress() {
+            let basicProgress = 0;
+            let advancedProgress = 0;
+            let proProgress = 0;
+            
+            const interval = setInterval(() => {
+                if (basicProgress < 75) {
+                    basicProgress += 1;
+                    progressBars.basic.style.width = `${basicProgress}%`;
+                    progressBars.basic.parentElement.previousElementSibling.lastElementChild.textContent = `${basicProgress}%`;
+                }
+                
+                if (basicProgress > 30 && advancedProgress < 45) {
+                    advancedProgress += 1;
+                    progressBars.advanced.style.width = `${advancedProgress}%`;
+                    progressBars.advanced.parentElement.previousElementSibling.lastElementChild.textContent = `${advancedProgress}%`;
+                }
+                
+                if (advancedProgress > 20 && proProgress < 20) {
+                    proProgress += 1;
+                    progressBars.pro.style.width = `${proProgress}%`;
+                    progressBars.pro.parentElement.previousElementSibling.lastElementChild.textContent = `${proProgress}%`;
+                }
+                
+                if (basicProgress >= 75 && advancedProgress >= 45 && proProgress >= 20) {
+                    clearInterval(interval);
+                }
+            }, 50);
+        }
+        
+        // 页面加载后延迟启动进度模拟
+        setTimeout(simulateProgress, 1500);
+    </script>
+</body>
+</html>

@@ -1,0 +1,1792 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python学习之旅 - 系统化学习路线</title>
+    <!-- 引入外部资源 -->
+    <link rel="stylesheet" href="https://cdn.staticfile.org/tailwindcss/2.2.19/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@latest/dist/mermaid.min.js"></script>
+    <style>
+        /* 基础样式设置 */
+        :root {
+            --primary-color: #3B82F6;
+            --primary-dark: #2563EB;
+            --secondary-color: #10B981;
+            --accent-color: #8B5CF6;
+            --text-color: #1F2937;
+            --text-light: #4B5563;
+            --bg-color: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --border-color: #E5E7EB;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --highlight-bg: #EFF6FF;
+            --highlight-border: #DBEAFE;
+        }
+
+        .dark {
+            --primary-color: #60A5FA;
+            --primary-dark: #3B82F6;
+            --secondary-color: #34D399;
+            --accent-color: #A78BFA;
+            --text-color: #F9FAFB;
+            --text-light: #E5E7EB;
+            --bg-color: #111827;
+            --bg-secondary: #1F2937;
+            --border-color: #374151;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --highlight-bg: #1E3A8A;
+            --highlight-border: #2563EB;
+        }
+
+        /* 深色模式下的文本颜色增强 */
+        .dark .text-gray-600 {
+            color: #D1D5DB !important; /* 提高灰色文本在深色背景下的可见度 */
+        }
+        
+        .dark .text-gray-700 {
+            color: #E5E7EB !important;
+        }
+        
+        .dark .text-gray-800 {
+            color: #F3F4F6 !important;
+        }
+        
+        /* 深色模式下的卡片和背景增强 */
+        .dark .custom-card {
+            background-color: #1F2937;
+            border-color: #374151;
+        }
+        
+        .dark .module-card {
+            background-color: #1F2937;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', Tahoma, Arial, Roboto, "Droid Sans", "Helvetica Neue", "Droid Sans Fallback", "Heiti SC", "Hiragino Sans GB", Simsun, sans-serif;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Noto Serif SC', serif;
+            font-weight: 600;
+        }
+
+        /* 首字下沉效果 */
+        .first-letter-drop:first-letter {
+            float: left;
+            font-size: 3.5rem;
+            line-height: 0.8;
+            margin-right: 0.5rem;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        /* 卡片样式 */
+        .custom-card {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .custom-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 模块卡片样式 */
+        .module-card {
+            border-left: 4px solid var(--primary-color);
+            background-color: var(--bg-color);
+            transition: all 0.3s ease;
+        }
+
+        .module-card:hover {
+            border-left-width: 8px;
+        }
+
+        /* 阶段卡片样式 */
+        .stage-card {
+            border-top: 4px solid var(--secondary-color);
+        }
+
+        /* 高亮区域 */
+        .highlight-section {
+            background-color: var(--highlight-bg);
+            border: 1px solid var(--highlight-border);
+        }
+
+        /* 导航栏固定 */
+        .sticky-nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+
+        /* 进度条样式 */
+        .progress-bar {
+            height: 6px;
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            width: 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            transition: width 0.2s ease;
+        }
+
+        /* 目录样式 */
+        .toc-link {
+            position: relative;
+            display: block;
+            padding: 0.5rem 1rem;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+
+        .toc-link:hover {
+            color: var(--primary-color);
+            background-color: var(--highlight-bg);
+            border-radius: 0.25rem;
+        }
+
+        .toc-link.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+        
+        /* 深色模式下目录链接增强 */
+        .dark .toc-link {
+            color: #D1D5DB;
+        }
+        
+        .dark .toc-link:hover {
+            background-color: #2D3748;
+        }
+
+        .toc-link.active::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            width: 3px;
+            background-color: var(--primary-color);
+            border-radius: 0 3px 3px 0;
+        }
+
+        /* 返回顶部按钮 */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--primary-color);
+            color: white;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            transform: translateY(20px);
+            z-index: 99;
+        }
+
+        .back-to-top.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 动画效果 */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* 学习路线图 */
+        .roadmap-container {
+            position: relative;
+            padding: 2rem 0;
+        }
+
+        .roadmap-line {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            width: 4px;
+            background-color: var(--primary-color);
+            transform: translateX(-50%);
+        }
+        
+        /* 深色模式下的列表项增强 */
+        .dark .list-disc li {
+            color: #E5E7EB;
+        }
+        
+        /* 深色模式下列表项内文本颜色增强 */
+        .dark .list-disc li .text-gray-700,
+        .dark .text-gray-700 {
+            color: #E5E7EB !important;
+        }
+        
+        /* 深色模式下的按钮增强 */
+        .dark .bg-blue-50 {
+            background-color: #1E3A8A;
+        }
+        
+        .dark .text-green-600 {
+            color: #34D399 !important;
+        }
+        
+        .dark .text-blue-600 {
+            color: #60A5FA !important;
+        }
+        
+        /* 深色模式下白色背景按钮文本颜色增强 */
+        .dark .bg-white.text-blue-600 {
+            background-color: #1E3A8A !important;
+            color: #FFFFFF !important;
+        }
+        
+        .dark .hover\:bg-blue-50:hover {
+            background-color: #2D3748 !important;
+        }
+        
+        /* 深色模式下的进度条文本增强 */
+        .dark .progress-basic-text,
+        .dark .progress-advanced-text,
+        .dark .progress-pro-text {
+            color: #D1D5DB;
+        }
+
+        .roadmap-item {
+            position: relative;
+            margin-bottom: 2rem;
+            width: 100%;
+        }
+
+        .roadmap-item:nth-child(odd) {
+            padding-right: calc(50% + 2rem);
+            text-align: right;
+        }
+
+        .roadmap-item:nth-child(even) {
+            padding-left: calc(50% + 2rem);
+        }
+        
+        /* 深色模式下的路线图项目增强 */
+        .dark .roadmap-item {
+            color: #E5E7EB;
+        }
+        
+        /* 深色模式下的阶段卡片增强 */
+        .dark .stage-card {
+            background-color: #1F2937;
+            border-color: #374151;
+        }
+        
+        /* 深色模式下的高亮区域增强 */
+        .dark .highlight-section {
+            background-color: #1E3A8A;
+            border-color: #2563EB;
+        }
+
+        .roadmap-item::before {
+            content: "";
+            position: absolute;
+            top: 1.5rem;
+            width: 1.5rem;
+            height: 1.5rem;
+            background-color: var(--secondary-color);
+            border: 4px solid var(--primary-color);
+            border-radius: 50%;
+        }
+
+        .roadmap-item:nth-child(odd)::before {
+            right: calc(50% - 0.75rem);
+        }
+
+        .roadmap-item:nth-child(even)::before {
+            left: calc(50% - 0.75rem);
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .roadmap-line {
+                left: 2rem;
+            }
+
+            .roadmap-item:nth-child(odd),
+            .roadmap-item:nth-child(even) {
+                padding-left: 4rem;
+                padding-right: 0;
+                text-align: left;
+            }
+
+            .roadmap-item:nth-child(odd)::before,
+            .roadmap-item:nth-child(even)::before {
+                left: 2rem;
+                margin-left: -0.75rem;
+            }
+        }
+
+        /* 打印样式 */
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+
+            .page-break {
+                page-break-before: always;
+            }
+
+            body {
+                font-size: 12pt;
+            }
+
+            .container {
+                max-width: 100% !important;
+                width: 100% !important;
+            }
+        }
+        
+        /* 深色模式下的代码和引用增强 */
+        .dark pre, .dark code {
+            background-color: #1E293B !important;
+            color: #E5E7EB !important;
+            border-color: #374151 !important;
+        }
+        
+        /* Hero区域按钮深色模式增强 */
+        .dark a.bg-white {
+            background-color: #1E3A8A !important;
+            color: #FFFFFF !important;
+        }
+        
+        /* 确保所有白色背景元素在深色模式下可见 */
+        .dark .bg-white {
+            background-color: #1F2937 !important;
+        }
+        
+        /* 确保所有深色模式下的文本有足够对比度 */
+        .dark p, .dark li, .dark h3, .dark h4, .dark span {
+            color: #E5E7EB !important;
+        }
+        
+        /* 深色模式下的表格增强 */
+        .dark table th {
+            background-color: #1F2937 !important;
+            color: #F9FAFB !important;
+            border-color: #374151 !important;
+        }
+        
+        .dark table td {
+            border-color: #374151 !important;
+            color: #E5E7EB !important;
+        }
+        
+        /* 深色模式下的引用和提示框增强 */
+        .dark blockquote {
+            background-color: #1F2937 !important;
+            border-color: #60A5FA !important;
+            color: #E5E7EB !important;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- 进度条 -->
+    <div class="progress-bar"></div>
+
+    <!-- 导航栏 -->
+    <nav class="sticky-nav bg-opacity-90 dark:bg-opacity-90 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-700 shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fab fa-python text-3xl text-blue-500"></i>
+                <h1 class="text-xl font-bold">Python学习之旅</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="toc-toggle" class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <i class="fas fa-list-ul"></i>
+                </button>
+                <button id="theme-toggle" class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <i class="fas fa-moon dark:hidden"></i>
+                    <i class="fas fa-sun hidden dark:block"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容区域 -->
+    <div class="container mx-auto px-4 py-8 flex flex-col lg:flex-row">
+        <!-- 侧边栏目录 -->
+        <aside id="toc" class="lg:w-1/4 lg:sticky lg:top-20 lg:self-start lg:max-h-(screen-24) lg:overflow-y-auto p-4 hidden lg:block no-print">
+            <div class="mb-6">
+                <h3 class="text-lg font-bold mb-3 flex items-center">
+                    <i class="fas fa-book-open mr-2 text-primary-color"></i>目录
+                </h3>
+                <ul class="space-y-1">
+                    <li><a href="#overview" class="toc-link">概述</a></li>
+                    <li><a href="#modules" class="toc-link">学习模块</a></li>
+                    <li><a href="#stages" class="toc-link">分阶段学习路线</a></li>
+                    <li><a href="#summary" class="toc-link">总结</a></li>
+                    <li><a href="#learning-methods" class="toc-link">建议学习方法</a></li>
+                    <li><a href="#recommended-reading" class="toc-link">延伸阅读</a></li>
+                </ul>
+            </div>
+            <div class="p-4 bg-blue-50 dark:bg-blue-900 rounded-lg">
+                <h4 class="font-bold mb-2">学习进度追踪</h4>
+                <div id="progress-message" class="text-center mb-2 text-sm font-medium text-green-600 dark:text-green-400 hidden"></div>
+                <div class="space-y-3">
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>基础阶段</span>
+                            <span class="progress-basic-text">0%</span>
+                        </div>
+                        <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full relative">
+                            <div class="progress-basic h-full bg-blue-500 rounded-full" style="width: 0%"></div>
+                            <input type="range" class="absolute inset-0 w-full opacity-0 cursor-pointer" min="0" max="100" value="0" data-progress="basic">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>进阶阶段</span>
+                            <span class="progress-advanced-text">0%</span>
+                        </div>
+                        <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full relative">
+                            <div class="progress-advanced h-full bg-green-500 rounded-full" style="width: 0%"></div>
+                            <input type="range" class="absolute inset-0 w-full opacity-0 cursor-pointer" min="0" max="100" value="0" data-progress="advanced">
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between text-sm mb-1">
+                            <span>专业阶段</span>
+                            <span class="progress-pro-text">0%</span>
+                        </div>
+                        <div class="h-2 bg-gray-200 dark:bg-gray-700 rounded-full relative">
+                            <div class="progress-pro h-full bg-purple-500 rounded-full" style="width: 0%"></div>
+                            <input type="range" class="absolute inset-0 w-full opacity-0 cursor-pointer" min="0" max="100" value="0" data-progress="pro">
+                        </div>
+                    </div>
+                </div>
+                <button id="reset-progress" class="mt-4 w-full py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors text-sm">
+                    重置进度
+                </button>
+            </div>
+        </aside>
+
+        <!-- 主内容 -->
+        <main class="lg:w-3/4 lg:pl-8">
+            <!-- Hero 区域 -->
+            <section id="hero" class="mb-12 relative overflow-hidden rounded-xl">
+                <div class="absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 opacity-90"></div>
+                <div class="relative z-10 py-16 px-8 text-white">
+                    <h1 class="text-4xl md:text-5xl font-bold mb-4">Python 系统学习路线</h1>
+                    <p class="text-xl md:text-2xl mb-6 max-w-2xl">从入门到精通，构建扎实的编程基础和应用能力</p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="#modules" class="inline-flex items-center px-6 py-3 bg-white text-blue-600 rounded-md font-medium hover:bg-blue-50 transition-colors">
+                            <i class="fas fa-book mr-2"></i>
+                            浏览学习模块
+                        </a>
+                        <a href="#stages" class="inline-flex items-center px-6 py-3 bg-transparent border border-white text-white rounded-md font-medium hover:bg-white hover:bg-opacity-10 transition-colors">
+                            <i class="fas fa-road mr-2"></i>
+                            查看学习路线
+                        </a>
+                    </div>
+                </div>
+                <div class="absolute right-0 bottom-0 opacity-20 text-white">
+                    <i class="fab fa-python text-9xl"></i>
+                </div>
+            </section>
+
+            <!-- 概述部分 -->
+            <section id="overview" class="mb-12 fade-in">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-100 dark:border-gray-700">
+                    <h2 class="text-3xl font-bold mb-6 flex items-center">
+                        <i class="fas fa-map-marked-alt mr-3 text-blue-500"></i>
+                        学习大纲概述
+                    </h2>
+                    <p class="text-lg mb-6 first-letter-drop">
+                        本大纲基于多个Python相关技术文档内容整合，涵盖Python语言基础、程序结构、面向对象编程、文件操作、异常处理、图像与办公文档处理、网络编程、多线程与多进程、正则表达式、GUI与游戏开发等核心模块。每个模块包含关键知识点和学习目标，旨在帮助学习者系统掌握Python编程及应用。
+                    </p>
+                    <div class="grid md:grid-cols-3 gap-6 mt-8">
+                        <div class="custom-card p-6 text-center">
+                            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                                <i class="fas fa-layer-group text-2xl text-blue-500"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">11个核心模块</h3>
+                            <p class="text-gray-600 dark:text-gray-100">从基础语法到高级应用，全面覆盖Python知识体系</p>
+                        </div>
+                        <div class="custom-card p-6 text-center">
+                            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
+                                <i class="fas fa-route text-2xl text-green-500"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">5个学习阶段</h3>
+                            <p class="text-gray-600 dark:text-gray-100">循序渐进的学习路线，从入门到精通</p>
+                        </div>
+                        <div class="custom-card p-6 text-center">
+                            <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center">
+                                <i class="fas fa-project-diagram text-2xl text-purple-500"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2">实践项目驱动</h3>
+                            <p class="text-gray-600 dark:text-gray-100">理论结合实践，巩固知识点，提升应用能力</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 学习模块部分 -->
+            <section id="modules" class="mb-12 fade-in">
+                <h2 class="text-3xl font-bold mb-6">学习模块</h2>
+                <div class="space-y-6">
+                    <!-- 模块1 -->
+                    <div class="module-card p-6 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center mr-3 flex-shrink-0">1</span>
+                            Python语言基础与核心语法
+                        </h3>
+                        <div class="text-right mt-2 mb-4">
+                            <a href="第一模块.html" class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors">
+                                <i class="fas fa-arrow-right mr-2"></i>进入学习
+                            </a>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                                    关键知识点
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>Python语言发展历史与版本区别</li>
+                                    <li>变量与数据类型（整型、浮点型、字符串、布尔型、复数）</li>
+                                    <li>运算符与表达式优先级</li>
+                                    <li>变量命名规范与类型转换</li>
+                                    <li>输入输出基础</li>
+                                    <li>注释与代码规范（PEP8）</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-bullseye text-red-500 mr-2"></i>
+                                    学习目标
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>理解Python语言的基本组成和发展背景</li>
+                                    <li>掌握Python常用数据类型及变量使用</li>
+                                    <li>熟练使用基本运算符和表达式</li>
+                                    <li>掌握Python代码的规范写法和注释方法</li>
+                                    <li>能够编写简单的输入输出程序</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 模块2 -->
+                    <div class="module-card p-6 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center mr-3 flex-shrink-0">2</span>
+                            程序流程控制
+                        </h3>
+                        <div class="text-right mt-2 mb-4">
+                            <a href="第二模块.html" class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors">
+                                <i class="fas fa-arrow-right mr-2"></i>进入学习
+                            </a>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                                    关键知识点
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>分支结构（if、elif、else）</li>
+                                    <li>循环结构（for-in循环、while循环）</li>
+                                    <li>嵌套分支与循环</li>
+                                    <li>循环控制语句（break、continue）</li>
+                                    <li>经典算法练习（素数判断、最大公约数、最小公倍数）</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-bullseye text-red-500 mr-2"></i>
+                                    学习目标
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>理解并掌握条件判断和多分支结构的使用</li>
+                                    <li>熟练编写各种循环结构及控制循环流程</li>
+                                    <li>能够解决基本算法问题，提升逻辑思维能力</li>
+                                    <li>理解代码的可读性和扁平化结构设计原则</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 模块3 -->
+                    <div class="module-card p-6 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center mr-3 flex-shrink-0">3</span>
+                            函数与模块
+                        </h3>
+                        <div class="text-right mt-2 mb-4">
+                            <a href="第三模块.html" class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors">
+                                <i class="fas fa-arrow-right mr-2"></i>进入学习
+                            </a>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                                    关键知识点
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>函数定义与调用（def关键字）</li>
+                                    <li>函数参数（默认参数、可变参数、关键字参数）</li>
+                                    <li>函数返回值与文档字符串</li>
+                                    <li>作用域与变量生命周期（局部变量、全局变量、nonlocal）</li>
+                                    <li>模块的定义与导入（import、from-import、别名）</li>
+                                    <li>避免命名冲突与模块执行控制（if __name__ == '__main__'）</li>
+                                    <li>高阶函数与匿名函数（lambda）</li>
+                                    <li>代码重构与重复代码消除</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-bullseye text-red-500 mr-2"></i>
+                                    学习目标
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>掌握函数的定义、调用及参数传递方式</li>
+                                    <li>理解变量作用域及其对程序设计的影响</li>
+                                    <li>学会模块化编程，合理组织代码结构</li>
+                                    <li>能够使用高阶函数和匿名函数提升代码简洁性</li>
+                                    <li>理解代码重构的重要性，避免重复代码</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 模块4 -->
+                    <div class="module-card p-6 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center mr-3 flex-shrink-0">4</span>
+                            常用数据结构
+                        </h3>
+                        <div class="text-right mt-2 mb-4">
+                            <a href="第四模块.html" class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors">
+                                <i class="fas fa-arrow-right mr-2"></i>进入学习
+                            </a>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                                    关键知识点
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>列表（list）的定义、访问、修改、遍历</li>
+                                    <li>元组（tuple）的不可变特性及应用场景</li>
+                                    <li>字典（dict）的键值对存储与操作</li>
+                                    <li>集合（set）的基本操作</li>
+                                    <li>列表生成式与生成器表达式</li>
+                                    <li>生成器函数（yield关键字）</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-bullseye text-red-500 mr-2"></i>
+                                    学习目标
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>掌握Python中常用数据结构的使用方法</li>
+                                    <li>理解数据结构的特性及适用场景</li>
+                                    <li>能够使用生成式和生成器优化内存和性能</li>
+                                    <li>熟练操作字典和集合解决实际问题</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 模块5 -->
+                    <div class="module-card p-6 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center mr-3 flex-shrink-0">5</span>
+                            文件操作与异常处理
+                        </h3>
+                        <div class="text-right mt-2 mb-4">
+                            <a href="第五模块.html" class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors">
+                                <i class="fas fa-arrow-right mr-2"></i>进入学习
+                            </a>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                                    关键知识点
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>文件的打开、读取、写入与关闭</li>
+                                    <li>文件操作模式（读、写、追加、二进制）</li>
+                                    <li>使用上下文管理器（with语句）安全操作文件</li>
+                                    <li>异常处理机制（try-except-finally）</li>
+                                    <li>常见异常类型及处理策略</li>
+                                    <li>JSON数据的序列化与反序列化（json模块）</li>
+                                    <li>读写文本文件与二进制文件示例</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-bullseye text-red-500 mr-2"></i>
+                                    学习目标
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>掌握文件的基本操作流程及模式选择</li>
+                                    <li>理解异常处理机制，编写健壮的代码</li>
+                                    <li>能够处理JSON格式数据，实现数据持久化</li>
+                                    <li>熟悉文本与二进制文件的读写方法</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 模块6 -->
+                    <div class="module-card p-6 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center mr-3 flex-shrink-0">6</span>
+                            面向对象编程基础与进阶
+                        </h3>
+                        <div class="text-right mt-2 mb-4">
+                            <a href="第六模块.html" class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors">
+                                <i class="fas fa-arrow-right mr-2"></i>进入学习
+                            </a>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                                    关键知识点
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>类与对象的定义与使用</li>
+                                    <li>属性与方法的封装</li>
+                                    <li>访问控制（公有、私有属性）</li>
+                                    <li>继承与多态</li>
+                                    <li>类方法与静态方法</li>
+                                    <li>类之间的关系（is-a、has-a、use-a）</li>
+                                    <li>抽象类与接口（ABC模块）</li>
+                                    <li>设计原则（SOLID原则）</li>
+                                    <li>设计模式简介（策略模式、工厂模式等）</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-bullseye text-red-500 mr-2"></i>
+                                    学习目标
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>理解面向对象的基本概念及三大支柱</li>
+                                    <li>能够设计并实现类及其继承体系</li>
+                                    <li>掌握封装、继承、多态的应用</li>
+                                    <li>理解并应用设计原则提升代码质量</li>
+                                    <li>具备初步设计模式的认知和应用能力</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 模块7 -->
+                    <div class="module-card p-6 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center mr-3 flex-shrink-0">7</span>
+                            图像与办公文档处理
+                        </h3>
+                        <div class="text-right mt-2 mb-4">
+                            <a href="第七模块.html" class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors">
+                                <i class="fas fa-arrow-right mr-2"></i>进入学习
+                            </a>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                                    关键知识点
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>图像基础知识（颜色模型、像素）</li>
+                                    <li>Pillow库的安装与使用</li>
+                                    <li>图像的打开、显示、剪裁、缩放、旋转、滤镜</li>
+                                    <li>操作像素点与图像合成</li>
+                                    <li>Word文档处理（python-docx）</li>
+                                    <li>Excel电子表格处理（openpyxl）</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-bullseye text-red-500 mr-2"></i>
+                                    学习目标
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>掌握Python图像处理的基本操作</li>
+                                    <li>能够使用Pillow实现图像的编辑与处理</li>
+                                    <li>熟悉办公文档的自动化生成与修改</li>
+                                    <li>能够处理Word和Excel文件满足办公自动化需求</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 模块8 -->
+                    <div class="module-card p-6 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center mr-3 flex-shrink-0">8</span>
+                            网络编程基础与应用
+                        </h3>
+                        <div class="text-right mt-2 mb-4">
+                            <a href="第八模块.html" class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors">
+                                <i class="fas fa-arrow-right mr-2"></i>进入学习
+                            </a>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                                    关键知识点
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>计算机网络基础（TCP/IP模型、HTTP协议）</li>
+                                    <li>网络资源访问（requests模块）</li>
+                                    <li>JSON数据处理与网络API交互</li>
+                                    <li>发送短信与电子邮件（HTTP接口、SMTP协议）</li>
+                                    <li>网络应用模式（C/S、B/S、去中心化）</li>
+                                    <li>简单的网络客户端与服务器编程</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-bullseye text-red-500 mr-2"></i>
+                                    学习目标
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>理解网络通信的基本原理与协议</li>
+                                    <li>能够使用Python访问网络资源并处理数据</li>
+                                    <li>掌握发送短信和邮件的编程方法</li>
+                                    <li>具备开发简单网络应用的能力</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 模块9 -->
+                    <div class="module-card p-6 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center mr-3 flex-shrink-0">9</span>
+                            多线程与多进程编程
+                        </h3>
+                        <div class="text-right mt-2 mb-4">
+                            <a href="第九模块.html" class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors">
+                                <i class="fas fa-arrow-right mr-2"></i>进入学习
+                            </a>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                                    关键知识点
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>进程与线程的概念及区别</li>
+                                    <li>Python多线程（threading模块）</li>
+                                    <li>Python多进程（multiprocessing模块）</li>
+                                    <li>线程与进程的创建、启动、同步与通信</li>
+                                    <li>线程安全与GIL（全局解释器锁）问题</li>
+                                    <li>适用场景分析（计算密集型 vs I/O密集型）</li>
+                                    <li>异步编程简介（asyncio模块）</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-bullseye text-red-500 mr-2"></i>
+                                    学习目标
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>理解并掌握多线程和多进程的基本用法</li>
+                                    <li>能够根据任务类型选择合适的并发模型</li>
+                                    <li>掌握线程和进程间的同步与通信机制</li>
+                                    <li>了解异步编程的基本概念和应用</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 模块10 -->
+                    <div class="module-card p-6 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center mr-3 flex-shrink-0">10</span>
+                            正则表达式与文本处理
+                        </h3>
+                        <div class="text-right mt-2 mb-4">
+                            <a href="第十模块.html" class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors">
+                                <i class="fas fa-arrow-right mr-2"></i>进入学习
+                            </a>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                                    关键知识点
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>正则表达式基础语法与常用符号</li>
+                                    <li>Python re模块的核心函数（match、search、findall等）</li>
+                                    <li>正则表达式的编译与缓存</li>
+                                    <li>常见文本匹配、提取与替换操作</li>
+                                    <li>实际应用案例（手机号、座机号匹配）</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-bullseye text-red-500 mr-2"></i>
+                                    学习目标
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>掌握正则表达式的基本语法和使用方法</li>
+                                    <li>能够使用Python进行复杂文本匹配和处理</li>
+                                    <li>理解正则表达式的性能优化技巧</li>
+                                    <li>应用正则表达式解决实际文本处理问题</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 模块11 -->
+                    <div class="module-card p-6 rounded-lg shadow-md">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-blue-500 text-white flex items-center justify-center mr-3 flex-shrink-0">11</span>
+                            图形用户界面（GUI）与游戏开发
+                        </h3>
+                        <div class="text-right mt-2 mb-4">
+                            <a href="第十一模块.html" class="inline-flex items-center px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-md transition-colors">
+                                <i class="fas fa-arrow-right mr-2"></i>进入学习
+                            </a>
+                        </div>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-lightbulb text-yellow-500 mr-2"></i>
+                                    关键知识点
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>GUI基础与事件驱动模型</li>
+                                    <li>Tkinter模块的使用（窗口、控件、布局管理）</li>
+                                    <li>Pygame库简介与安装</li>
+                                    <li>游戏窗口创建与事件处理</li>
+                                    <li>简单游戏开发案例（大球吃小球）</li>
+                                    <li>碰撞检测与动画实现</li>
+                                    <li>多线程在GUI中的应用</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-bullseye text-red-500 mr-2"></i>
+                                    学习目标
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>理解GUI编程的基本原理和事件模型</li>
+                                    <li>能够使用Tkinter开发简单的图形界面应用</li>
+                                    <li>掌握Pygame进行游戏开发的基础技能</li>
+                                    <li>能够设计并实现简单的交互式游戏</li>
+                                    <li>理解多线程提升GUI响应性的应用场景</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 学习路线图 -->
+            <section id="stages" class="mb-12 fade-in">
+                <h2 class="text-3xl font-bold mb-6">分阶段学习路线</h2>
+                
+                <!-- 路线图可视化 -->
+                <div class="mb-8 p-6 bg-white dark:bg-gray-800 rounded-xl shadow-lg border border-gray-100 dark:border-gray-700">
+                    <h3 class="text-2xl font-bold mb-6 text-center">Python学习路线图</h3>
+                    <div class="roadmap-container">
+                        <div class="roadmap-line"></div>
+                        
+                        <div class="roadmap-item fade-in">
+                            <div class="stage-card p-4 rounded-lg shadow-md bg-white dark:bg-gray-800">
+                                <h4 class="text-xl font-bold mb-2">阶段一：Python基础与程序设计入门</h4>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">建议时间：2-3周</p>
+                                <p class="mb-2">掌握Python基础语法、流程控制、函数与模块基础、常用数据结构</p>
+                                <div class="mt-3 flex items-center text-sm">
+                                    <i class="fas fa-graduation-cap text-blue-500 mr-2"></i>
+                                    <span>目标：能够独立编写简单的Python程序</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="roadmap-item fade-in">
+                            <div class="stage-card p-4 rounded-lg shadow-md bg-white dark:bg-gray-800">
+                                <h4 class="text-xl font-bold mb-2">阶段二：进阶编程与文件操作</h4>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">建议时间：2周</p>
+                                <p class="mb-2">学习文件读写、异常处理、JSON数据处理、高级函数特性</p>
+                                <div class="mt-3 flex items-center text-sm">
+                                    <i class="fas fa-graduation-cap text-blue-500 mr-2"></i>
+                                    <span>目标：能够处理文件和JSON数据，实现数据持久化</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="roadmap-item fade-in">
+                            <div class="stage-card p-4 rounded-lg shadow-md bg-white dark:bg-gray-800">
+                                <h4 class="text-xl font-bold mb-2">阶段三：面向对象编程与设计原则</h4>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">建议时间：2周</p>
+                                <p class="mb-2">学习类与对象、封装继承多态、设计原则与简单设计模式</p>
+                                <div class="mt-3 flex items-center text-sm">
+                                    <i class="fas fa-graduation-cap text-blue-500 mr-2"></i>
+                                    <span>目标：能够设计面向对象程序，提升代码复用性</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="roadmap-item fade-in">
+                            <div class="stage-card p-4 rounded-lg shadow-md bg-white dark:bg-gray-800">
+                                <h4 class="text-xl font-bold mb-2">阶段四：实用编程技能与应用开发</h4>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">建议时间：2周</p>
+                                <p class="mb-2">学习图像处理、办公文档自动化、网络编程、多线程与多进程、正则表达式</p>
+                                <div class="mt-3 flex items-center text-sm">
+                                    <i class="fas fa-graduation-cap text-blue-500 mr-2"></i>
+                                    <span>目标：能够完成图像和办公文档的自动化处理</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="roadmap-item fade-in">
+                            <div class="stage-card p-4 rounded-lg shadow-md bg-white dark:bg-gray-800">
+                                <h4 class="text-xl font-bold mb-2">阶段五：GUI开发与游戏编程</h4>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mb-2">建议时间：2周</p>
+                                <p class="mb-2">学习Tkinter GUI编程、Pygame游戏开发、事件处理与动画实现</p>
+                                <div class="mt-3 flex items-center text-sm">
+                                    <i class="fas fa-graduation-cap text-blue-500 mr-2"></i>
+                                    <span>目标：能够开发交互式GUI应用和简单游戏</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 阶段详细内容 -->
+                <div class="space-y-8">
+                    <!-- 阶段一 -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700 fade-in">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center mr-3 flex-shrink-0">1</span>
+                            阶段一：Python基础与程序设计入门
+                        </h3>
+                        <p class="text-gray-500 dark:text-gray-400 mb-4">建议时间：2-3周</p>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-star text-yellow-500 mr-2"></i>
+                                    学习重点
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>Python语言基础与核心语法</li>
+                                    <li>程序流程控制（分支与循环）</li>
+                                    <li>函数与模块基础</li>
+                                    <li>常用数据结构（列表、元组、字典）</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-tasks text-blue-500 mr-2"></i>
+                                    学习任务
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>理解Python基本语法，完成基础练习</li>
+                                    <li>编写条件判断和循环程序</li>
+                                    <li>定义并调用函数，掌握参数传递</li>
+                                    <li>操作常用数据结构，完成相关练习题</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                <i class="fas fa-flag-checkered text-green-500 mr-2"></i>
+                                目标成果
+                            </h4>
+                            <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
+                                <li>能够独立编写简单的Python程序</li>
+                                <li>理解程序的基本控制流程和数据结构</li>
+                                <li>掌握函数的定义与模块化编程基础</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 阶段二 -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700 fade-in">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center mr-3 flex-shrink-0">2</span>
+                            阶段二：进阶编程与文件操作
+                        </h3>
+                        <p class="text-gray-500 dark:text-gray-400 mb-4">建议时间：2周</p>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-star text-yellow-500 mr-2"></i>
+                                    学习重点
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>文件读写与异常处理</li>
+                                    <li>JSON数据处理</li>
+                                    <li>高级函数特性（高阶函数、匿名函数）</li>
+                                    <li>变量作用域与模块管理</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-tasks text-blue-500 mr-2"></i>
+                                    学习任务
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>实现文件的读写操作及异常捕获</li>
+                                    <li>使用json模块进行数据序列化与反序列化</li>
+                                    <li>掌握高阶函数和lambda表达式的使用</li>
+                                    <li>理解变量作用域，合理组织模块代码</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                <i class="fas fa-flag-checkered text-green-500 mr-2"></i>
+                                目标成果
+                            </h4>
+                            <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
+                                <li>能够处理文件和JSON数据，实现数据持久化</li>
+                                <li>理解并应用函数式编程思想</li>
+                                <li>编写结构清晰、模块化的Python代码</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 阶段三 -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700 fade-in">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center mr-3 flex-shrink-0">3</span>
+                            阶段三：面向对象编程与设计原则
+                        </h3>
+                        <p class="text-gray-500 dark:text-gray-400 mb-4">建议时间：2周</p>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-star text-yellow-500 mr-2"></i>
+                                    学习重点
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>类与对象基础</li>
+                                    <li>封装、继承、多态</li>
+                                    <li>类方法与静态方法</li>
+                                    <li>设计原则与简单设计模式</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-tasks text-blue-500 mr-2"></i>
+                                    学习任务
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>设计并实现类和对象，完成面向对象练习</li>
+                                    <li>理解并应用继承与多态机制</li>
+                                    <li>学习并实践SOLID设计原则</li>
+                                    <li>了解并尝试简单设计模式（如策略模式）</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                <i class="fas fa-flag-checkered text-green-500 mr-2"></i>
+                                目标成果
+                            </h4>
+                            <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
+                                <li>能够设计面向对象程序，提升代码复用性</li>
+                                <li>理解面向对象设计思想，编写高质量代码</li>
+                                <li>掌握基本设计模式的应用场景和实现</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 阶段四 -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700 fade-in">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center mr-3 flex-shrink-0">4</span>
+                            阶段四：实用编程技能与应用开发
+                        </h3>
+                        <p class="text-gray-500 dark:text-gray-400 mb-4">建议时间：2周</p>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-star text-yellow-500 mr-2"></i>
+                                    学习重点
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>图像处理与办公文档自动化</li>
+                                    <li>网络编程基础与API交互</li>
+                                    <li>多线程与多进程编程</li>
+                                    <li>正则表达式与文本处理</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-tasks text-blue-500 mr-2"></i>
+                                    学习任务
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>使用Pillow处理图像，操作Word和Excel文件</li>
+                                    <li>访问网络API，发送短信和邮件</li>
+                                    <li>编写多线程和多进程程序，理解并发模型</li>
+                                    <li>使用正则表达式完成复杂文本匹配任务</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                <i class="fas fa-flag-checkered text-green-500 mr-2"></i>
+                                目标成果
+                            </h4>
+                            <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
+                                <li>能够完成图像和办公文档的自动化处理</li>
+                                <li>掌握网络编程基础，能调用网络服务</li>
+                                <li>理解并发编程，编写高效的多线程/多进程程序</li>
+                                <li>熟练使用正则表达式解决文本处理问题</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <!-- 阶段五 -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 border border-gray-100 dark:border-gray-700 fade-in">
+                        <h3 class="text-2xl font-bold mb-4 flex items-center">
+                            <span class="w-8 h-8 rounded-full bg-green-500 text-white flex items-center justify-center mr-3 flex-shrink-0">5</span>
+                            阶段五：GUI开发与游戏编程
+                        </h3>
+                        <p class="text-gray-500 dark:text-gray-400 mb-4">建议时间：2周</p>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-star text-yellow-500 mr-2"></i>
+                                    学习重点
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>Tkinter GUI编程基础</li>
+                                    <li>Pygame游戏开发入门</li>
+                                    <li>事件处理与动画实现</li>
+                                    <li>多线程在GUI中的应用</li>
+                                </ul>
+                            </div>
+                            <div>
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-tasks text-blue-500 mr-2"></i>
+                                    学习任务
+                                </h4>
+                                <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-200">
+                                    <li>设计并实现基本的图形界面应用</li>
+                                    <li>使用Pygame开发简单游戏，掌握游戏循环和事件处理</li>
+                                    <li>实现碰撞检测和动画效果</li>
+                                    <li>理解多线程提升GUI响应性的技术</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6">
+                            <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                <i class="fas fa-flag-checkered text-green-500 mr-2"></i>
+                                目标成果
+                            </h4>
+                            <ul class="list-disc list-inside space-y-2 text-gray-700 dark:text-gray-300">
+                                <li>能够开发交互式GUI应用</li>
+                                <li>掌握基础游戏开发技能</li>
+                                <li>理解事件驱动编程和动画实现</li>
+                                <li>能够编写响应流畅的多线程GUI程序</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 总结部分 -->
+            <section id="summary" class="mb-12 fade-in">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-100 dark:border-gray-700">
+                    <h2 class="text-3xl font-bold mb-6 flex items-center">
+                        <i class="fas fa-check-circle mr-3 text-green-500"></i>
+                        总结
+                    </h2>
+                    <p class="text-lg mb-6">
+                        本学习大纲涵盖Python编程的核心知识体系，从基础语法到高级应用，逐步引导学习者掌握编程技能和实用技术。分阶段学习路线设计合理，兼顾理论与实践，适合初学者循序渐进地深入学习。通过系统学习，学习者将具备独立开发Python应用的能力，能够胜任数据处理、网络编程、自动化办公、GUI开发及简单游戏制作等多种任务。
+                    </p>
+                    <div class="p-4 bg-blue-50 dark:bg-blue-900 rounded-lg">
+                        <p class="text-blue-800 dark:text-blue-200 font-medium">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            完成本学习路线后，您将具备从初级到中级Python开发者的技能水平，能够独立开发各类Python应用程序。
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 建议学习方法 -->
+            <section id="learning-methods" class="mb-12 fade-in">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-100 dark:border-gray-700">
+                    <h2 class="text-3xl font-bold mb-6 flex items-center">
+                        <i class="fas fa-graduation-cap mr-3 text-purple-500"></i>
+                        建议学习方法
+                    </h2>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="custom-card p-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mr-4">
+                                    <i class="fas fa-code text-xl text-blue-500"></i>
+                                </div>
+                                <h3 class="text-xl font-bold">理论结合实践</h3>
+                            </div>
+                            <p class="text-gray-700 dark:text-gray-300">
+                                每学完一个模块，务必完成相关练习和项目，巩固知识。理论学习是基础，但只有通过实践才能真正掌握编程技能。
+                            </p>
+                        </div>
+                        
+                        <div class="custom-card p-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center mr-4">
+                                    <i class="fas fa-sync-alt text-xl text-green-500"></i>
+                                </div>
+                                <h3 class="text-xl font-bold">持续复习巩固</h3>
+                            </div>
+                            <p class="text-gray-700 dark:text-gray-300">
+                                定期回顾已学内容，强化记忆和理解。编程知识需要不断重复和应用才能内化为自己的技能。
+                            </p>
+                        </div>
+                        
+                        <div class="custom-card p-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 rounded-full bg-yellow-100 dark:bg-yellow-900 flex items-center justify-center mr-4">
+                                    <i class="fas fa-search text-xl text-yellow-500"></i>
+                                </div>
+                                <h3 class="text-xl font-bold">主动探索扩展</h3>
+                            </div>
+                            <p class="text-gray-700 dark:text-gray-300">
+                                在掌握基础后，尝试阅读官方文档和第三方库，拓展视野。不要局限于教材内容，主动探索Python生态系统。
+                            </p>
+                        </div>
+                        
+                        <div class="custom-card p-6">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center mr-4">
+                                    <i class="fas fa-users text-xl text-red-500"></i>
+                                </div>
+                                <h3 class="text-xl font-bold">参与社区交流</h3>
+                            </div>
+                            <p class="text-gray-700 dark:text-gray-300">
+                                加入Python学习社区，分享经验，解决疑难。与其他学习者和专业人士交流可以获得新的见解和解决问题的思路。
+                            </p>
+                        </div>
+                        
+                        <div class="custom-card p-6 md:col-span-2">
+                            <div class="flex items-center mb-4">
+                                <div class="w-12 h-12 rounded-full bg-purple-100 dark:bg-purple-900 flex items-center justify-center mr-4">
+                                    <i class="fas fa-project-diagram text-xl text-purple-500"></i>
+                                </div>
+                                <h3 class="text-xl font-bold">项目驱动学习</h3>
+                            </div>
+                            <p class="text-gray-700 dark:text-gray-300">
+                                结合实际项目需求，设计并实现功能，提升综合能力。通过完成有意义的项目，不仅可以巩固所学知识，还能培养解决实际问题的能力和信心。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 延伸阅读 -->
+            <section id="recommended-reading" class="mb-12 fade-in">
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 border border-gray-100 dark:border-gray-700">
+                    <h2 class="text-3xl font-bold mb-6 flex items-center">
+                        <i class="fas fa-book mr-3 text-red-500"></i>
+                        延伸阅读
+                    </h2>
+                    <p class="mb-6">以下是五本推荐的Python相关书籍，可以帮助你深入学习和掌握Python编程：</p>
+                    
+                    <div class="space-y-6">
+                        <div class="flex flex-col md:flex-row md:items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <div class="md:w-1/4 flex-shrink-0 mb-4 md:mb-0 md:mr-6">
+                                <div class="bg-gray-200 dark:bg-gray-600 h-40 rounded-md flex items-center justify-center">
+                                    <i class="fas fa-book text-4xl text-gray-400 dark:text-gray-300"></i>
+                                </div>
+                            </div>
+                            <div class="md:w-3/4">
+                                <h3 class="text-xl font-bold mb-2">《Python编程：从入门到实践》</h3>
+                                <p class="text-gray-600 dark:text-gray-300 mb-2">作者：Eric Matthes</p>
+                                <p class="mb-3">这本书是Python初学者的理想选择，通过简单易懂的语言和丰富的实例，引导读者逐步掌握Python编程基础，并通过项目实践巩固所学知识。</p>
+                                <div class="flex items-center text-sm text-blue-500">
+                                    <i class="fas fa-tag mr-2"></i>
+                                    <span>入门级 | 实践项目 | 全面基础</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-col md:flex-row md:items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <div class="md:w-1/4 flex-shrink-0 mb-4 md:mb-0 md:mr-6">
+                                <div class="bg-gray-200 dark:bg-gray-600 h-40 rounded-md flex items-center justify-center">
+                                    <i class="fas fa-book text-4xl text-gray-400 dark:text-gray-300"></i>
+                                </div>
+                            </div>
+                            <div class="md:w-3/4">
+                                <h3 class="text-xl font-bold mb-2">《流畅的Python》</h3>
+                                <p class="text-gray-600 dark:text-gray-300 mb-2">作者：Luciano Ramalho</p>
+                                <p class="mb-3">这本书适合有一定Python基础的读者，深入探讨Python的高级特性和惯用法，帮助读者编写更加Pythonic的代码，提升代码质量和效率。</p>
+                                <div class="flex items-center text-sm text-blue-500">
+                                    <i class="fas fa-tag mr-2"></i>
+                                    <span>进阶级 | 高级特性 | 代码优化</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-col md:flex-row md:items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <div class="md:w-1/4 flex-shrink-0 mb-4 md:mb-0 md:mr-6">
+                                <div class="bg-gray-200 dark:bg-gray-600 h-40 rounded-md flex items-center justify-center">
+                                    <i class="fas fa-book text-4xl text-gray-400 dark:text-gray-300"></i>
+                                </div>
+                            </div>
+                            <div class="md:w-3/4">
+                                <h3 class="text-xl font-bold mb-2">《Python设计模式（第2版）》</h3>
+                                <p class="text-gray-600 dark:text-gray-300 mb-2">作者：Chetan Giridhar</p>
+                                <p class="mb-3">这本书介绍了如何在Python中应用各种设计模式，帮助读者理解面向对象设计原则，提升代码的可维护性和可扩展性。</p>
+                                <div class="flex items-center text-sm text-blue-500">
+                                    <i class="fas fa-tag mr-2"></i>
+                                    <span>进阶级 | 设计模式 | 面向对象</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-col md:flex-row md:items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <div class="md:w-1/4 flex-shrink-0 mb-4 md:mb-0 md:mr-6">
+                                <div class="bg-gray-200 dark:bg-gray-600 h-40 rounded-md flex items-center justify-center">
+                                    <i class="fas fa-book text-4xl text-gray-400 dark:text-gray-300"></i>
+                                </div>
+                            </div>
+                            <div class="md:w-3/4">
+                                <h3 class="text-xl font-bold mb-2">《Python并行编程》</h3>
+                                <p class="text-gray-600 dark:text-gray-300 mb-2">作者：Jan Palach</p>
+                                <p class="mb-3">这本书深入探讨Python中的并发编程技术，包括多线程、多进程和异步编程，帮助读者编写高效的并发程序，提升程序性能。</p>
+                                <div class="flex items-center text-sm text-blue-500">
+                                    <i class="fas fa-tag mr-2"></i>
+                                    <span>高级 | 并发编程 | 性能优化</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="flex flex-col md:flex-row md:items-center p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                            <div class="md:w-1/4 flex-shrink-0 mb-4 md:mb-0 md:mr-6">
+                                <div class="bg-gray-200 dark:bg-gray-600 h-40 rounded-md flex items-center justify-center">
+                                    <i class="fas fa-book text-4xl text-gray-400 dark:text-gray-300"></i>
+                                </div>
+                            </div>
+                            <div class="md:w-3/4">
+                                <h3 class="text-xl font-bold mb-2">《Python项目开发实战（第2版）》</h3>
+                                <p class="text-gray-600 dark:text-gray-300 mb-2">作者：Laura Cassell, Alan Gauld</p>
+                                <p class="mb-3">这本书通过多个实际项目，涵盖了从需求分析到部署的完整开发流程，帮助读者将所学知识应用到实际项目中，提升项目开发能力。</p>
+                                <div class="flex items-center text-sm text-blue-500">
+                                    <i class="fas fa-tag mr-2"></i>
+                                    <span>实战级 | 项目开发 | 综合应用</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 页脚 -->
+            <footer class="text-center py-8 text-gray-600 dark:text-gray-400 border-t border-gray-200 dark:border-gray-700">
+                <p>© 2025 Python学习之旅 | 系统化学习路线</p>
+                <div class="mt-4 flex justify-center space-x-4">
+                    <a href="#" class="text-gray-500 hover:text-blue-500 transition-colors">
+                        <i class="fab fa-github text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-blue-500 transition-colors">
+                        <i class="fab fa-python text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-500 hover:text-blue-500 transition-colors">
+                        <i class="fas fa-envelope text-xl"></i>
+                    </a>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <!-- 返回顶部按钮 -->
+    <div id="back-to-top" class="back-to-top">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // 初始化 Mermaid
+        mermaid.initialize({ startOnLoad: true });
+
+        // 深色模式切换
+        const themeToggle = document.getElementById('theme-toggle');
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        // 检查本地存储或系统偏好
+        const currentTheme = localStorage.getItem('theme') || (prefersDarkScheme.matches ? 'dark' : 'light');
+        
+        if (currentTheme === 'dark') {
+            document.documentElement.classList.add('dark');
+        } else {
+            document.documentElement.classList.remove('dark');
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            if (document.documentElement.classList.contains('dark')) {
+                document.documentElement.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+            } else {
+                document.documentElement.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // 目录切换（移动端）
+        const tocToggle = document.getElementById('toc-toggle');
+        const toc = document.getElementById('toc');
+        
+        tocToggle.addEventListener('click', () => {
+            toc.classList.toggle('hidden');
+        });
+
+        // 滚动监听
+        const sections = document.querySelectorAll('section[id]');
+        const tocLinks = document.querySelectorAll('.toc-link');
+        const backToTop = document.getElementById('back-to-top');
+        const progressBar = document.querySelector('.progress-bar');
+        
+        function updateActiveLink() {
+            const scrollPosition = window.scrollY + 100;
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.offsetHeight;
+                const sectionId = section.getAttribute('id');
+                
+                if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+                    tocLinks.forEach(link => {
+                        link.classList.remove('active');
+                        if (link.getAttribute('href') === `#${sectionId}`) {
+                            link.classList.add('active');
+                        }
+                    });
+                }
+            });
+            
+            // 更新进度条
+            const scrollPercentage = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+            progressBar.style.width = `${scrollPercentage}%`;
+            
+            // 显示/隐藏返回顶部按钮
+            if (window.scrollY > 300) {
+                backToTop.classList.add('visible');
+            } else {
+                backToTop.classList.remove('visible');
+            }
+            
+            // 检查元素是否在视口中，添加动画
+            const fadeElements = document.querySelectorAll('.fade-in');
+            fadeElements.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                const elementBottom = element.getBoundingClientRect().bottom;
+                
+                if (elementTop < window.innerHeight - 100 && elementBottom > 0) {
+                    element.classList.add('visible');
+                }
+            });
+        }
+        
+        window.addEventListener('scroll', updateActiveLink);
+        updateActiveLink();
+
+        // 返回顶部按钮点击事件
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // 目录链接点击平滑滚动
+        tocLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                window.scrollTo({
+                    top: targetElement.offsetTop - 80,
+                    behavior: 'smooth'
+                });
+                
+                // 在移动端点击链接后关闭目录
+                if (window.innerWidth < 1024) {
+                    toc.classList.add('hidden');
+                }
+            });
+        });
+
+        // 学习进度追踪功能
+        const progressBars = {
+            basic: document.querySelector('.progress-basic'),
+            advanced: document.querySelector('.progress-advanced'),
+            pro: document.querySelector('.progress-pro')
+        };
+        
+        const progressTexts = {
+            basic: document.querySelector('.progress-basic-text'),
+            advanced: document.querySelector('.progress-advanced-text'),
+            pro: document.querySelector('.progress-pro-text')
+        };
+        
+        const progressInputs = document.querySelectorAll('input[type="range"]');
+        const resetButton = document.getElementById('reset-progress');
+        const progressMessage = document.getElementById('progress-message');
+        
+        // 从本地存储加载进度
+        function loadProgress() {
+            const savedProgress = JSON.parse(localStorage.getItem('pythonLearningProgress') || '{}');
+            
+            if (savedProgress.basic !== undefined) {
+                updateProgress('basic', savedProgress.basic);
+            }
+            
+            if (savedProgress.advanced !== undefined) {
+                updateProgress('advanced', savedProgress.advanced);
+            }
+            
+            if (savedProgress.pro !== undefined) {
+                updateProgress('pro', savedProgress.pro);
+            }
+            
+            checkAllProgress();
+        }
+        
+        // 更新进度条
+        function updateProgress(type, value) {
+            progressBars[type].style.width = `${value}%`;
+            progressTexts[type].textContent = `${value}%`;
+            
+            // 更新对应的range输入值
+            const input = document.querySelector(`input[data-progress="${type}"]`);
+            if (input) {
+                input.value = value;
+            }
+            
+            // 保存到本地存储
+            const savedProgress = JSON.parse(localStorage.getItem('pythonLearningProgress') || '{}');
+            savedProgress[type] = value;
+            localStorage.setItem('pythonLearningProgress', JSON.stringify(savedProgress));
+            
+            // 检查单个进度是否完成
+            if (value >= 100) {
+                showStageCompleteMessage(type);
+            } else {
+                // 如果进度不是100%，隐藏完成消息
+                if (progressMessage.textContent.includes(getStageNameByType(type))) {
+                    progressMessage.classList.add('hidden');
+                }
+            }
+            
+            // 检查所有进度
+            checkAllProgress();
+        }
+        
+        // 获取阶段名称
+        function getStageNameByType(type) {
+            switch(type) {
+                case 'basic': return '基础阶段';
+                case 'advanced': return '进阶阶段';
+                case 'pro': return '专业阶段';
+                default: return '';
+            }
+        }
+        
+        // 显示阶段完成消息
+        function showStageCompleteMessage(type) {
+            const stageName = getStageNameByType(type);
+            progressMessage.textContent = `${stageName}学习完成！`;
+            progressMessage.classList.remove('hidden');
+        }
+        
+        // 检查所有进度
+        function checkAllProgress() {
+            const savedProgress = JSON.parse(localStorage.getItem('pythonLearningProgress') || '{}');
+            const basic = savedProgress.basic || 0;
+            const advanced = savedProgress.advanced || 0;
+            const pro = savedProgress.pro || 0;
+            
+            // 检查是否所有阶段都完成了
+            if (basic >= 100 && advanced >= 100 && pro >= 100) {
+                progressMessage.textContent = '恭喜你，完成学习！';
+                progressMessage.classList.remove('hidden');
+            }
+        }
+        
+        // 重置进度
+        function resetProgress() {
+            // 重置所有进度条和文本
+            Object.keys(progressBars).forEach(type => {
+                updateProgress(type, 0);
+            });
+            
+            // 隐藏完成消息
+            progressMessage.classList.add('hidden');
+            
+            // 清除本地存储
+            localStorage.removeItem('pythonLearningProgress');
+        }
+        
+        // 为进度条滑块添加事件监听
+        progressInputs.forEach(input => {
+            const type = input.getAttribute('data-progress');
+            
+            input.addEventListener('input', function() {
+                const value = parseInt(this.value);
+                updateProgress(type, value);
+            });
+        });
+        
+        // 重置按钮点击事件
+        resetButton.addEventListener('click', resetProgress);
+        
+        // 页面加载时加载保存的进度
+        document.addEventListener('DOMContentLoaded', loadProgress);
+    </script>
+</body>
+</html>

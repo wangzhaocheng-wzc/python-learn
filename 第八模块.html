@@ -1,0 +1,1559 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python学习之旅 - 模块八：网络编程入门与网络应用开发</title>
+    <!-- 引入外部资源 -->
+    <link rel="stylesheet" href="https://cdn.staticfile.org/tailwindcss/2.2.19/tailwind.min.css">
+    <link rel="stylesheet" href="https://cdn.staticfile.org/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@latest/dist/mermaid.min.js"></script>
+    <style>
+        /* 基础样式设置 */
+        :root {
+            --primary-color: #3B82F6;
+            --primary-dark: #2563EB;
+            --secondary-color: #10B981;
+            --accent-color: #8B5CF6;
+            --text-color: #1F2937;
+            --text-light: #4B5563;
+            --bg-color: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --border-color: #E5E7EB;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --highlight-bg: #EFF6FF;
+            --highlight-border: #DBEAFE;
+        }
+
+        .dark {
+            --primary-color: #60A5FA;
+            --primary-dark: #3B82F6;
+            --secondary-color: #34D399;
+            --accent-color: #A78BFA;
+            --text-color: #F9FAFB;
+            --text-light: #E5E7EB;
+            --bg-color: #0F172A; /* 更深的背景色 */
+            --bg-secondary: #1E293B; /* 更深的次要背景色 */
+            --border-color: #475569;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --highlight-bg: #0D2150; /* 更深的高亮背景色 */
+            --highlight-border: #3B82F6;
+        }
+        
+        /* 深色模式下的文本颜色增强 */
+        .dark .text-gray-600 {
+            color: #D1D5DB !important; /* 提高灰色文本在深色背景下的可见度 */
+        }
+        
+        .dark .text-gray-700 {
+            color: #E5E7EB !important;
+        }
+        
+        .dark .text-gray-800 {
+            color: #F3F4F6 !important;
+        }
+        
+        /* 深色模式下的卡片和背景增强 */
+        .dark .card {
+            background-color: #1F2937 !important;
+            border-color: #374151 !important;
+            border: 1px solid #374151 !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        /* 安装Python解释器的三个环境模块 */
+        .dark .installation-section {
+            background-color: #1F2937 !important;
+            color: #F8FAFC !important;
+            border: 1px solid #374151 !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        /* Python开发工具模块 */
+        .dark .tools-section {
+            background-color: #1F2937 !important;
+            color: #F8FAFC !important;
+            border: 1px solid #374151 !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        .dark #IDLE {
+            background-color: #1F2937 !important;
+            color: #F8FAFC !important;
+            border: 1px solid #374151 !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        .dark #IPython, .dark #PyCharm, .dark .practice-section, .dark .windows-section, .dark .linux-section, .dark .macos-section {
+            background-color: #1F2937 !important;
+            color: #F8FAFC !important;
+            border: 1px solid #374151 !important;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5) !important;
+        }
+        
+        /* 练习模块 */
+        .dark .practice-section {
+            background-color: var(--bg-secondary);
+            border-radius: 0.5rem;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .dark .practice-section h3, 
+        .dark .practice-section h4, 
+        .dark .practice-section p, 
+        .dark .practice-section li {
+            color: #F8FAFC !important;
+        }
+        
+        .dark .practice-section code {
+            background-color: #1E293B !important;
+            color: #F8FAFC !important;
+        }
+        
+        .dark .practice-section pre {
+            background-color: var(--bg-secondary);
+            border-left: 4px solid var(--primary-color);
+        }
+        /* 深色模式下的内容区域增强 */
+        .dark .module-section {
+            background-color: #1F2937 !important;
+            border-radius: 0.5rem;
+            border: 1px solid #E5E7EB;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .dark .module-section h3, .dark .module-section h4, .dark .module-section p, .dark .module-section li {
+            color: #F8FAFC !important;
+        }
+        
+        .dark .text-gray-700 {
+            color: #E5E7EB !important;
+        }
+        
+        .dark .text-gray-800 {
+            color: #F3F4F6 !important;
+        }
+        
+        /* 深色模式下的卡片和背景增强 */
+        .dark .card {
+            background-color: var(--bg-color);
+            border-radius: 0.5rem;
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        /* 确保所有深色模式下的文本有足够对比度 */
+        .dark p, .dark li, .dark h3, .dark h4, .dark span {
+            color: #F8FAFC !important; /* 更亮的文本颜色，提高对比度 */
+        }
+        
+        /* 深色模式下的标题增强 */
+        .dark h1, .dark h2 {
+            color: #F8FAFC !important;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        /* 深色模式下的代码块增强 */
+        .dark pre {
+            background-color: #0D1829 !important;
+            border-left: 4px solid #60A5FA !important;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+            margin: 1.5rem 0;
+            padding: 1.25rem;
+        }
+        
+        .dark code {
+            background-color: #1E293B !important;
+            color: #F8FAFC !important;
+            font-weight: 500;
+        }
+        
+        .dark pre code {
+            background-color: transparent !important;
+            color: #F8FAFC !important;
+            font-weight: normal;
+        }
+                /* 进度条 */
+        .progress-container {
+            width: 100%;
+            height: 4px;
+            background: rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+        
+        /* 深色模式下的表格增强 */
+        .dark table th {
+            background-color: #0D1829 !important;
+            color: #F8FAFC !important;
+            border-color: #374151 !important;
+            font-weight: 600;
+        }
+        
+        .dark table td {
+            background-color: #1E293B !important;
+            border-color: #374151 !important;
+            color: #F1F5F9 !important;
+        }
+        
+        .dark table tr:nth-child(odd) td {
+            background-color: #172033 !important;
+        }
+        
+        /* 深色模式下的引用和提示框增强 */
+        .dark blockquote {
+            background-color: #0D1829 !important;
+            border-color: #60A5FA !important;
+            color: #F8FAFC !important;
+            padding: 1.25rem !important;
+            border-radius: 0.375rem !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+            border-left: 4px solid #60A5FA !important;
+            margin: 1.5rem 0 !important;
+        }
+        
+        /* Hero区域按钮深色模式增强 */
+        .dark a.bg-white {
+            background-color: #2563EB !important;
+            color: #FFFFFF !important;
+            border: 1px solid #60A5FA !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+            font-weight: 600;
+        }
+        
+        .dark .hover\:bg-blue-50:hover {
+            background-color: #1D4ED8 !important;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4) !important;
+            color: #FFFFFF !important;
+        }
+        
+        /* 深色模式下的Hero区域增强 */
+        .dark .bg-gradient-to-r {
+            background: linear-gradient(to right, #1E3A8A, #5B21B6) !important;
+            border: 1px solid #2D3748;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.4);
+        }
+        
+        /* 深色模式下的导航链接增强 */
+        .dark .nav-link {
+            color: #E2E8F0 !important;
+            transition: all 0.2s ease;
+        }
+        
+        .dark .nav-link:hover {
+            color: #7DD3FC !important;
+            background-color: #0D1829 !important;
+            border-radius: 0.375rem;
+            padding-left: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+        
+        .dark .nav-link.active {
+            color: #38BDF8 !important;
+            font-weight: 600;
+            background-color: #0D1829 !important;
+            border-radius: 0.375rem;
+            padding: 0.5rem;
+            border-left: 3px solid #60A5FA;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', Tahoma, Arial, Roboto, "Droid Sans", "Helvetica Neue", "Droid Sans Fallback", "Heiti SC", "Hiragino Sans GB", Simsun, sans-serif;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        /* 排版样式 */
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Noto Serif SC', serif;
+            font-weight: 600;
+            line-height: 1.3;
+            margin-bottom: 0.75em;
+            color: var(--text-color);
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        h2 {
+            font-size: 2rem;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 0.5rem;
+            margin-top: 2rem;
+        }
+
+        h3 {
+            font-size: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        h4 {
+            font-size: 1.25rem;
+            margin-top: 1.25rem;
+        }
+
+        p {
+            margin-bottom: 1.25rem;
+            line-height: 1.7;
+        }
+
+        /* 首字下沉效果 */
+        .first-letter::first-letter {
+            font-size: 3.5em;
+            font-weight: 700;
+            float: left;
+            line-height: 0.8;
+            margin-right: 0.1em;
+            color: var(--primary-color);
+        }
+
+        /* 链接样式 */
+        a {
+            color: var(--primary-color);
+            text-decoration: none;
+            transition: color 0.2s ease;
+        }
+
+        a:hover {
+            color: var(--primary-dark);
+            text-decoration: underline;
+        }
+
+        /* 代码样式 */
+        pre {
+            background-color: var(--bg-secondary);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+            border-left: 4px solid var(--primary-color);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        code {
+            font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+            font-size: 0.9em;
+            background-color: var(--bg-secondary);
+            padding: 0.2em 0.4em;
+            border-radius: 0.25rem;
+            color: var(--text-color);
+        }
+
+        pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+            color: inherit;
+            font-size: 1em;
+            line-height: 1.6;
+        }
+
+        /* 表格样式 */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+        }
+
+        th, td {
+            padding: 0.75rem;
+            border: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: var(--bg-secondary);
+            font-weight: 600;
+        }
+
+        /* 引用样式 */
+        blockquote {
+            border-left: 4px solid var(--accent-color);
+            padding-left: 1rem;
+            margin: 1.5rem 0;
+            font-style: italic;
+            color: var(--text-light);
+        }
+
+        /* 列表样式 */
+        ul, ol {
+            margin: 1.25rem 0;
+            padding-left: 1.5rem;
+        }
+
+        ul {
+            list-style-type: disc;
+        }
+
+        ol {
+            list-style-type: decimal;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+            line-height: 1.6;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background-color: var(--bg-color);
+            border-radius: 0.5rem;
+            box-shadow: var(--card-shadow);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 高亮区域 */
+        .highlight {
+            background-color: var(--highlight-bg);
+            border: 1px solid var(--highlight-border);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        /* 导航样式 */
+        .nav-link {
+            display: block;
+            padding: 0.5rem 0;
+            color: var(--text-light);
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+            transform: translateX(5px);
+            text-decoration: none;
+        }
+
+        .nav-link.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        /* 目录样式 */
+        .toc-container {
+            position: fixed;
+            top: 5rem;
+            bottom: 2rem;
+            width: 280px;
+            overflow-y: auto;
+            padding-right: 1rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) var(--bg-secondary);
+        }
+
+        .toc-container::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .toc-container::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        .toc-container::-webkit-scrollbar-thumb {
+            background-color: var(--primary-color);
+            border-radius: 3px;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 1023px) {
+            .toc-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: auto;
+                width: 100%;
+                height: 100%;
+                z-index: 50;
+                background-color: var(--bg-color);
+                padding: 2rem;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+
+            .toc-container.show {
+                transform: translateX(0);
+            }
+
+            .toc-overlay {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 40;
+                opacity: 0;
+                pointer-events: none;
+                transition: opacity 0.3s ease;
+            }
+
+            .toc-overlay.show {
+                opacity: 1;
+                pointer-events: auto;
+            }
+        }
+
+        /* 进度条样式 */
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: rgba(0,0,0,0.1);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        /* 主题切换按钮 */
+        .theme-toggle {
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s ease;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--bg-secondary);
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* 代码高亮 */
+        .token.comment,
+        .token.prolog,
+        .token.doctype,
+        .token.cdata {
+            color: #6B7280;
+        }
+
+        .token.punctuation {
+            color: #6B7280;
+        }
+
+        .token.namespace {
+            opacity: 0.7;
+        }
+
+        .token.property,
+        .token.tag,
+        .token.boolean,
+        .token.number,
+        .token.constant,
+        .token.symbol {
+            color: #EA580C;
+        }
+
+        .token.selector,
+        .token.attr-name,
+        .token.string,
+        .token.char,
+        .token.builtin {
+            color: #059669;
+        }
+
+        .token.operator,
+        .token.entity,
+        .token.url,
+        .language-css .token.string,
+        .style .token.string {
+            color: #9333EA;
+        }
+
+        .token.atrule,
+        .token.attr-value,
+        .token.keyword {
+            color: #2563EB;
+        }
+
+        .token.function,
+        .token.class-name {
+            color: #D97706;
+        }
+
+        .token.regex,
+        .token.important,
+        .token.variable {
+            color: #EC4899;
+        }
+
+        .token.important,
+        .token.bold {
+            font-weight: bold;
+        }
+
+        .token.italic {
+            font-style: italic;
+        }
+
+        .token.entity {
+            cursor: help;
+        }
+
+        /* 深色模式代码高亮调整 */
+        .dark .token.comment,
+        .dark .token.prolog,
+        .dark .token.doctype,
+        .dark .token.cdata {
+            color: #94A3B8; /* 更亮的注释颜色 */
+        }
+
+        .dark .token.punctuation {
+            color: #E2E8F0; /* 更亮的标点符号 */
+        }
+        
+        /* 深色模式下的页面背景增强 */
+        .dark body {
+            background-color: #0A1120; /* 更深的页面背景 */
+        }
+        
+        /* 深色模式下的顶部导航栏增强 */
+        .dark header {
+            background-color: #0D1829 !important;
+            border-bottom: 1px solid #1E293B;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .dark .token.property,
+        .dark .token.tag,
+        .dark .token.boolean,
+        .dark .token.number,
+        .dark .token.constant,
+        .dark .token.symbol {
+            color: #FB923C; /* 更亮的属性颜色 */
+        }
+
+        .dark .token.selector,
+        .dark .token.attr-name,
+        .dark .token.string,
+        .dark .token.char,
+        .dark .token.builtin {
+            color: #34D399; /* 更亮的字符串颜色 */
+        }
+
+        .dark .token.operator,
+        .dark .token.entity,
+        .dark .token.url,
+        .dark .language-css .token.string,
+        .dark .style .token.string {
+            color: #C4B5FD; /* 更亮的运算符颜色 */
+        }
+
+        .dark .token.atrule,
+        .dark .token.attr-value,
+        .dark .token.keyword {
+            color: #93C5FD; /* 更亮的关键字颜色 */
+        }
+
+        .dark .token.function,
+        .dark .token.class-name {
+            color: #FCD34D; /* 更亮的函数名颜色 */
+        }
+
+        .dark .token.regex,
+        .dark .token.important,
+        .dark .token.variable {
+            color: #F9A8D4; /* 更亮的变量颜色 */
+        }
+        
+        /* 深色模式下的卡片内容增强 */
+        .dark .card h3, .dark .card h4 {
+            color: #BAE6FD !important; /* 更亮的蓝色标题 */
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+        }
+        
+        .dark .card a {
+            color: #38BDF8 !important;
+            text-decoration: underline;
+            font-weight: 500;
+        }
+        
+        .dark .card a:hover {
+            color: #7DD3FC !important; /* 更亮的悬停颜色 */
+            text-decoration: none;
+        }
+        
+        /* 深色模式下的内容区域增强 */
+.dark main section {
+    background-color: #0D1829;
+    border-radius: 0.5rem;
+    padding: 1.25rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #1E293B;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* 练习模块深色模式样式 */
+.dark .bg-gray-50 {
+    background-color: #1F2937 !important;
+    color: #F8FAFC !important;
+}
+
+.dark .bg-gray-50 h4,
+.dark .bg-gray-50 p,
+.dark .bg-gray-50 li {
+    color: #F8FAFC !important;
+}
+
+.dark .bg-gray-50 code {
+    background-color: #1E293B !important;
+    color: #F8FAFC !important;
+}
+
+.dark .bg-gray-50 pre {
+    background-color: #0D1829 !important;
+    border-left: 4px solid #60A5FA !important;
+}
+        
+        /* 深色模式下的内容文本增强 */
+        .dark main section p {
+            color: #F8FAFC !important;
+            line-height: 1.8;
+        }
+        
+        /* 深色模式下的列表项增强 */
+        .dark main section li {
+            color: #F8FAFC !important;
+            margin-bottom: 0.75rem;
+        }
+        
+        /* 深色模式下的内容块增强 */
+        .dark .highlight {
+            background-color: #0D2150 !important;
+            border: 1px solid #1E40AF !important;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <div class="progress-container no-print">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <!-- 顶部导航栏 -->
+    <header class="sticky top-0 z-30 bg-white dark:bg-gray-900 shadow-md">
+        <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <i class="fab fa-python text-3xl text-blue-500"></i>
+                <h1 class="text-xl font-bold m-0">Python学习之旅</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="toc-toggle" class="lg:hidden p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                    <i class="fas fa-bars text-gray-600 dark:text-gray-300"></i>
+                </button>
+                <div class="theme-toggle" id="theme-toggle">
+                    <i class="fas fa-sun text-yellow-500 dark:hidden"></i>
+                    <i class="fas fa-moon text-blue-300 hidden dark:block"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 主要内容区域 -->
+    <div class="container mx-auto px-4 py-8 flex flex-col lg:flex-row">
+        <!-- 目录区域 -->
+        <aside class="lg:w-1/4 lg:pr-8">
+            <div class="toc-container hidden lg:block">
+                <h2 class="text-lg font-bold mb-4 flex items-center">
+                    <i class="fas fa-list-ul mr-2 text-blue-500"></i>目录
+                </h2>
+                <nav id="toc" class="space-y-1">
+                    <!-- 目录内容将通过JavaScript动态生成 -->
+                </nav>
+            </div>
+        </aside>
+
+        <!-- 移动端目录覆盖层 -->
+        <div class="toc-overlay" id="toc-overlay"></div>
+        <div class="toc-container lg:hidden" id="mobile-toc">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-lg font-bold flex items-center">
+                    <i class="fas fa-list-ul mr-2 text-blue-500"></i>目录
+                </h2>
+                <button id="close-toc" class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <i class="fas fa-times text-gray-600 dark:text-gray-300"></i>
+                </button>
+            </div>
+            <nav class="space-y-1">
+                <!-- 移动端目录内容将通过JavaScript动态复制 -->
+            </nav>
+        </div>
+
+        <!-- 内容区域 -->
+        <main class="lg:w-3/4 animate-fade-in" id="content">
+
+    <!-- Hero 区域 -->
+    <section class="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-16 md:py-24">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl font-bold mb-6 leading-tight">网络编程入门与网络应用开发</h1>
+                <p class="text-xl md:text-2xl mb-8 opacity-90">掌握现代网络编程的核心概念与实践技巧</p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="#intro" class="btn bg-white text-blue-600 hover:bg-blue-50 transition duration-300 rounded-lg px-6 py-3 shadow-md">
+                        <i class="fas fa-network-wired mr-2"></i>网络编程入门
+                    </a>
+                    <a href="#http" class="btn bg-white text-blue-600 hover:bg-blue-50 transition duration-300 rounded-lg px-6 py-3 shadow-md">
+                        <i class="fas fa-globe mr-2"></i>HTTP协议
+                    </a>
+                    <a href="#socket" class="btn bg-white text-blue-600 hover:bg-blue-50 transition duration-300 rounded-lg px-6 py-3 shadow-md">
+                        <i class="fas fa-plug mr-2"></i>套接字编程
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+                    <!-- 内容开始 -->
+                    <!-- Introduction -->
+                    <section id="intro" class="mb-16 scroll-mt-20">
+                        <h2 class="text-3xl font-bold mb-6">网络编程入门</h2>
+                        <p class="mb-4 first-letter-drop">计算机网络是独立自主的计算机互联而成的系统的总称，组建计算机网络最主要的目的是实现多台计算机之间的通信和资源共享。</p>
+                    </section>
+
+                    <section id="network-apps" class="mb-16 scroll-mt-20">
+                        <h2 class="text-3xl font-bold mb-6">网络应用开发</h2>
+                        <p class="mb-4">今天计算机网络中的设备和计算机网络的用户已经多得不可计数，而计算机网络也可以称得上是一个"复杂巨系统"。</p>
+                    </section>
+
+                    <section id="network-basics" class="mb-16 scroll-mt-20">
+                        <h2 class="text-3xl font-bold mb-6">计算机网络基础</h2>
+                        <p class="mb-4">对于这样的系统，我们不可能用一两篇文章把它讲清楚，有兴趣的读者可以自行阅读Andrew S.Tanenbaum老师的经典之作《计算机网络》或Kurose和Ross老师合著的《计算机网络:自顶向下方法》来了解计算机网络的相关知识。</p>
+
+                        <div id="network-history" class="mt-8 mb-12">
+                            <h3 class="text-2xl font-bold mb-6">计算机网络发展史</h3>
+                            <div class="space-y-6">
+                                <div class="card p-6">
+                                    <div class="flex items-start">
+                                        <div class="bg-black-100 dark:bg-black-900 text-blue-800 dark:text-blue-200 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 mt-1 mr-3">1</div>
+                                        <div>
+                                            <h4 class="font-semibold text-lg mb-2">1960s</h4>
+                                            <p>美国国防部ARPANET项目问世，奠定了分组交换网络的基础。</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card p-6">
+                                    <div class="flex items-start">
+                                        <div class="bg-black-100 dark:bg-black-900 text-blue-800 dark:text-blue-200 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 mt-1 mr-3">2</div>
+                                        <div>
+                                            <h4 class="font-semibold text-lg mb-2">1980s</h4>
+                                            <p>国际标准化组织（ISO）发布OSI/RM，奠定了网络技术标准化的基础。</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card p-6">
+                                    <div class="flex items-start">
+                                        <div class="bg-black-100 dark:bg-black-900 text-blue-800 dark:text-blue-200 rounded-full w-8 h-8 flex items-center justify-center flex-shrink-0 mt-1 mr-3">3</div>
+                                        <div>
+                                            <h4 class="font-semibold text-lg mb-2">1990s</h4>
+                                            <p class="mb-4">英国人蒂姆·伯纳斯-李发明了图形化的浏览器，浏览器的简单易用性使得计算机网络迅速被普及。</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="tcp-ip" class="mb-12">
+                            <h3 class="text-2xl font-bold mb-6">TCP/IP模型</h3>
+                            <p class="mb-4">实现网络通信的基础是网络通信协议，这些协议通常是由互联网工程任务组 （IETF）制定的。所谓"协议"就是通信计算机双方必须共同遵从的一组约定，例如怎样建立连接、怎样互相识别等，网络协议的三要素是：语法、语义和时序。</p>
+                            
+                            <div class="highlight-block my-6 flex justify-center">
+                                <div class="mermaid">
+                                    graph TD
+                                        A[应用层] -->|HTTP, FTP, SMTP| B[传输层]
+                                        B -->|TCP, UDP| C[网络层]
+                                        C -->|IP, ICMP| D[网络接口层]
+                                </div>
+                            </div>
+
+                            <p class="mb-4">构成我们今天使用的Internet的基础的是TCP/IP协议族，所谓协议族就是一系列的协议及其构成的通信模型，我们通常也把这套东西称为TCP/IP模型。与国际标准化组织发布的OSI/RM这个七层模型不同，TCP/IP是一个四层模型，也就是说，该模型将我们使用的网络从逻辑上分解为四个层次，自底向上依次是：网络接口层、网络层、传输层和应用层，如上图所示。</p>
+                        </div>
+                    </section>
+
+                        <div class="bg-black-100 dark:bg-black-900 border-l-4 border-blue-500 p-4 my-6 rounded-r">
+                            <h4 class="font-bold text-blue-800 dark:text-blue-300 mb-2">网络协议的分层思想</h4>
+                            <p>TCP/IP模型的分层思想体现了计算机领域中一个非常重要的原则，即分而治之的思想，这也是所有复杂系统开发的基本原则。由于每一层只需要考虑自己的任务，不需要考虑其他层的处理过程，这样大大简化了复杂网络系统的设计。</p>
+                        </div>
+
+                        <p>TCP全称传输控制协议，它是基于IP提供的寻址和路由服务而建立起来的负责实现端到端可靠传输的协议，之所以将TCP称为可靠的传输协议是因为TCP向调用者承诺了三件事情：</p>
+                        <ol class="list-decimal pl-6 space-y-2 mt-4">
+                            <li>数据不传丢不传错（利用握手、校验和重传机制可以实现）。</li>
+                            <li>流量控制（通过滑动窗口匹配数据发送者和接收者之间的传输速度）。</li>
+                            <li>拥塞控制（通过RTT时间以及对滑动窗口的控制缓解网络拥堵）。</li>
+                        </ol>
+
+                </section>
+                
+                <section id="network-models" class="mb-16 scroll-mt-20">
+                    <h2 class="text-3xl font-bold mb-6">网络应用模式</h2>
+                        <p>在实际开发中，我们通常会使用一些应用层协议来实现网络应用，根据应用的架构和通信方式，可以将网络应用分为几种不同的模式。</p>
+                        
+                        <div class="highlight-block my-6">
+                            <h4>常见的网络应用模式</h4>
+                            <ul class="list-disc pl-6 space-y-2">
+                                <li><strong>客户端-服务器模式</strong>：最常见的网络应用模式，客户端向服务器发送请求，服务器处理请求并返回响应</li>
+                                <li><strong>P2P模式</strong>：点对点模式，每个节点既可以是客户端也可以是服务器</li>
+                                <li><strong>分布式系统</strong>：将应用程序分布在多个计算机上，通过网络进行通信和协作</li>
+                            </ul>
+                        </div>
+
+                    </section>
+
+                <section id="http" class="scroll-mt-20 mt-12"> 
+
+                    <h2 class="text-3xl font-bold mb-6">基于HTTP协议的网络资源访问</h2>
+
+                    <div id="http-protocol" class="mt-8">
+                        <h3>HTTP（超文本传输协议）</h3>
+                        <p>HTTP是超文本传输协议（Hyper-Text Transfer Proctol）的简称，维基百科上对HTTP的解释是：超文本传输协议是一种用于分布式、协作式和超媒体信息系统的应用层协议，它是万维网数据通信的基础，设计HTTP最初的目的是为了提供一种发布和接收HTML页面的方法，通过HTTP或者HTTPS（超文本传输安全协议）请求的资源由URI（统一资源标识符）来标识。</p>
+                        <p>关于HTTP的更多内容，我们推荐阅读阮一峰老师的《HTTP 协议入门》，简单的说，通过HTTP我们可以获取网络上的（基于字符的）资源，开发中经常会用到的网络API（有的地方也称之为网络数据接口）就是基于HTTP来实现数据传输的。</p>
+                    </div>
+
+                    <div id="json" class="mt-8">
+                        <h3>JSON格式</h3>
+                        <p><strong>JSON</strong>（<strong>J</strong>ava<strong>S</strong>cript <strong>O</strong>bject <strong>N</strong>otation）是一种轻量级的数据交换语言，该语言以易于让人阅读的文字（纯文本）为基础，用来传输由属性值或者序列性的值组成的数据对象。尽管JSON是最初只是Javascript中一种创建对象的字面量语法，但它在当下更是一种独立于语言的数据格式，很多编程语言都支持JSON格式数据的生成和解析，Python内置的json模块也提供了这方面的功能。由于JSON是纯文本，它和XML一样都适用于异构系统之间的数据交换，而相较于XML，JSON显得更加的轻便和优雅。下面是表达同样信息的XML和JSON，而JSON的优势是相当直观的。</p>
+                        
+                        <div class="code-example">
+                            <div class="code-description">
+                                <h4>XML与JSON格式对比</h4>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+                                <div class="bbg-black-100 dark:bg-black-900 p-4 rounded-lg">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <h4 class="font-semibold">XML的例子：</h4>
+                                        <span class="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">XML</span>
+                                    </div>
+                                    <pre class="text-sm overflow-x-auto p-4 bg-gray-200 dark:bg-gray-700 rounded"><code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;message&gt;
+    &lt;from&gt;Alice&lt;/from&gt;
+    &lt;to&gt;Bob&lt;/to&gt;
+    &lt;content&gt;Will you marry me?&lt;/content&gt;
+&lt;/message&gt;</code></pre>
+                                </div>
+                                <div class="bbg-black-100 dark:bg-black-900 p-4 rounded-lg">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <h4 class="font-semibold">JSON的例子：</h4>
+                                        <span class="text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">JSON</span>
+                                    </div>
+                                    <pre class="text-sm overflow-x-auto p-4 bg-gray-200 dark:bg-gray-700 rounded"><code>{
+    "from": "Alice",
+    "to": "Bob",
+    "content": "Will you marry me?"
+}</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <h3 class="text-3xl font-bold mb-6">requests库</h3>
+                    <p>requests是一个基于HTTP协议来使用网络的第三库，其[官方网站]这样的一句介绍它的话：“Requests是唯一的一个**非转基因**的Python HTTP库，人类可以安全享用。”简单的说，使用requests库可以非常方便的使用HTTP，避免安全缺陷、冗余代码以及“重复发明轮子”（行业黑话，通常用在软件工程领域表示重新创造一个已有的或是早已被优化過的基本方法）。前面的文章中我们已经使用过这个库，下面我们还是通过requests来实现一个访问网络数据接口并从中获取美女图片下载链接然后下载美女图片到本地的例子程序，程序中使用了[天行数据]提供的网络API。</p>
+                    <div class="practice-example">
+                        <p>我们可以先通过pip安装requests及其依赖库。
+                        </p>
+                            <div class="code-example">
+
+                                <pre><code>pip install requests
+               </code></pre>
+
+                            </div>
+                        </div>
+                    <div class="practice-example">
+                        <p>
+                            如果使用PyCharm作为开发工具，可以直接在代码中书写`import requests`，然后通过代码修复功能来自动下载安装requests。
+                        </p>
+                            <div class="code-example">
+
+                                <pre><code>
+from time import time
+from threading import Thread
+
+import requests
+
+
+# 继承Thread类创建自定义的线程类
+class DownloadHanlder(Thread):
+
+    def __init__(self, url):
+        super().__init__()
+        self.url = url
+
+    def run(self):
+        filename = self.url[self.url.rfind('/') + 1:]
+        resp = requests.get(self.url)
+        with open('/Users/Hao/' + filename, 'wb') as f:
+            f.write(resp.content)
+
+
+def main():
+    # 通过requests模块的get函数获取网络资源
+    # 下面的代码中使用了天行数据接口提供的网络API
+    # 要使用该数据接口需要在天行数据的网站上注册
+    # 然后用自己的Key替换掉下面代码的中APIKey即可
+    resp = requests.get(
+        'http://api.tianapi.com/meinv/?key=APIKey&num=10')
+    # 将服务器返回的JSON格式的数据解析为字典
+    data_model = resp.json()
+    for mm_dict in data_model['newslist']:
+        url = mm_dict['picUrl']
+        # 通过多线程的方式实现图片下载
+        DownloadHanlder(url).start()
+
+
+if __name__ == '__main__':
+    main()
+               
+                            </div>
+                        </div>
+                </section>
+
+                <section id="socket" class="mb-16 scroll-mt-20">
+                    <h2 class="text-3xl font-bold mb-6">基于传输层协议的套接字编程</h2>
+                    <p>套接字这个词对很多不了解网络编程的人来说显得非常晦涩和陌生，其实说得通俗点，套接字就是一套用C语言写成的应用程序开发库，主要用于实现进程间通信和网络编程，在网络应用开发中被广泛使用。在Python中也可以基于套接字来使用传输层提供的传输服务，并基于此开发自己的网络应用。实际开发中使用的套接字可以分为三类：流套接字（TCP套接字）、数据报套接字和原始套接字。</p>
+                    
+                   
+                        <div class="code-example">
+                            <h4 class="text-3xl font-bold mb-6">TCP套接字</h4>
+                            <p>所谓TCP套接字就是使用TCP协议提供的传输服务来实现网络通信的编程接口。在Python中可以通过创建socket对象并指定type属性为SOCK_STREAM来使用TCP套接字。由于一台主机可能拥有多个IP地址，而且很有可能会配置多个不同的服务，所以作为服务器端的程序，需要在创建套接字对象后将其绑定到指定的IP地址和端口上。这里的端口并不是物理设备而是对IP地址的扩展，用于区分不同的服务，例如我们通常将HTTP服务跟80端口绑定，而MySQL数据库服务默认绑定在3306端口，这样当服务器收到用户请求时就可以根据端口号来确定到底用户请求的是HTTP服务器还是数据库服务器提供的服务。端口的取值范围是0~65535，而1024以下的端口我们通常称之为“著名端口”（留给像FTP、HTTP、SMTP等“著名服务”使用的端口，有的地方也称之为“周知端口”），自定义的服务通常不使用这些端口，除非自定义的是HTTP或FTP这样的著名服务。</p>
+                            <div class="practice-example">
+                                <p>下面的代码实现了一个提供时间日期的服务器
+                                </p>
+                                    </div>
+             
+                                        <pre><code>
+ from socket import socket, SOCK_STREAM, AF_INET
+from datetime import datetime
+
+
+def main():
+    # 1.创建套接字对象并指定使用哪种传输服务
+    # family=AF_INET - IPv4地址
+    # family=AF_INET6 - IPv6地址
+    # type=SOCK_STREAM - TCP套接字
+    # type=SOCK_DGRAM - UDP套接字
+    # type=SOCK_RAW - 原始套接字
+    server = socket(family=AF_INET, type=SOCK_STREAM)
+    # 2.绑定IP地址和端口(端口用于区分不同的服务)
+    # 同一时间在同一个端口上只能绑定一个服务否则报错
+    server.bind(('192.168.1.2', 6789))
+    # 3.开启监听 - 监听客户端连接到服务器
+    # 参数512可以理解为连接队列的大小
+    server.listen(512)
+    print('服务器启动开始监听...')
+    while True:
+        # 4.通过循环接收客户端的连接并作出相应的处理(提供服务)
+        # accept方法是一个阻塞方法如果没有客户端连接到服务器代码不会向下执行
+        # accept方法返回一个元组其中的第一个元素是客户端对象
+        # 第二个元素是连接到服务器的客户端的地址(由IP和端口两部分构成)
+        client, addr = server.accept()
+        print(str(addr) + '连接到了服务器.')
+        # 5.发送数据
+        client.send(str(datetime.now()).encode('utf-8'))
+        # 6.断开连接
+        client.close()
+
+
+if __name__ == '__main__':
+    main()</code></pre>
+                            </div>
+                            <div class="practice-example">
+                                <h4>实践示例：使用telnet连接服务器</h4>
+                                <p>运行服务器程序后我们可以通过Windows系统的telnet来访问该服务器，结果如下图所示。</p>
+        
+                            <div class="code-description">
+                                <span>telnet命令示例</span>
+                            </div>
+                            <pre><code>telnet 192.168.1.2 6789</code></pre>
+                        </div>
+                    <div class="practice-example">
+                        <h4>连接示例代码</h4>
+                            <div class="code-example">
+                                <div class="code-description">
+                                    <span>Python实现TCP客户端</span>
+                                </div>
+                                <pre><code># 连接示例代码
+from socket import socket
+
+
+def main():
+    # 1.创建套接字对象默认使用IPv4和TCP协议
+    client = socket()
+    # 2.连接到服务器(需要指定IP地址和端口)
+    client.connect(('192.168.1.2', 6789))
+    # 3.从服务器接收数据
+    print(client.recv(1024).decode('utf-8'))
+    client.close()
+
+
+if __name__ == '__main__':
+    main()
+               </code></pre>
+
+                       </div>
+                            </div>
+
+
+                        <div class="practice-example">
+                            <p>需要注意的是，上面的服务器并没有使用多线程或者异步I/O的处理方式，这也就意味着当服务器与一个客户端处于通信状态时，其他的客户端只能排队等待。很显然，这样的服务器并不能满足我们的需求，我们需要的服务器是能够同时接纳和处理多个用户请求的。下面我们来设计一个使用多线程技术处理多个用户请求的服务器，该服务器会向连接到服务器的客户端发送一张图片</p>
+                        </div>
+                        <div class="practice-example">
+                        <h4>服务器端示例代码</h4>
+                            <div class="code-example">
+                                <pre><code>
+ from socket import socket, SOCK_STREAM, AF_INET
+from base64 import b64encode
+from json import dumps
+from threading import Thread
+
+
+def main():
+    
+    # 自定义线程类
+    class FileTransferHandler(Thread):
+
+        def __init__(self, cclient):
+            super().__init__()
+            self.cclient = cclient
+
+        def run(self):
+            my_dict = {}
+            my_dict['filename'] = 'guido.jpg'
+            # JSON是纯文本不能携带二进制数据
+            # 所以图片的二进制数据要处理成base64编码
+            my_dict['filedata'] = data
+            # 通过dumps函数将字典处理成JSON字符串
+            json_str = dumps(my_dict)
+            # 发送JSON字符串
+            self.cclient.send(json_str.encode('utf-8'))
+            self.cclient.close()
+
+    # 1.创建套接字对象并指定使用哪种传输服务
+    server = socket()
+    # 2.绑定IP地址和端口(区分不同的服务)
+    server.bind(('192.168.1.2', 5566))
+    # 3.开启监听 - 监听客户端连接到服务器
+    server.listen(512)
+    print('服务器启动开始监听...')
+    with open('guido.jpg', 'rb') as f:
+        # 将二进制数据处理成base64再解码成字符串
+        data = b64encode(f.read()).decode('utf-8')
+    while True:
+        client, addr = server.accept()
+        # 启动一个线程来处理客户端的请求
+        FileTransferHandler(client).start()
+
+
+if __name__ == '__main__':
+    main()
+               </code></pre>
+                            </div>
+                        </div>
+                        <div class="practice-example">
+                            <h4>客户端端示例代码</h4>
+                                <div class="code-example">
+                                    <pre><code>
+from socket import socket
+from json import loads
+from base64 import b64decode
+
+
+def main():
+    client = socket()
+    client.connect(('192.168.1.2', 5566))
+    # 定义一个保存二进制数据的对象
+    in_data = bytes()
+    # 由于不知道服务器发送的数据有多大每次接收1024字节
+    data = client.recv(1024)
+    while data:
+        # 将收到的数据拼接起来
+        in_data += data
+        data = client.recv(1024)
+    # 将收到的二进制数据解码成JSON字符串并转换成字典
+    # loads函数的作用就是将JSON字符串转成字典对象
+    my_dict = loads(in_data.decode('utf-8'))
+    filename = my_dict['filename']
+    filedata = my_dict['filedata'].encode('utf-8')
+    with open('/Users/Hao/' + filename, 'wb') as f:
+        # 将base64格式的数据解码成二进制数据并写入文件
+        f.write(b64decode(filedata))
+    print('图片已保存.')
+
+
+if __name__ == '__main__':
+    main()
+                   </code></pre>
+                                </div>
+                            </div>
+
+                    </section>
+
+                
+
+            <section id="sms" class="mb-16 scroll-mt-20">
+                <h2 class="text-3xl font-bold mb-6">发送短信</h2>
+                <p class="mb-4">发送短信也是项目中常见的功能，网站的注册码、验证码、营销信息基本上都是通过短信来发送给用户的。在下面的代码中我们使用了互亿无线短信平台（购买支付费用）提供的短信服务，其他的短信平台也提供了类似的服务。</p>
+                <div class="card p-6 mb-6">
+                    <h4 class="font-semibold text-lg mb-2">短信发送步骤</h4>
+                    <ol class="list-decimal pl-6 space-y-2">
+                        <li>注册短信平台账号</li>
+                        <li>购买短信服务</li>
+                        <li>获取API接口和密钥</li>
+                        <li>调用API发送短信</li>
+                    </ol>
+                    <div class="code-example">
+                        <div class="code-description">
+                            <span>Python实现短信发送功能</span>
+                        </div>
+                        <pre><code>
+import urllib.parse
+import http.client
+import json
+
+
+def main():
+    host  = "106.ihuyi.com"
+    sms_send_uri = "/webservice/sms.php?method=Submit"
+    # 下面的参数需要填入自己注册的账号和对应的密码
+    params = urllib.parse.urlencode({'account': '你自己的账号', 'password' : '你自己的密码', 'content': '您的验证码是：147258。请不要把验证码泄露给其他人。', 'mobile': '接收者的手机号', 'format':'json' })
+    print(params)
+    headers = {'Content-type': 'application/x-www-form-urlencoded', 'Accept': 'text/plain'}
+    conn = http.client.HTTPConnection(host, port=80, timeout=30)
+    conn.request('POST', sms_send_uri, params, headers)
+    response = conn.getresponse()
+    response_str = response.read()
+    jsonstr = response_str.decode('utf-8')
+    print(json.loads(jsonstr))
+    conn.close()
+
+
+if __name__ == '__main__':
+    main()
+                            </code></pre>
+                    </div>
+                </div>
+            </section>
+
+                
+                <section id="email" class="mb-16 scroll-mt-20">
+                    <h2 class="text-3xl font-bold mb-6">发送电子邮件</h2>
+                    <p class="mb-4">电子邮件是互联网最古老、应用最广泛的服务之一，几乎所有的编程语言都提供了收发电子邮件的相关API，Python也不例外。</p>
+                    
+                    <div class="practice-example">
+                        <h4>电子邮件发送示例</h4>
+                        <div class="code-example">
+                            <div class="code-description">
+                                <span>Python实现邮件发送功能</span>
+                            </div>
+                            <pre><code>
+ from smtplib import SMTP
+from email.header import Header
+from email.mime.text import MIMEText
+
+
+def main():
+    # 请自行修改下面的邮件发送者和接收者
+    sender = 'abcdefg@126.com'
+    receivers = ['uvwxyz@qq.com', 'uvwxyz@126.com']
+    message = MIMEText('用Python发送邮件的示例代码.', 'plain', 'utf-8')
+    message['From'] = Header('王大锤', 'utf-8')
+    message['To'] = Header('Wik', 'utf-8')
+    message['Subject'] = Header('示例代码实验邮件', 'utf-8')
+    smtper = SMTP('smtp.126.com')
+    # 请自行修改下面的登录口令
+    smtper.login(sender, 'secretpass')
+    smtper.sendmail(sender, receivers, message.as_string())
+    print('邮件发送完成!')
+
+
+if __name__ == '__main__':
+    main()
+                                </code></pre>
+                        </div>
+                        <div class="code-example">
+                            <div class="code-description">
+                                <span>发送带有附件的邮件</span>
+                            </div>
+                            <pre><code>
+ from smtplib import SMTP
+from email.header import Header
+from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+
+import urllib
+
+
+def main():
+    # 创建一个带附件的邮件消息对象
+    message = MIMEMultipart()
+    
+    # 创建文本内容
+    text_content = MIMEText('附件中有本月数据请查收', 'plain', 'utf-8')
+    message['Subject'] = Header('本月数据', 'utf-8')
+    # 将文本内容添加到邮件消息对象中
+    message.attach(text_content)
+
+    # 读取文件并将文件作为附件添加到邮件消息对象中
+    with open('/Users/Hao/Desktop/hello.txt', 'rb') as f:
+        txt = MIMEText(f.read(), 'base64', 'utf-8')
+        txt['Content-Type'] = 'text/plain'
+        txt['Content-Disposition'] = 'attachment; filename=hello.txt'
+        message.attach(txt)
+    # 读取文件并将文件作为附件添加到邮件消息对象中
+    with open('/Users/Hao/Desktop/汇总数据.xlsx', 'rb') as f:
+        xls = MIMEText(f.read(), 'base64', 'utf-8')
+        xls['Content-Type'] = 'application/vnd.ms-excel'
+        xls['Content-Disposition'] = 'attachment; filename=month-data.xlsx'
+        message.attach(xls)
+    
+    # 创建SMTP对象
+    smtper = SMTP('smtp.126.com')
+    # 开启安全连接
+    # smtper.starttls()
+    sender = 'abcdefg@126.com'
+    receivers = ['uvwxyz@qq.com']
+    # 登录到SMTP服务器
+    # 请注意此处不是使用密码而是邮件客户端授权码进行登录
+    # 对此有疑问的读者可以联系自己使用的邮件服务器客服
+    smtper.login(sender, 'secretpass')
+    # 发送邮件
+    smtper.sendmail(sender, receivers, message.as_string())
+    # 与邮件服务器断开连接
+    smtper.quit()
+    print('发送完成!')
+
+
+if __name__ == '__main__':
+    main()
+                                
+                                </code></pre>
+                        </div>
+                    </div>
+                </section>
+
+     <!-- 页脚 -->
+    <!-- JavaScript -->
+    <footer class="bg-black-100 dark:bg-gaay-900 text-black-700 dark:text-black-300 py-6">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-wrap justify-center items-center">
+                <div class="text-sm">
+                    © 2025 Python学习之旅. 保留所有权利。
+                </div>
+                <div class="flex space-x-4">
+                        <a href="#" class="text-black-500 hover:text-blue-500 dark:text-black-400 dark:hover:text-blue-400">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="#" class="text-black-500 hover:text-blue-500 dark:text-black-400 dark:hover:text-blue-400">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-black-500 hover:text-blue-500 dark:text-black-400 dark:hover:text-blue-400">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                    </div>
+                <div class="text-sm">
+                </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+</main>  
+</div>
+    
+
+    <!-- 返回顶部按钮 -->
+    <button id="back-to-top" class="fixed bottom-8 right-8 bg-blue-500 text-white p-3 rounded-full shadow-lg opacity-0 transition-opacity duration-300 hover:bg-blue-600 focus:outline-none">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <!-- JavaScript -->
+    <script>
+        // 初始化Mermaid
+        mermaid.initialize({
+            startOnLoad: true,
+            theme: window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'default'
+        });
+        
+        // DOM元素
+        const body = document.body;
+        const themeToggle = document.getElementById('theme-toggle');
+        const tocToggle = document.getElementById('toc-toggle');
+        const closeToc = document.getElementById('close-toc');
+        const tocOverlay = document.getElementById('toc-overlay');
+        const mobileToc = document.getElementById('mobile-toc');
+        const backToTop = document.getElementById('back-to-top');
+        const content = document.getElementById('content');
+        const toc = document.getElementById('toc');
+        const progressBar = document.getElementById('progressBar');
+        
+        // 主题切换
+        function setTheme(isDark) {
+            if (isDark) {
+                body.classList.add('dark');
+                localStorage.setItem('theme', 'dark');
+                mermaid.initialize({ theme: 'dark' });
+            } else {
+                body.classList.remove('dark');
+                localStorage.setItem('theme', 'light');
+                mermaid.initialize({ theme: 'default' });
+            }
+        }
+        
+        // 检查用户偏好
+        const userPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const savedTheme = localStorage.getItem('theme');
+        
+        if (savedTheme === 'dark' || (!savedTheme && userPrefersDark)) {
+            setTheme(true);
+        }
+        
+        // 主题切换事件
+        themeToggle.addEventListener('click', () => {
+            const isDark = body.classList.contains('dark');
+            setTheme(!isDark);
+        });
+        
+        // 移动端目录切换
+        tocToggle.addEventListener('click', () => {
+            mobileToc.classList.add('show');
+            tocOverlay.classList.add('show');
+        });
+        
+        closeToc.addEventListener('click', () => {
+            mobileToc.classList.remove('show');
+            tocOverlay.classList.remove('show');
+        });
+        
+        tocOverlay.addEventListener('click', () => {
+            mobileToc.classList.remove('show');
+            tocOverlay.classList.remove('show');
+        });
+        
+        // 返回顶部按钮
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 300) {
+                backToTop.style.opacity = '1';
+            } else {
+                backToTop.style.opacity = '0';
+            }
+            // 更新进度条
+            const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight || document.body.scrollHeight;
+            const clientHeight = document.documentElement.clientHeight || window.innerHeight;
+            const scrollPercentage = (scrollTop / (scrollHeight - clientHeight)) * 100;
+            progressBar.style.width = scrollPercentage + '%';
+ 
+        });
+        
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        // 生成目录
+        function generateTOC() {
+            const headings = content.querySelectorAll('h2, h3, h4');
+            let tocHTML = '';
+            
+            headings.forEach(heading => {
+                const id = heading.id || heading.textContent.toLowerCase().replace(/\s+/g, '-');
+                heading.id = id;
+                
+                const level = parseInt(heading.tagName.substring(1)) - 2;
+                const indent = level > 0 ? `ml-${level * 4}` : '';
+                
+                tocHTML += `<a href="#${id}" class="nav-link ${indent}">${heading.textContent}</a>`;
+            });
+            
+            toc.innerHTML = tocHTML;
+            
+            // 复制到移动端目录
+            document.querySelector('#mobile-toc nav').innerHTML = tocHTML;
+            
+            // 添加目录点击事件
+            const tocLinks = document.querySelectorAll('.nav-link');
+            tocLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    // 在移动端点击链接后关闭目录
+                    if (window.innerWidth < 1024) {
+                        mobileToc.classList.remove('show');
+                        tocOverlay.classList.remove('show');
+                    }
+                });
+            });
+        }
+        
+        // 页面加载完成后生成目录
+        document.addEventListener('DOMContentLoaded', generateTOC);
+
+        // 学习进度模拟（仅作演示）
+        const progressBars = {
+            basic: document.querySelector('.progress-basic'),
+            advanced: document.querySelector('.progress-advanced'),
+            pro: document.querySelector('.progress-pro')
+        };
+        
+        // 模拟进度更新
+        function simulateProgress() {
+            let basicProgress = 0;
+            let advancedProgress = 0;
+            let proProgress = 0;
+            
+            const interval = setInterval(() => {
+                if (basicProgress < 75) {
+                    basicProgress += 1;
+                    progressBars.basic.style.width = `${basicProgress}%`;
+                    progressBars.basic.parentElement.previousElementSibling.lastElementChild.textContent = `${basicProgress}%`;
+                }
+                
+                if (basicProgress > 30 && advancedProgress < 45) {
+                    advancedProgress += 1;
+                    progressBars.advanced.style.width = `${advancedProgress}%`;
+                    progressBars.advanced.parentElement.previousElementSibling.lastElementChild.textContent = `${advancedProgress}%`;
+                }
+                
+                if (advancedProgress > 20 && proProgress < 20) {
+                    proProgress += 1;
+                    progressBars.pro.style.width = `${proProgress}%`;
+                    progressBars.pro.parentElement.previousElementSibling.lastElementChild.textContent = `${proProgress}%`;
+                }
+                
+                if (basicProgress >= 75 && advancedProgress >= 45 && proProgress >= 20) {
+                    clearInterval(interval);
+                }
+            }, 50);
+        }
+        
+        // 页面加载后延迟启动进度模拟
+        setTimeout(simulateProgress, 1500);
+    </script>
+</body>
+</html>
+
+

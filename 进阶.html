@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python语言进阶教程</title>
+    <link href="https://cdn.staticfile.org/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.staticfile.org/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@latest/dist/mermaid.min.js"></script>
+    <style>
+        /* 基础样式设置 */
+        :root {
+            --primary-color: #3B82F6;
+            --primary-dark: #2563EB;
+            --secondary-color: #10B981;
+            --accent-color: #8B5CF6;
+            --text-color: #1F2937;
+            --text-light: #4B5563;
+            --bg-color: #FFFFFF;
+            --bg-secondary: #F9FAFB;
+            --border-color: #E5E7EB;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --highlight-bg: #EFF6FF;
+            --highlight-border: #DBEAFE;
+            --code-bg: #F3F4F6;
+            --code-text: #1E40AF;
+            --header-gradient-start: #3B82F6;
+            --header-gradient-end: #8B5CF6;
+        }
+
+        .dark {
+            --primary-color: #60A5FA;
+            --primary-dark: #3B82F6;
+            --secondary-color: #34D399;
+            --accent-color: #A78BFA;
+            --text-color: #F9FAFB;
+            --text-light: #D1D5DB;
+            --bg-color: #111827;
+            --bg-secondary: #1F2937;
+            --border-color: #374151;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+            --highlight-bg: #1E3A8A;
+            --highlight-border: #2563EB;
+            --code-bg: #1F2937;
+            --code-text: #93C5FD;
+            --header-gradient-start: #1E40AF;
+            --header-gradient-end: #5B21B6;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', Tahoma, Arial, Roboto, "Droid Sans", "Helvetica Neue", "Droid Sans Fallback", "Heiti SC", "Hiragino Sans GB", Simsun, sans-serif;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: 'Noto Serif SC', serif;
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        /* 首字下沉效果 */
+        .first-letter-drop::first-letter {
+            font-size: 3.5em;
+            float: left;
+            line-height: 0.8;
+            margin-right: 0.1em;
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        /* 代码块样式 */
+        pre {
+            background-color: var(--code-bg);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            overflow-x: auto;
+            margin: 1.5rem 0;
+            border-left: 4px solid var(--primary-color);
+            font-family: 'Courier New', Courier, monospace;
+            position: relative;
+        }
+
+        pre code {
+            color: var(--code-text);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* 代码语言标签 */
+        pre::before {
+            content: "Python";
+            position: absolute;
+            top: 0;
+            right: 1rem;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            font-size: 0.7rem;
+            border-bottom-left-radius: 0.3rem;
+            border-bottom-right-radius: 0.3rem;
+        }
+
+        /* 内联代码样式 */
+        code:not(pre code) {
+            background-color: var(--code-bg);
+            color: var(--code-text);
+            padding: 0.1rem 0.3rem;
+            border-radius: 0.25rem;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9em;
+        }
+
+        /* 导航菜单样式 */
+        .nav-link {
+            position: relative;
+            padding: 0.5rem 0;
+            margin: 0.5rem 0;
+            display: block;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: 0;
+            left: 0;
+            background-color: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-link:hover::after,
+        .nav-link.active::after {
+            width: 100%;
+        }
+
+        .nav-link.active {
+            color: var(--primary-color);
+            font-weight: 500;
+        }
+
+        /* 卡片样式 */
+        .card {
+            background-color: var(--bg-color);
+            border-radius: 0.5rem;
+            box-shadow: var(--card-shadow);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+
+        /* 高亮块样式 */
+        .highlight-block {
+            background-color: var(--highlight-bg);
+            border-left: 4px solid var(--primary-color);
+            padding: 1rem;
+            margin: 1.5rem 0;
+            border-radius: 0.5rem;
+        }
+
+        /* 目录样式 */
+        .toc-container {
+            position: sticky;
+            top: 2rem;
+            max-height: calc(100vh - 4rem);
+            overflow-y: auto;
+            padding-right: 1rem;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary-color) var(--bg-secondary);
+        }
+
+        .toc-container::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        .toc-container::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        .toc-container::-webkit-scrollbar-thumb {
+            background-color: var(--primary-color);
+            border-radius: 10px;
+        }
+
+        /* 移动端目录覆盖层 */
+        .toc-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 40;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .toc-overlay.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 移动端目录侧边栏 */
+        .mobile-toc {
+            position: fixed;
+            top: 0;
+            left: -280px;
+            width: 280px;
+            height: 100%;
+            background-color: var(--bg-color);
+            z-index: 50;
+            transition: left 0.3s ease;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .mobile-toc.show {
+            left: 0;
+        }
+
+        /* 进度条样式 */
+        .progress-container {
+            width: 100%;
+            height: 5px;
+            background-color: var(--bg-secondary);
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 100;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--primary-color), var(--accent-color));
+            width: 0%;
+            transition: width 0.1s ease;
+        }
+
+        /* 返回顶部按钮 */
+        .back-to-top {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background-color: var(--primary-color);
+            color: white;
+            width: 3rem;
+            height: 3rem;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease, background-color 0.3s ease;
+            z-index: 30;
+        }
+
+        .back-to-top:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* 主题切换按钮 */
+        .theme-toggle {
+            cursor: pointer;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: background-color 0.3s ease;
+        }
+
+        .theme-toggle:hover {
+            background-color: var(--bg-secondary);
+        }
+
+        /* 页面头部渐变背景 */
+        .header-gradient {
+            background: linear-gradient(135deg, var(--header-gradient-start), var(--header-gradient-end));
+        }
+
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.8s ease forwards;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 768px) {
+            .first-letter-drop::first-letter {
+                font-size: 2.5em;
+            }
+        }
+
+        /* 代码块容器样式 */
+        .code-block {
+            margin: 1.5rem 0;
+            position: relative;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- 进度条 -->
+    <div class="progress-container">
+        <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- 移动端目录覆盖层 -->
+    <div class="toc-overlay" id="tocOverlay"></div>
+
+    <!-- 移动端目录侧边栏 -->
+    <div class="mobile-toc p-6 pt-16" id="mobileToc">
+        <button class="absolute top-4 right-4 text-2xl" id="closeToc">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="text-xl font-bold mb-4">目录</div>
+        <nav id="mobileNavLinks"></nav>
+    </div>
+
+        <!-- 顶部导航栏 -->
+        <header class="sticky top-0 z-30 bg-black-100 dark:bg-black-900 shadow-md">
+            <div class="container mx-auto px-4 py-3 flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                    <i class="fab fa-python text-3xl text-blue-500"></i>
+                    <h1 class="text-xl font-bold m-0">Python学习之旅</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="toc-toggle" class="lg:hidden p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors">
+                        <i class="fas fa-bars text-gray-600 dark:text-gray-300"></i>
+                    </button>
+                    <div class="theme-toggle" id="theme-toggle">
+                        <i class="fas fa-sun text-yellow-500 dark:hidden"></i>
+                        <i class="fas fa-moon text-blue-300 hidden dark:block"></i>
+                    </div>
+                </div>
+            </div>
+        </header>
+    <!-- Hero 区域 -->
+    <section class="bg-gradient-to-r from-blue-500 to-purple-600 text-white py-16 md:py-24">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl font-bold mb-6 leading-tight">Python语言进阶</h1>
+                <p class="text-xl md:text-2xl mb-8 opacity-90">掌掌握Python高级编程技巧</p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="#async-io" class="btn bg-white text-blue-600 hover:bg-blue-50 transition duration-300 rounded-lg px-6 py-3 shadow-md">
+                        <i class="fas fa-quote-right mr-2"></i>异步I/O编程
+                    </a>
+                    <a href="#function-usage" class="btn bg-white text-blue-600 hover:bg-blue-50 transition duration-300 rounded-lg px-6 py-3 shadow-md">
+                        <i class="fas fa-list mr-2"></i>函数使用
+                    </a>
+                    <a href="#concurrency" class="btn bg-white text-blue-600 hover:bg-blue-50 transition duration-300 rounded-lg px-6 py-3 shadow-md">
+                        <i class="fas fa-table mr-2"></i>并发编程
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+   <!-- 主要内容区域 -->
+   <main class="container mx-auto px-4 md:px-8 lg:px-16 py-8 md:py-12">
+    <div class="flex flex-col lg:flex-row">
+        <!-- 左侧目录 (桌面端) -->
+        <aside class="lg:w-1/4 hidden lg:block">
+            <div class="toc-container">
+                <div class="text-xl font-bold mb-4">目录</div>
+                <nav id="desktopNavLinks"></nav>
+            </div>
+        </aside>
+
+        <!-- 右侧内容 -->
+        <div class="lg:w-3/4 lg:pl-8">
+            <!-- 移动端目录按钮 -->
+            <div class="lg:hidden mb-6">
+                <button class="flex items-center bg-gray-100 dark:bg-gray-800 px-4 py-2 rounded-lg shadow-sm" id="showToc">
+                    <i class="fas fa-list-ul mr-2"></i>
+                    <span>显示目录</span>
+                </button>
+            </div>
+
+            <!-- 文章内容 -->
+            <article class="prose prose-lg max-w-none dark:prose-invert">
+
+                <!-- 内容开始 -->
+                <!-- Introduction -->
+                <section id="async-io" class="mb-12">
+                    <h2 class="text-2xl font-bold mb-4">异步I/O编程</h2>
+                    <p>Python中有一个名为<code>aiohttp</code>的三方库，它提供了异步的HTTP客户端和服务器，这个三方库可以跟<code>asyncio</code>模块一起工作，并提供了对<code>Future</code>对象的支持。Python 3.6中引入了<code>async</code>和<code>await</code>来定义异步执行的函数以及创建异步上下文，在Python 3.7中它们正式成为了关键字。</p>
+                    
+                    <div class="note">
+                        <p><strong>说明</strong>：上面的代码使用<code>get_event_loop</code>函数获得系统默认的事件循环，通过<code>gather</code>函数可以获得一个<code>future</code>对象，<code>future</code>对象的<code>add_done_callback</code>可以添加执行完成时的回调函数，<code>loop</code>对象的<code>run_until_complete</code>方法可以等待通过<code>future</code>对象获得协程执行结果。</p>
+                    </div>
+                </section>
+
+                <!-- OOP Principles -->
+                <section id="oop-principles" class="mb-12">
+                    <h2 class="text-2xl font-bold mb-4">面向对象设计原则</h2>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li><strong>单一职责原则 (SRP)</strong> - 一个类只做该做的事情（类的设计要高内聚）</li>
+                        <li><strong>开闭原则 (OCP)</strong> - 软件实体应该对扩展开发对修改关闭</li>
+                        <li><strong>依赖倒转原则 (DIP)</strong> - 面向抽象编程（在弱类型语言中已经被弱化）</li>
+                        <li><strong>里氏替换原则 (LSP)</strong> - 任何时候可以用子类对象替换掉父类对象</li>
+                        <li><strong>接口隔离原则 (ISP)</strong> - 接口要小而专不要大而全（Python中没有接口的概念）</li>
+                        <li><strong>合成聚合复用原则 (CARP)</strong> - 优先使用强关联关系而不是继承关系复用代码</li>
+                        <li><strong>最少知识原则 (迪米特法则，LoD)</strong> - 不要给没有必然联系的对象发消息</li>
+                    </ul>
+                    
+                    <div class="note mt-4">
+                        <p><strong>说明</strong>：上面加粗的字母放在一起称为面向对象的<strong>SOLID</strong>原则。</p>
+                    </div>
+                    
+                    <h3 class="text-xl font-semibold mt-6 mb-3">GoF设计模式</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <h4 class="font-medium">创建型模式</h4>
+                            <ul class="list-disc pl-6 mt-2">
+                                <li>单例</li>
+                                <li>工厂</li>
+                                <li>建造者</li>
+                                <li>原型</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">结构型模式</h4>
+                            <ul class="list-disc pl-6 mt-2">
+                                <li>适配器</li>
+                                <li>门面（外观）</li>
+                                <li>代理</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="font-medium">行为型模式</h4>
+                            <ul class="list-disc pl-6 mt-2">
+                                <li>迭代器</li>
+                                <li>观察者</li>
+                                <li>状态</li>
+                                <li>策略</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <p class="mt-4">例子：可插拔的哈希算法（策略模式）。</p>
+                </section>
+
+                <!-- Function Usage -->
+                <section id="function-usage" class="mb-12">
+                    <h2 class="text-2xl font-bold mb-4">函数的使用方式</h2>
+                    
+                    <h3 class="text-xl font-semibold mt-6 mb-3">将函数视为"一等公民"</h3>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li>函数可以赋值给变量</li>
+                        <li>函数可以作为函数的参数</li>
+                        <li>函数可以作为函数的返回值</li>
+                    </ul>
+                    
+                    <h3 class="text-xl font-semibold mt-6 mb-3">高阶函数的用法</h3>
+                    <p><code>filter</code>、<code>map</code>以及它们的替代品</p>
+                    <div class="code-block">
+                        <pre><code>items1 = list(map(lambda x: x ** 2, filter(lambda x: x % 2, range(1, 10))))
+items2 = [x ** 2 for x in range(1, 10) if x % 2]</code></pre>
+                    </div>
+                    
+                    <h3 class="text-xl font-semibold mt-6 mb-3">参数类型</h3>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li>位置参数</li>
+                        <li>可变参数</li>
+                        <li>关键字参数</li>
+                        <li>命名关键字参数</li>
+                    </ul>
+                    
+                    <h3 class="text-xl font-semibold mt-6 mb-3">参数的元信息（代码可读性问题）</h3>
+                    
+                    <h3 class="text-xl font-semibold mt-6 mb-3">匿名函数和内联函数的用法（<code>lambda</code>函数）</h3>
+                    
+                    <h3 class="text-xl font-semibold mt-6 mb-3">闭包和作用域问题</h3>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li>Python搜索变量的LEGB顺序（Local >>> Embedded >>> Global >>> Built-in）</li>
+                        <li><code>global</code>和<code>nonlocal</code>关键字的作用
+                            <ul class="list-disc pl-6 mt-2">
+                                <li><code>global</code>：声明或定义全局变量（要么直接使用现有的全局作用域的变量，要么定义一个变量放到全局作用域）。</li>
+                                <li><code>nonlocal</code>：声明使用嵌套作用域的变量（嵌套作用域必须存在该变量，否则报错）。</li>
+                            </ul>
+                        </li>
+                    </ul>
+                    
+                    <h3 class="text-xl font-semibold mt-6 mb-3">装饰器函数（使用装饰器和取消装饰器）</h3>
+                    <p>例子：输出函数执行时间的装饰器。</p>
+                    <div class="code-block">
+                        <pre><code>def record_time(func):
+    """自定义装饰函数的装饰器"""
+    
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        start = time()
+        result = func(*args, **kwargs)
+        print(f'{func.__name__}: {time() - start}秒')
+        return result
+        
+    return wrapper</code></pre>
+                    </div>
+                </section>
+
+                <!-- Key Concepts -->
+                <section id="key-concepts" class="mb-12">
+                    <h2 class="text-2xl font-bold mb-4">重要知识点</h2>
+                    
+                    <h3 class="text-xl font-semibold mt-6 mb-3">生成式（推导式）的用法</h3>
+                    <div class="code-block">
+                        <pre><code>prices = {
+    'AAPL': 191.88,
+    'GOOG': 1186.96,
+    'IBM': 149.24,
+    'ORCL': 48.44,
+    'ACN': 166.89,
+    'FB': 208.09,
+    'SYMC': 21.29
+}
+# 用股票价格大于100元的股票构造一个新的字典
+prices2 = {key: value for key, value in prices.items() if value > 100}
+print(prices2)</code></pre>
+                    </div>
+                    <div class="note mt-4">
+                        <p><strong>说明</strong>：生成式（推导式）可以用来生成列表、集合和字典。</p>
+                    </div>
+                    
+                    <h3 class="text-xl font-semibold mt-6 mb-3">嵌套的列表的坑</h3>
+                    <div class="code-block">
+                        <pre><code>names = ['关羽', '张飞', '赵云', '马超', '黄忠']
+courses = ['语文', '数学', '英语']
+# 录入五个学生三门课程的成绩
+# 错误 - 参考http://pythontutor.com/visualize.html#mode=edit
+# scores = [[None] * len(courses)] * len(names)
+scores = [[None] * len(courses) for _ in range(len(names))]
+for row, name in enumerate(names):
+    for col, course in enumerate(courses):
+        scores[row][col] = float(input(f'请输入{name}的{course}成绩: '))
+        print(scores)</code></pre>
+                    </div>
+                    
+                    <h3 class="text-xl font-semibold mt-6 mb-3"><code>itertools</code>模块</h3>
+                    <div class="code-block">
+                        <pre><code>"""
+迭代工具模块
+"""
+import itertools
+
+# 产生ABCD的全排列
+itertools.permutations('ABCD')
+# 产生ABCDE的五选三组合
+itertools.combinations('ABCDE', 3)
+# 产生ABCD和123的笛卡尔积
+itertools.product('ABCD', '123')
+# 产生ABC的无限循环序列
+itertools.cycle(('A', 'B', 'C'))</code></pre>
+                    </div>
+                </section>
+
+                <!-- Concurrency -->
+                <section id="concurrency" class="mb-12">
+                    <h2 class="text-2xl font-bold mb-4">并发编程</h2>
+                    <p>Python中实现并发编程的三种方案：多线程、多进程和异步I/O。并发编程的好处在于可以提升程序的执行效率以及改善用户体验；坏处在于并发的程序不容易开发和调试，同时对其他程序来说它并不友好。</p>
+                    
+                    <ul class="list-disc pl-6 mt-4 space-y-2">
+                        <li><strong>多线程</strong>：Python中提供了<code>Thread</code>类并辅以<code>Lock</code>、<code>Condition</code>、<code>Event</code>、<code>Semaphore</code>和<code>Barrier</code>。Python中有GIL来防止多个线程同时执行本地字节码，这个锁对于CPython是必须的，因为CPython的内存管理并不是线程安全的，因为GIL的存在多线程并不能发挥CPU的多核特性。</li>
+                    </ul>
+                    
+                    <div class="code-block mt-4">
+                        <pre><code>"""
+月薪结算系统 - 部门经理每月15000 程序员每小时200 销售员1800底薪加销售额5%提成
+"""
+from abc import ABCMeta, abstractmethod
+
+
+class Employee(metaclass=ABCMeta):
+    """员工(抽象类)"""
+
+    def __init__(self, name):
+        self.name = name
+
+    @abstractmethod
+    def get_salary(self):
+        """结算月薪(抽象方法)"""
+        pass
+
+
+class Manager(Employee):
+    """部门经理"""
+
+    def get_salary(self):
+        return 15000.0
+
+
+class Programmer(Employee):
+    """程序员"""
+
+    def __init__(self, name, working_hour=0):
+        self.working_hour = working_hour
+        super().__init__(name)
+
+    def get_salary(self):
+        return 200.0 * self.working_hour
+
+
+class Salesman(Employee):
+    """销售员"""
+
+    def __init__(self, name, sales=0.0):
+        self.sales = sales
+        super().__init__(name)
+
+    def get_salary(self):
+        return 1800.0 + self.sales * 0.05
+
+
+class EmployeeFactory:</code></pre>
+                    </div>
+                    
+                    <div class="note mt-4">
+                        <p><strong>说明</strong>：上面的代码中使用了Emoji字符来表示扑克牌的四种花色，在某些不支持Emoji字符的系统上可能无法显示。</p>
+                    </div>
+                    
+                    <h3 class="text-xl font-semibold mt-6 mb-3">对象的复制</h3>
+                    <p>深复制/深拷贝/深度克隆和浅复制/浅拷贝/影子克隆</p>
+                    
+                    <h3 class="text-xl font-semibold mt-6 mb-3">垃圾回收、循环引用和弱引用</h3>
+                    <p>Python使用了自动化内存管理，这种管理机制以<strong>引用计数</strong>为基础，同时也引入了<strong>标记-清除</strong>和<strong>分代收集</strong>两种机制为辅的策略。</p>
+                    <div class="code-block">
+                        <pre><code>typedef struct _object {
+    /* 引用计数 */
+    int ob_refcnt;
+    /* 对象指针 */
+    struct _typeobject *ob_type;
+} PyObject;</code></pre>
+                    </div>
+                    <div class="code-block mt-4">
+                        <pre><code>/* 增加引用计数的宏定义 */
+#define Py_INCREF(op)   ((op)->ob_refcnt++)
+/* 减少引用计数的宏定义 */
+#define Py_DECREF(op) \ //减少计数
+    if (--(op)->ob_refcnt != 0) \
+        ; \
+    else \
+        __Py_Dealloc((PyObject *)(op))</code></pre>
+                    </div>
+                </section>
+
+                <!-- Iterators and Generators -->
+                <section id="iterators-generators" class="mb-12">
+                    <h2 class="text-2xl font-bold mb-4">迭代器和生成器</h2>
+                    
+                    <h3 class="text-xl font-semibold mt-6 mb-3">迭代器</h3>
+                    <p>迭代器是实现了迭代器协议的对象。</p>
+                    <ul class="list-disc pl-6 space-y-2">
+                        <li>Python中没有像<code>protocol</code>或<code>interface</code>这样的定义协议的关键字。</li>
+                        <li>Python中用魔术方法表示协议。</li>
+                        <li><code>__iter__</code>和<code>__next__</code>魔术方法就是迭代器协议。</li>
+                    </ul>
+                    <div class="code-block mt-4">
+                        <pre><code>class Fib(object):
+    """迭代器"""
+    
+    def __init__(self, num):
+        self.num = num
+        self.a, self.b = 0, 1
+        self.idx = 0
+   
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.idx < self.num:
+            self.a, self.b = self.b, self.a + self.b
+            self.idx += 1
+            return self.a
+        raise StopIteration()</code></pre>
+                    </div>
+                    
+                    <h3 class="text-xl font-semibold mt-6 mb-3">生成器</h3>
+                    <p>生成器是语法简化版的迭代器。</p>
+                    <div class="code-block">
+                        <pre><code>def fib(num):
+    """生成器"""
+    a, b = 0, 1
+    for _ in range(num):
+        a, b = b, a + b
+        yield a</code></pre>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+   <!-- 页脚 -->
+    <!-- JavaScript -->
+    <footer class="bg-black-100 dark:bg-gaay-900 text-gray-700 dark:text-gray-300 py-6">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-wrap justify-center items-center">
+                <div class="text-sm">
+                    © 2025 Python学习之旅. 保留所有权利。
+                </div>
+                <div class="flex space-x-4">
+                        <a href="#" class="text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="#" class="text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" class="text-gray-500 hover:text-blue-500 dark:text-gray-400 dark:hover:text-blue-400">
+                            <i class="fab fa-linkedin"></i>
+                        </a>
+                    </div>
+                <div class="text-sm">
+                </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 返回顶部按钮 -->
+    <div class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <!-- JavaScript 功能 -->
+    <script>
+        // 生成目录
+        function generateTOC() {
+            const headings = document.querySelectorAll('h2');
+            const desktopNavLinks = document.getElementById('desktopNavLinks');
+            const mobileNavLinks = document.getElementById('mobileNavLinks');
+            
+            if (headings.length === 0 || !desktopNavLinks || !mobileNavLinks) return;
+            
+            let desktopTocHtml = '';
+            let mobileTocHtml = '';
+            
+            headings.forEach(heading => {
+                if (!heading.id) {
+                    heading.id = heading.textContent.toLowerCase().replace(/\s+/g, '-');
+                }
+                
+                const link = `<a href="#${heading.id}" class="nav-link">${heading.textContent}</a>`;
+                desktopTocHtml += link;
+                mobileTocHtml += link;
+            });
+            
+            desktopNavLinks.innerHTML = desktopTocHtml;
+            mobileNavLinks.innerHTML = mobileTocHtml;
+        }
+        
+        // 更新活动导航链接
+        function updateActiveNavLink() {
+            const scrollPosition = window.scrollY;
+            const headings = document.querySelectorAll('h2');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            if (headings.length === 0 || navLinks.length === 0) return;
+            
+            let activeIndex = 0;
+            
+            headings.forEach((heading, index) => {
+                const rect = heading.getBoundingClientRect();
+                if (rect.top <= 150) {
+                    activeIndex = index;
+                }
+            });
+            
+            navLinks.forEach(link => link.classList.remove('active'));
+            
+            const desktopLinks = document.querySelectorAll('#desktopNavLinks .nav-link');
+            const mobileLinks = document.querySelectorAll('#mobileNavLinks .nav-link');
+            
+            if (desktopLinks[activeIndex]) desktopLinks[activeIndex].classList.add('active');
+            if (mobileLinks[activeIndex]) mobileLinks[activeIndex].classList.add('active');
+            
+            // 显示/隐藏返回顶部按钮
+            const backToTopBtn = document.getElementById('backToTop');
+            if (backToTopBtn) {
+                if (scrollPosition > 300) {
+                    backToTopBtn.classList.add('show');
+                } else {
+                    backToTopBtn.classList.remove('show');
+                }
+            }
+        }
+        
+        // 更新进度条
+        function updateProgressBar() {
+            const scrollPosition = window.scrollY;
+            const totalHeight = document.body.scrollHeight - window.innerHeight;
+            const progress = (scrollPosition / totalHeight) * 100;
+            
+            const progressBar = document.getElementById('progressBar');
+            if (progressBar) {
+                progressBar.style.width = `${progress}%`;
+            }
+        }
+        
+        // 设置主题切换
+        function setupThemeToggle() {
+            const themeToggle = document.getElementById('theme-toggle');
+            const savedTheme = localStorage.getItem('theme');
+            
+            // 初始化主题
+            if (savedTheme === 'dark' || (!savedTheme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+                document.documentElement.classList.add('dark');
+                themeToggle.innerHTML = '<i class="fas fa-sun text-xl"></i>';
+            } else {
+                document.documentElement.classList.remove('dark');
+                themeToggle.innerHTML = '<i class="fas fa-moon text-xl"></i>';
+            }
+            
+            // 主题切换事件
+            themeToggle.addEventListener('click', () => {
+                if (document.documentElement.classList.contains('dark')) {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                    themeToggle.innerHTML = '<i class="fas fa-moon text-xl"></i>';
+                } else {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                    themeToggle.innerHTML = '<i class="fas fa-sun text-xl"></i>';
+                }
+            });
+        }
+
+        // 移动端目录控制
+        function setupMobileTOC() {
+            const showTocBtn = document.getElementById('showToc');
+            const closeTocBtn = document.getElementById('closeToc');
+            const mobileToc = document.getElementById('mobileToc');
+            const tocOverlay = document.getElementById('tocOverlay');
+            
+            showTocBtn.addEventListener('click', () => {
+                mobileToc.classList.add('show');
+                tocOverlay.classList.add('show');
+            });
+            
+            closeTocBtn.addEventListener('click', () => {
+                mobileToc.classList.remove('show');
+                tocOverlay.classList.remove('show');
+            });
+            
+            tocOverlay.addEventListener('click', () => {
+                mobileToc.classList.remove('show');
+                tocOverlay.classList.remove('show');
+            });
+        }
+
+        // 返回顶部按钮
+        function setupBackToTop() {
+            const backToTopBtn = document.getElementById('backToTop');
+            
+            backToTopBtn.addEventListener('click', () => {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+        }
+
+        // 初始化Mermaid图表
+        function initMermaid() {
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: document.documentElement.classList.contains('dark') ? 'dark' : 'default'
+            });
+        }
+
+        // 页面加载完成后执行
+        document.addEventListener('DOMContentLoaded', () => {
+            generateTOC();
+            updateActiveNavLink();
+            updateProgressBar();
+            setupThemeToggle();
+            setupMobileTOC();
+            setupBackToTop();
+            initMermaid();
+            
+            // 监听滚动事件
+            window.addEventListener('scroll', () => {
+                updateActiveNavLink();
+                updateProgressBar();
+            });
+        });
+    </script>
+
+</body>
+</html>
