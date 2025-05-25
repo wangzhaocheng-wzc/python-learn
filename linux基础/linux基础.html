@@ -3,18 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NoSQL数据库入门教程</title>
+    <title>玩转Linux操作系统 - 完整学习教程</title>
     
-    <!-- External CSS -->
+    <!-- External Resources -->
     <link href="https://cdn.staticfile.org/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link href="https://cdn.staticfile.org/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@latest/dist/mermaid.min.js"></script>
     
     <style>
         :root {
             --primary-color: #2563eb;
-            --secondary-color: #7c3aed;
-            --accent-color: #f59e0b;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
             --text-primary: #1f2937;
             --text-secondary: #6b7280;
             --bg-primary: #ffffff;
@@ -44,8 +45,12 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
 
+        .dark .hero-gradient {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+        }
+
         .content-card {
-            background-color: var(--bg-primary);
+            background-color: var(--bg-secondary);
             border: 1px solid var(--border-color);
             transition: all 0.3s ease;
         }
@@ -55,43 +60,40 @@
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
+        .dark .content-card:hover {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
         .sidebar {
             background-color: var(--bg-secondary);
             border-right: 1px solid var(--border-color);
         }
 
         .nav-item {
-            color: var(--text-secondary);
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             border-left: 3px solid transparent;
         }
 
-        .nav-item:hover, .nav-item.active {
-            color: var(--primary-color);
+        .nav-item:hover {
             background-color: var(--bg-primary);
             border-left-color: var(--primary-color);
         }
 
+        .nav-item.active {
+            background-color: var(--bg-primary);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
         .code-block {
-            background: #1e293b;
-            color: #e2e8f0;
+            background-color: #1f2937;
+            color: #f9fafb;
             border-radius: 8px;
             overflow-x: auto;
         }
 
-        .table-container {
-            overflow-x: auto;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-        }
-
-        .fade-in {
-            animation: fadeIn 0.6s ease-in;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+        .dark .code-block {
+            background-color: #0f172a;
         }
 
         .section-content {
@@ -100,650 +102,880 @@
 
         .section-content.active {
             display: block;
+            animation: fadeIn 0.5s ease-in-out;
         }
 
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                transition: transform 0.3s ease;
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .floating-toc {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 40;
+        }
+
+        @media (max-width: 1024px) {
+            .floating-toc {
+                display: none;
             }
-            
-            .sidebar.open {
-                transform: translateX(0);
-            }
+        }
+
+        .scroll-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            transform-origin: left;
+            transform: scaleX(0);
+            z-index: 50;
         }
     </style>
 </head>
-<body>
-    <!-- Theme Toggle -->
-    <div class="fixed top-4 right-4 z-50">
-        <button id="themeToggle" class="p-3 rounded-full bg-white dark:bg-gray-800 shadow-lg hover:shadow-xl transition-all duration-300">
-            <i class="fas fa-moon text-gray-600 dark:text-gray-300"></i>
-        </button>
-    </div>
+<body class="min-h-screen">
+    <!-- Scroll Indicator -->
+    <div class="scroll-indicator" id="scrollIndicator"></div>
 
-    <!-- Mobile Menu Toggle -->
-    <div class="fixed top-4 left-4 z-50 md:hidden">
-        <button id="mobileMenuToggle" class="p-3 rounded-full bg-white dark:bg-gray-800 shadow-lg">
-            <i class="fas fa-bars text-gray-600 dark:text-gray-300"></i>
-        </button>
-    </div>
-
-    <!-- Hero Section -->
-    <div class="hero-gradient text-white py-20 px-6">
-        <div class="max-w-4xl mx-auto text-center">
-            <div class="mb-6">
-                <i class="fas fa-database text-6xl mb-4 opacity-90"></i>
+    <!-- Header -->
+    <header class="sticky top-0 z-30 bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-700">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fab fa-linux text-3xl text-blue-600"></i>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Linux操作系统教程</h1>
             </div>
-            <h1 class="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-                NoSQL数据库
-                <span class="block text-yellow-300">入门教程</span>
-            </h1>
-            <p class="text-xl md:text-2xl mb-8 opacity-90 leading-relaxed">
-                探索现代数据存储技术，掌握大数据时代的核心技能
-            </p>
-            <div class="flex flex-wrap justify-center gap-4 text-sm">
-                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">
-                    <i class="fas fa-chart-line mr-2"></i>大数据处理
-                </span>
-                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">
-                    <i class="fas fa-code mr-2"></i>实战代码
-                </span>
-                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">
-                    <i class="fas fa-graduation-cap mr-2"></i>系统学习
-                </span>
+            <div class="flex items-center space-x-4">
+                <button id="themeToggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-moon dark:hidden"></i>
+                    <i class="fas fa-sun hidden dark:inline"></i>
+                </button>
+                <button id="menuToggle" class="lg:hidden p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
+                    <i class="fas fa-bars"></i>
+                </button>
             </div>
         </div>
-    </div>
+    </header>
 
-    <div class="flex min-h-screen">
+    <div class="flex">
         <!-- Sidebar -->
-        <div id="sidebar" class="sidebar w-80 fixed md:relative h-full md:h-auto z-40 overflow-y-auto">
+        <aside id="sidebar" class="sidebar fixed lg:sticky top-16 left-0 w-80 h-screen overflow-y-auto z-20 transform -translate-x-full lg:translate-x-0 transition-transform">
             <div class="p-6">
-                <h2 class="text-xl font-bold mb-6 text-center">
-                    <i class="fas fa-list-ul mr-2 text-blue-500"></i>
-                    教程目录
+                <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+                    <i class="fas fa-list-ul mr-2"></i>目录导航
                 </h2>
                 <nav class="space-y-2">
-                    <a href="#overview" class="nav-item active flex items-center p-3 rounded-lg cursor-pointer">
-                        <i class="fas fa-info-circle mr-3 w-5"></i>
-                        <span>NoSQL概述</span>
+                    <a href="#overview" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="overview">
+                        <i class="fas fa-info-circle mr-3 text-blue-500"></i>Linux概述
                     </a>
-                    <a href="#classification" class="nav-item flex items-center p-3 rounded-lg cursor-pointer">
-                        <i class="fas fa-th-large mr-3 w-5"></i>
-                        <span>数据库分类</span>
+                    <a href="#advantages" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="advantages">
+                        <i class="fas fa-star mr-3 text-yellow-500"></i>系统优点
                     </a>
-                    <a href="#mongodb-intro" class="nav-item flex items-center p-3 rounded-lg cursor-pointer">
-                        <i class="fas fa-leaf mr-3 w-5"></i>
-                        <span>MongoDB简介</span>
+                    <a href="#distributions" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="distributions">
+                        <i class="fas fa-layer-group mr-3 text-green-500"></i>发行版本
                     </a>
-                    <a href="#mongodb-concepts" class="nav-item flex items-center p-3 rounded-lg cursor-pointer">
-                        <i class="fas fa-cubes mr-3 w-5"></i>
-                        <span>MongoDB基本概念</span>
+                    <a href="#filesystem" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="filesystem">
+                        <i class="fas fa-folder-tree mr-3 text-purple-500"></i>文件系统
                     </a>
-                    <a href="#mongodb-shell" class="nav-item flex items-center p-3 rounded-lg cursor-pointer">
-                        <i class="fas fa-terminal mr-3 w-5"></i>
-                        <span>Shell操作MongoDB</span>
+                    <a href="#basic-commands" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="basic-commands">
+                        <i class="fas fa-terminal mr-3 text-red-500"></i>基础命令
                     </a>
-                    <a href="#mongodb-crud" class="nav-item flex items-center p-3 rounded-lg cursor-pointer">
-                        <i class="fas fa-edit mr-3 w-5"></i>
-                        <span>文档CRUD操作</span>
+                    <a href="#file-operations" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="file-operations">
+                        <i class="fas fa-file-alt mr-3 text-indigo-500"></i>文件操作
                     </a>
-                    <a href="#redis-examples" class="nav-item flex items-center p-3 rounded-lg cursor-pointer">
-                        <i class="fas fa-memory mr-3 w-5"></i>
-                        <span>Redis操作示例</span>
+                    <a href="#text-processing" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="text-processing">
+                        <i class="fas fa-edit mr-3 text-teal-500"></i>文本处理
+                    </a>
+                    <a href="#system-info" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="system-info">
+                        <i class="fas fa-server mr-3 text-orange-500"></i>系统信息
+                    </a>
+                    <a href="#network-tools" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="network-tools">
+                        <i class="fas fa-network-wired mr-3 text-cyan-500"></i>网络工具
+                    </a>
+                    <a href="#user-management" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="user-management">
+                        <i class="fas fa-users mr-3 text-blue-600"></i>用户管理
+                    </a>
+                    <a href="#pipes-redirection" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="pipes-redirection">
+                        <i class="fas fa-exchange-alt mr-3 text-green-600"></i>管道和重定向
+                    </a>
+                    <a href="#aliases" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="aliases">
+                        <i class="fas fa-link mr-3 text-yellow-600"></i>别名
+                    </a>
+                    <a href="#vim-editor" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="vim-editor">
+                        <i class="fas fa-edit mr-3 text-purple-600"></i>编辑器vim
+                    </a>
+                    <a href="#software-installation" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="software-installation">
+                        <i class="fas fa-download mr-3 text-indigo-600"></i>软件安装和配置
+                    </a>
+                    <a href="#service-configuration" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="service-configuration">
+                        <i class="fas fa-cogs mr-3 text-red-600"></i>配置服务
+                    </a>
+                    <a href="#scheduled-tasks" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="scheduled-tasks">
+                        <i class="fas fa-clock mr-3 text-orange-600"></i>计划任务
+                    </a>
+                    <a href="#network-management" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="network-management">
+                        <i class="fas fa-wifi mr-3 text-cyan-600"></i>网络访问和管理
+                    </a>
+                    <a href="#process-management" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="process-management">
+                        <i class="fas fa-tasks mr-3 text-pink-600"></i>进程管理
+                    </a>
+                    <a href="#system-diagnosis" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="system-diagnosis">
+                        <i class="fas fa-stethoscope mr-3 text-teal-600"></i>系统诊断
+                    </a>
+                    <a href="#shell-scripts" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="shell-scripts">
+                        <i class="fas fa-code mr-3 text-gray-600"></i>Shell脚本
+                    </a>
+                    <a href="#resources" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="resources">
+                        <i class="fas fa-book mr-3 text-gray-500"></i>相关资源
                     </a>
                 </nav>
             </div>
-        </div>
+        </aside>
 
         <!-- Main Content -->
-        <div class="flex-1 md:ml-0">
-            <div class="max-w-4xl mx-auto p-6 md:p-8">
-                
-                <!-- NoSQL概述 -->
-                <section id="overview" class="section-content active fade-in">
+        <main class="flex-1 lg:ml-0">
+            <!-- Hero Section -->
+            <section class="hero-gradient text-white py-20">
+                <div class="container mx-auto px-6 text-center">
+                    <div class="max-w-4xl mx-auto">
+                        <h1 class="text-5xl md:text-6xl font-bold mb-6">
+                            <i class="fab fa-linux mr-4"></i>
+                            玩转Linux操作系统
+                        </h1>
+                        <p class="text-xl md:text-2xl mb-8 opacity-90">
+                            从零开始掌握Linux系统，成为命令行高手
+                        </p>
+                        <div class="flex flex-wrap justify-center gap-4 text-sm">
+                            <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                                <i class="fas fa-terminal mr-2"></i>命令行操作
+                            </span>
+                            <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                                <i class="fas fa-folder mr-2"></i>文件系统
+                            </span>
+                            <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                                <i class="fas fa-code mr-2"></i>Shell脚本
+                            </span>
+                            <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                                <i class="fas fa-network-wired mr-2"></i>网络工具
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Content Sections -->
+            <div class="container mx-auto px-6 py-12">
+                <!-- Linux概述 -->
+                <section id="overview" class="section-content active">
                     <div class="content-card rounded-xl p-8 mb-8">
-                        <h2 class="text-3xl font-bold mb-6 text-blue-600">
-                            <i class="fas fa-info-circle mr-3"></i>
-                            NoSQL概述
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-info-circle mr-3 text-blue-500"></i>
+                            Linux概述
                         </h2>
-                        
                         <div class="prose prose-lg max-w-none">
-                            <p class="text-lg leading-relaxed mb-6">
-                                如今，大多数的计算机系统（包括服务器、PC、移动设备等）都会产生庞大的数据量。其实，早在2012年的时候，全世界每天产生的数据量就达到了<strong>2.5EB</strong>（艾字节，1EB≈10¹⁸B）。这些数据有很大一部分是由关系型数据库来存储和管理的。
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+                                Linux是一个通用操作系统。一个操作系统要负责任务调度、内存分配、处理外围设备I/O等操作。操作系统通常由内核（运行其他程序，管理像磁盘、打印机等硬件设备的核心程序）和系统程序（设备驱动、底层库、shell、服务程序等）两部分组成。
                             </p>
-                            
-                            <div class="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30 p-6 rounded-lg mb-6">
-                                <h3 class="text-xl font-semibold mb-3 text-blue-800 dark:text-blue-300">
-                                    <i class="fas fa-history mr-2"></i>
-                                    历史背景
-                                </h3>
-                                <p class="leading-relaxed">
-                                    早在1970年，E.F.Codd发表了论述关系型数据库的著名论文"<em>A relational model of data for large shared data banks</em>"，这篇文章奠定了关系型数据库的基础并在接下来的数十年时间内产生了深远的影响。实践证明，关系型数据库是实现数据持久化最为重要的方式，它也是大多数应用在选择持久化方案时的首选技术。
-                                </p>
-                            </div>
-
-                            <div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900 dark:bg-opacity-30 p-6 rounded-lg mb-6">
-                                <h3 class="text-xl font-semibold mb-3 text-purple-800 dark:text-purple-300">
-                                    <i class="fas fa-rocket mr-2"></i>
-                                    NoSQL的兴起
-                                </h3>
-                                <p class="leading-relaxed mb-4">
-                                    NoSQL是一项全新的数据库革命性运动，虽然它的历史可以追溯到1998年，但是NoSQL真正深入人心并得到广泛的应用是在进入大数据时候以后，业界普遍认为NoSQL是更适合大数据存储的技术方案，这才使得NoSQL的发展达到了前所未有的高度。
-                                </p>
-                                <p class="leading-relaxed">
-                                    2012年《纽约时报》的一篇专栏中写到，大数据时代已经降临，在商业、经济及其他领域中，决策将不再基于经验和直觉而是基于数据和分析而作出。
-                                </p>
-                            </div>
-
-                            <div class="bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-30 p-6 rounded-lg">
-                                <h3 class="text-xl font-semibold mb-3 text-yellow-800 dark:text-yellow-300">
-                                    <i class="fas fa-globe mr-2"></i>
-                                    应用领域
-                                </h3>
-                                <p class="leading-relaxed">
-                                    在天文学、气象学、基因组学、生物学、社会学、互联网搜索引擎、金融、医疗、社交网络、电子商务等诸多领域，由于数据过于密集和庞大，在数据的分析和处理上也遇到了前所未有的限制和阻碍，这一切都使得对大数据处理技术的研究被提升到了新的高度，也使得各种NoSQL的技术方案进入到了公众的视野。
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- 数据库分类 -->
-                <section id="classification" class="section-content">
-                    <div class="content-card rounded-xl p-8 mb-8">
-                        <h2 class="text-3xl font-bold mb-6 text-green-600">
-                            <i class="fas fa-th-large mr-3"></i>
-                            NoSQL数据库分类
-                        </h2>
-                        
-                        <p class="text-lg mb-6 leading-relaxed">
-                            NoSQL数据库按照其存储类型可以大致分为以下几类：
-                        </p>
-
-                        <div class="table-container">
-                            <table class="w-full">
-                                <thead class="bg-gray-50 dark:bg-gray-800">
-                                    <tr>
-                                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">类型</th>
-                                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">部分代表</th>
-                                        <th class="px-6 py-4 text-left text-sm font-semibold text-gray-900 dark:text-gray-100">特点</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                        <td class="px-6 py-4 font-medium text-blue-600 dark:text-blue-400">列族数据库</td>
-                                        <td class="px-6 py-4">
-                                            <div class="space-y-1">
-                                                <div>HBase</div>
-                                                <div>Cassandra</div>
-                                                <div>Hypertable</div>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm leading-relaxed">
-                                            顾名思义是按列存储数据的。最大的特点是方便存储结构化和半结构化数据，方便做数据压缩，对针对某一列或者某几列的查询有非常大的I/O优势，适合于批量数据处理和即时查询。
-                                        </td>
-                                    </tr>
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                        <td class="px-6 py-4 font-medium text-green-600 dark:text-green-400">文档数据库</td>
-                                        <td class="px-6 py-4">
-                                            <div class="space-y-1">
-                                                <div>MongoDB</div>
-                                                <div>CouchDB</div>
-                                                <div>ElasticSearch</div>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm leading-relaxed">
-                                            文档数据库一般用类JSON格式存储数据，存储的内容是文档型的。这样也就有机会对某些字段建立索引，实现关系数据库的某些功能，但不提供对参照完整性和分布事务的支持。
-                                        </td>
-                                    </tr>
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                        <td class="px-6 py-4 font-medium text-red-600 dark:text-red-400">KV数据库</td>
-                                        <td class="px-6 py-4">
-                                            <div class="space-y-1">
-                                                <div>DynamoDB</div>
-                                                <div>Redis</div>
-                                                <div>LevelDB</div>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm leading-relaxed">
-                                            可以通过key快速查询到其value，有基于内存和基于磁盘两种实现方案。
-                                        </td>
-                                    </tr>
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                        <td class="px-6 py-4 font-medium text-purple-600 dark:text-purple-400">图数据库</td>
-                                        <td class="px-6 py-4">
-                                            <div class="space-y-1">
-                                                <div>Neo4J</div>
-                                                <div>FlockDB</div>
-                                                <div>JanusGraph</div>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm leading-relaxed">
-                                            使用图结构进行语义查询的数据库，它使用节点、边和属性来表示和存储数据。图数据库从设计上，就可以简单快速的检索难以在关系系统中建模的复杂层次结构。
-                                        </td>
-                                    </tr>
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                        <td class="px-6 py-4 font-medium text-orange-600 dark:text-orange-400">对象数据库</td>
-                                        <td class="px-6 py-4">
-                                            <div class="space-y-1">
-                                                <div>db4o</div>
-                                                <div>Versant</div>
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 text-sm leading-relaxed">
-                                            通过类似面向对象语言的语法操作数据库，通过对象的方式存取数据。
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30 rounded-lg">
-                            <p class="text-sm">
-                                <i class="fas fa-info-circle mr-2 text-blue-500"></i>
-                                <strong>说明：</strong>想了解更多的NoSQL数据库，可以访问 
-                                <a href="http://nosql-database.org/" class="text-blue-600 hover:text-blue-800 underline" target="_blank">
-                                    http://nosql-database.org/
-                                </a>
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                Linux内核是芬兰人Linus Torvalds开发的，于1991年9月发布。而Linux操作系统作为Internet时代的产物，它是由全世界许多开发者共同合作开发的，是一个自由的操作系统（注意自由和免费并不是同一个概念）。
                             </p>
                         </div>
                     </div>
                 </section>
 
-                <!-- MongoDB简介 -->
-                <section id="mongodb-intro" class="section-content">
+                <!-- Linux系统优点 -->
+                <section id="advantages" class="section-content">
                     <div class="content-card rounded-xl p-8 mb-8">
-                        <h2 class="text-3xl font-bold mb-6 text-green-600">
-                            <i class="fas fa-leaf mr-3"></i>
-                            MongoDB概述
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-star mr-3 text-yellow-500"></i>
+                            Linux系统优点
                         </h2>
-                        
-                        <div class="grid md:grid-cols-2 gap-8 mb-8">
-                            <div>
-                                <h3 class="text-xl font-semibold mb-4 text-green-700 dark:text-green-400">
-                                    <i class="fas fa-info-circle mr-2"></i>
-                                    MongoDB简介
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 p-6 rounded-lg">
+                                <h3 class="font-semibold mb-2 flex items-center">
+                                    <i class="fas fa-microchip mr-2 text-blue-500"></i>
+                                    通用性强
                                 </h3>
-                                <p class="leading-relaxed mb-4">
-                                    MongoDB是2009年问世的一个面向文档的数据库管理系统，由C++语言编写，旨在为Web应用提供可扩展的高性能数据存储解决方案。
-                                </p>
-                                <p class="leading-relaxed">
-                                    虽然在划分类别的时候后，MongoDB被认为是NoSQL的产品，但是它更像一个介于关系数据库和非关系数据库之间的产品，在非关系数据库中它功能最丰富，最像关系数据库。
-                                </p>
+                                <p class="text-sm text-gray-600 dark:text-gray-300">通用操作系统，不跟特定的硬件绑定</p>
                             </div>
-                            
-                            <div class="bg-gradient-to-br from-green-50 to-blue-50 dark:from-green-900 dark:to-blue-900 dark:bg-opacity-30 p-6 rounded-lg">
-                                <h3 class="text-xl font-semibold mb-4 text-green-700 dark:text-green-400">
-                                    <i class="fas fa-file-alt mr-2"></i>
-                                    文档存储
+                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 p-6 rounded-lg">
+                                <h3 class="font-semibold mb-2 flex items-center">
+                                    <i class="fas fa-code mr-2 text-green-500"></i>
+                                    可移植性
                                 </h3>
-                                <p class="leading-relaxed mb-4">
-                                    MongoDB将数据存储为一个文档，一个文档由一系列的"键值对"组成，其文档类似于JSON对象，但是MongoDB对JSON进行了二进制处理（能够更快的定位key和value），因此其文档的存储格式称为<strong>BSON</strong>。
-                                </p>
-                                <div class="text-sm text-gray-600 dark:text-gray-400">
-                                    <i class="fas fa-link mr-2"></i>
-                                    关于JSON和BSON的差别可以查看MongoDB官方文档《JSON and BSON》
-                                </div>
+                                <p class="text-sm text-gray-600 dark:text-gray-300">用C语言编写，可移植性强，有内核编程接口</p>
+                            </div>
+                            <div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900 p-6 rounded-lg">
+                                <h3 class="font-semibold mb-2 flex items-center">
+                                    <i class="fas fa-users mr-2 text-purple-500"></i>
+                                    多用户多任务
+                                </h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-300">支持多用户和多任务，支持安全的分层文件系统</p>
+                            </div>
+                            <div class="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900 dark:to-red-900 p-6 rounded-lg">
+                                <h3 class="font-semibold mb-2 flex items-center">
+                                    <i class="fas fa-tools mr-2 text-orange-500"></i>
+                                    功能完善
+                                </h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-300">大量的实用程序，完善的网络功能以及强大的支持文档</p>
+                            </div>
+                            <div class="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900 dark:to-cyan-900 p-6 rounded-lg md:col-span-2">
+                                <h3 class="font-semibold mb-2 flex items-center">
+                                    <i class="fas fa-shield-alt mr-2 text-teal-500"></i>
+                                    安全稳定
+                                </h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-300">可靠的安全性和良好的稳定性，对开发者更友好</p>
                             </div>
                         </div>
+                    </div>
+                </section>
 
-                        <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
-                            <h3 class="text-xl font-semibold mb-4 text-gray-700 dark:text-gray-300">
-                                <i class="fas fa-globe mr-2"></i>
-                                平台支持
+                <!-- Linux系统发行版本 -->
+                <section id="distributions" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-layer-group mr-3 text-green-500"></i>
+                            Linux系统发行版本
+                        </h2>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="bg-red-50 dark:bg-red-900 p-4 rounded-lg text-center">
+                                <i class="fab fa-redhat text-3xl text-red-600 mb-2"></i>
+                                <h3 class="font-semibold">Redhat</h3>
+                            </div>
+                            <div class="bg-orange-50 dark:bg-orange-900 p-4 rounded-lg text-center">
+                                <i class="fab fa-ubuntu text-3xl text-orange-600 mb-2"></i>
+                                <h3 class="font-semibold">Ubuntu</h3>
+                            </div>
+                            <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg text-center">
+                                <i class="fab fa-centos text-3xl text-blue-600 mb-2"></i>
+                                <h3 class="font-semibold">CentOS</h3>
+                            </div>
+                            <div class="bg-indigo-50 dark:bg-indigo-900 p-4 rounded-lg text-center">
+                                <i class="fab fa-fedora text-3xl text-indigo-600 mb-2"></i>
+                                <h3 class="font-semibold">Fedora</h3>
+                            </div>
+                            <div class="bg-pink-50 dark:bg-pink-900 p-4 rounded-lg text-center">
+                                <i class="fab fa-debian text-3xl text-pink-600 mb-2"></i>
+                                <h3 class="font-semibold">Debian</h3>
+                            </div>
+                            <div class="bg-green-50 dark:bg-green-900 p-4 rounded-lg text-center">
+                                <i class="fab fa-suse text-3xl text-green-600 mb-2"></i>
+                                <h3 class="font-semibold">openSUSE</h3>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 文件系统 -->
+                <section id="filesystem" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-folder-tree mr-3 text-purple-500"></i>
+                            文件系统
+                        </h2>
+                        
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-file mr-2 text-blue-500"></i>
+                                文件和路径
                             </h3>
-                            <p class="leading-relaxed">
-                                目前，MongoDB已经提供了对Windows、macOS、Linux、Solaris等多个平台的支持，而且也提供了多种开发语言的驱动程序，Python当然是其中之一。
-                            </p>
+                            <div class="space-y-4">
+                                <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">命名规则</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">文件名的最大长度与文件系统类型有关，一般情况下，文件名不应该超过255个字符，虽然绝大多数的字符都可以用于文件名，但是最好使用英文大小写字母、数字、下划线、点这样的符号。文件名中虽然可以使用空格，但应该尽可能避免使用空格，否则在输入文件名时需要用将文件名放在双引号中或者通过`\`对空格进行转义。</p>
+                                </div>
+                                <div class="bg-green-50 dark:bg-green-900 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">扩展名</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">在Linux系统下文件的扩展名是可选的，但是使用扩展名有助于对文件内容的理解。有些应用程序要通过扩展名来识别文件，但是更多的应用程序并不依赖文件的扩展名，就像`file`命令在识别文件时并不是依据扩展名来判定文件的类型。</p>
+                                </div>
+                                <div class="bg-yellow-50 dark:bg-yellow-900 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">隐藏文件</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">以点开头的文件在Linux系统中是隐藏文件（不可见文件）。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-sitemap mr-2 text-purple-500"></i>
+                                目录结构
+                            </h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="space-y-2">
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/bin</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">基本命令的二进制文件</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/boot</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">引导加载程序的静态文件</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/dev</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">设备文件</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-yellow-50 dark:bg-yellow-900 rounded">
+                                        <code class="font-mono text-sm font-semibold text-yellow-600 w-16">/etc</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">配置文件</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/home</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">普通用户主目录的父目录</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/lib</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">共享库文件</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/lib64</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">共享64位库文件</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/media</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">自动识别设备的挂载目录</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/mnt</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">临时挂载文件系统的挂载点</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/opt</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">可选插件软件包安装位置</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/proc</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">内核和进程信息</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-red-50 dark:bg-red-900 rounded">
+                                        <code class="font-mono text-sm font-semibold text-red-600 w-16">/root</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">超级管理员用户主目录</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/run</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">存放系统运行时需要的东西</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/sbin</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">超级用户的二进制文件</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/sys</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">设备的伪文件系统</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/tmp</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">临时文件夹</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-green-50 dark:bg-green-900 rounded">
+                                        <code class="font-mono text-sm font-semibold text-green-600 w-16">/usr</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">用户应用目录</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/var</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">变量数据目录</span>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- MongoDB基本概念 -->
-                <section id="mongodb-concepts" class="section-content">
+                <!-- 基础命令 -->
+                <section id="basic-commands" class="section-content">
                     <div class="content-card rounded-xl p-8 mb-8">
-                        <h2 class="text-3xl font-bold mb-6 text-purple-600">
-                            <i class="fas fa-cubes mr-3"></i>
-                            MongoDB基本概念
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-terminal mr-3 text-red-500"></i>
+                            基础命令
                         </h2>
                         
-                        <p class="text-lg mb-6 leading-relaxed">
-                            我们通过与关系型数据库的比较来说明MongoDB中的一些概念：
-                        </p>
-
-                        <div class="table-container">
-                            <table class="w-full">
-                                <thead class="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-50">
-                                    <tr>
-                                        <th class="px-6 py-4 text-left text-sm font-semibold text-purple-900 dark:text-purple-100">SQL</th>
-                                        <th class="px-6 py-4 text-left text-sm font-semibold text-purple-900 dark:text-purple-100">MongoDB</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                        <td class="px-6 py-4 font-medium">database</td>
-                                        <td class="px-6 py-4 font-medium text-purple-600 dark:text-purple-400">database</td>
-                                    </tr>
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                        <td class="px-6 py-4 font-medium">table（表）</td>
-                                        <td class="px-6 py-4 font-medium text-purple-600 dark:text-purple-400">collection（集合）</td>
-                                    </tr>
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                        <td class="px-6 py-4 font-medium">row（行）</td>
-                                        <td class="px-6 py-4 font-medium text-purple-600 dark:text-purple-400">document（文档）</td>
-                                    </tr>
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                        <td class="px-6 py-4 font-medium">column（列）</td>
-                                        <td class="px-6 py-4 font-medium text-purple-600 dark:text-purple-400">field（字段）</td>
-                                    </tr>
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                        <td class="px-6 py-4 font-medium">index</td>
-                                        <td class="px-6 py-4 font-medium text-purple-600 dark:text-purple-400">index</td>
-                                    </tr>
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                        <td class="px-6 py-4 font-medium">table joins（表连接）</td>
-                                        <td class="px-6 py-4 font-medium text-purple-600 dark:text-purple-400">（嵌套文档）</td>
-                                    </tr>
-                                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-800">
-                                        <td class="px-6 py-4 font-medium">primary key</td>
-                                        <td class="px-6 py-4 font-medium text-purple-600 dark:text-purple-400">primary key</td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                        <div class="mb-6">
+                            <p class="text-gray-700 dark:text-gray-300 mb-4">Linux系统的命令通常都是如下所示的格式：</p>
+                            <div class="code-block p-4 mb-4">
+                                <code class="text-green-400">命令名称 [命名参数] [命令对象]</code>
+                            </div>
                         </div>
 
-                        <div class="mt-8 grid md:grid-cols-3 gap-6">
-                            <div class="bg-blue-50 dark:bg-blue-900 dark:bg-opacity-30 p-6 rounded-lg text-center">
-                                <i class="fas fa-database text-3xl text-blue-500 mb-3"></i>
-                                <h4 class="font-semibold text-blue-700 dark:text-blue-300 mb-2">Database</h4>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">数据库容器</p>
-                            </div>
-                            <div class="bg-green-50 dark:bg-green-900 dark:bg-opacity-30 p-6 rounded-lg text-center">
-                                <i class="fas fa-folder text-3xl text-green-500 mb-3"></i>
-                                <h4 class="font-semibold text-green-700 dark:text-green-300 mb-2">Collection</h4>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">文档集合</p>
-                            </div>
-                            <div class="bg-purple-50 dark:bg-purple-900 dark:bg-opacity-30 p-6 rounded-lg text-center">
-                                <i class="fas fa-file-alt text-3xl text-purple-500 mb-3"></i>
-                                <h4 class="font-semibold text-purple-700 dark:text-purple-300 mb-2">Document</h4>
-                                <p class="text-sm text-gray-600 dark:text-gray-400">BSON文档</p>
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-question-circle mr-2 text-blue-500"></i>
+                                获取帮助
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">man命令 - 查看命令手册</h4>
+                                    <div class="code-block p-3 mb-3">
+                                        <code class="text-green-400">man ls</code>
+                                    </div>
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-sm">
+                                            <thead>
+                                                <tr class="border-b border-gray-300 dark:border-gray-600">
+                                                    <th class="text-left py-2 px-3 font-semibold">手册标题</th>
+                                                    <th class="text-left py-2 px-3 font-semibold">功能说明</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="text-gray-600 dark:text-gray-300">
+                                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                                    <td class="py-2 px-3 font-mono">NAME</td>
+                                                    <td class="py-2 px-3">命令的说明和介绍</td>
+                                                </tr>
+                                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                                    <td class="py-2 px-3 font-mono">SYNOPSIS</td>
+                                                    <td class="py-2 px-3">使用该命令的基本语法</td>
+                                                </tr>
+                                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                                    <td class="py-2 px-3 font-mono">DESCRIPTION</td>
+                                                    <td class="py-2 px-3">使用该命令的详细描述，各个参数的作用</td>
+                                                </tr>
+                                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                                    <td class="py-2 px-3 font-mono">OPTIONS</td>
+                                                    <td class="py-2 px-3">命令相关参数选项的说明</td>
+                                                </tr>
+                                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                                    <td class="py-2 px-3 font-mono">EXAMPLES</td>
+                                                    <td class="py-2 px-3">使用该命令的参考例子</td>
+                                                </tr>
+                                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                                    <td class="py-2 px-3 font-mono">EXIT STATUS</td>
+                                                    <td class="py-2 px-3">命令结束的退出状态码，通常0表示成功执行</td>
+                                                </tr>
+                                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                                    <td class="py-2 px-3 font-mono">SEE ALSO</td>
+                                                    <td class="py-2 px-3">和命令相关的其他命令或信息</td>
+                                                </tr>
+                                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                                    <td class="py-2 px-3 font-mono">BUGS</td>
+                                                    <td class="py-2 px-3">和命令相关的缺陷的描述</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-2 px-3 font-mono">AUTHOR</td>
+                                                    <td class="py-2 px-3">该命令的作者介绍</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- Shell操作MongoDB -->
-                <section id="mongodb-shell" class="section-content">
+                <!-- 文件操作 -->
+                <section id="file-operations" class="section-content">
                     <div class="content-card rounded-xl p-8 mb-8">
-                        <h2 class="text-3xl font-bold mb-6 text-indigo-600">
-                            <i class="fas fa-terminal mr-3"></i>
-                            通过Shell操作MongoDB
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-file-alt mr-3 text-indigo-500"></i>
+                            文件操作
                         </h2>
                         
-                        <div class="space-y-8">
-                            <!-- 启动命令行工具 -->
-                            <div>
-                                <h3 class="text-xl font-semibold mb-4 text-indigo-700 dark:text-indigo-400">
-                                    <i class="fas fa-play mr-2"></i>
-                                    0. 启动命令行工具，进入交互式环境
+                        <div class="space-y-6">
+                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-plus-circle mr-2 text-blue-500"></i>
+                                    创建和删除文件/目录
                                 </h3>
-                                <div class="code-block p-4">
-                                    <pre><code class="text-green-400">mongo</code></pre>
+                                <div class="space-y-3">
+                                    <div>
+                                        <h4 class="font-semibold mb-2">mkdir - 创建目录</h4>
+                                        <div class="code-block p-3 mb-2">
+                                            <code class="text-green-400">mkdir test<br>mkdir -p a/b/c  # 递归创建目录</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-2">touch - 创建空白文件或修改文件时间</h4>
+                                        <div class="code-block p-3 mb-2">
+                                            <code class="text-green-400">touch newfile.txt</code>
+                                        </div>
+                                        <p class="text-sm text-gray-600 dark:text-gray-300">Linux系统中一个文件有三种时间：更改内容的时间(mtime)、更改权限的时间(ctime)、最后访问时间(atime)</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-2">rm - 删除文件和目录</h4>
+                                        <div class="code-block p-3 mb-2">
+                                            <code class="text-green-400">rm file.txt<br>rm -i file.txt  # 交互式删除<br>rm -r directory  # 递归删除目录<br>rm -f file.txt  # 强制删除</code>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- 数据库操作 -->
-                            <div>
-                                <h3 class="text-xl font-semibold mb-4 text-indigo-700 dark:text-indigo-400">
-                                    <i class="fas fa-database mr-2"></i>
-                                    1. 查看、创建和删除数据库
+                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-arrows-alt mr-2 text-green-500"></i>
+                                    切换和查看目录
                                 </h3>
-                                <div class="code-block p-4">
-                                    <pre><code><span class="text-gray-400">> // 显示所有数据库</span>
-<span class="text-yellow-400">> show dbs</span>
-<span class="text-blue-400">admin   0.000GB
-config  0.000GB
-local   0.000GB</span>
-<span class="text-gray-400">> // 创建并切换到school数据库</span>
-<span class="text-yellow-400">> use school</span>
-<span class="text-green-400">switched to db school</span>
-<span class="text-gray-400">> // 删除当前数据库</span>
-<span class="text-yellow-400">> db.dropDatabase()</span>
-<span class="text-blue-400">{ "ok" : 1 }</span></code></pre>
+                                <div class="space-y-3">
+                                    <div>
+                                        <h4 class="font-semibold mb-2">cd - 切换目录</h4>
+                                        <div class="code-block p-3 mb-2">
+                                            <code class="text-green-400">cd /home/user  # 绝对路径<br>cd ../  # 返回上一级目录<br>cd ~  # 返回用户主目录</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-2">pwd - 显示当前工作目录</h4>
+                                        <div class="code-block p-3">
+                                            <code class="text-green-400">pwd</code>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- 集合操作 -->
-                            <div>
-                                <h3 class="text-xl font-semibold mb-4 text-indigo-700 dark:text-indigo-400">
-                                    <i class="fas fa-folder mr-2"></i>
-                                    2. 创建、删除和查看集合
+                            <div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-list mr-2 text-purple-500"></i>
+                                    查看目录内容
                                 </h3>
-                                <div class="code-block p-4">
-                                    <pre><code><span class="text-gray-400">> // 创建并切换到school数据库</span>
-<span class="text-yellow-400">> use school</span>
-<span class="text-green-400">switched to db school</span>
-<span class="text-gray-400">> // 创建colleges集合</span>
-<span class="text-yellow-400">> db.createCollection('colleges')</span>
-<span class="text-blue-400">{ "ok" : 1 }</span>
-<span class="text-gray-400">> // 创建students集合</span>
-<span class="text-yellow-400">> db.createCollection('students')</span>
-<span class="text-blue-400">{ "ok" : 1 }</span>
-<span class="text-gray-400">> // 查看所有集合</span>
-<span class="text-yellow-400">> show collections</span>
-<span class="text-blue-400">colleges
-students</span>
-<span class="text-gray-400">> // 删除colleges集合</span>
-<span class="text-yellow-400">> db.colleges.drop()</span>
-<span class="text-green-400">true</span></code></pre>
+                                <div>
+                                    <h4 class="font-semibold mb-2">ls - 列出目录内容</h4>
+                                    <div class="code-block p-3 mb-2">
+                                        <code class="text-green-400">ls  # 基本列表<br>ls -l  # 长格式显示<br>ls -a  # 显示隐藏文件<br>ls -R  # 递归显示<br>ls -d  # 只显示目录<br>ls -S  # 按大小排序<br>ls -t  # 按时间排序</code>
+                                    </div>
                                 </div>
-                                <div class="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900 dark:bg-opacity-30 rounded-lg">
-                                    <p class="text-sm">
-                                        <i class="fas fa-info-circle mr-2 text-yellow-600"></i>
-                                        <strong>说明：</strong>在MongoDB中插入文档时如果集合不存在会自动创建集合，所以也可以按照下面的方式通过插入文档来创建集合。
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 文本处理 -->
+                <section id="text-processing" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-edit mr-3 text-teal-500"></i>
+                            文本处理
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900 dark:to-cyan-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-eye mr-2 text-teal-500"></i>
+                                    查看文件内容
+                                </h3>
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <h4 class="font-semibold mb-2">cat / tac</h4>
+                                        <div class="code-block p-3 mb-2">
+                                            <code class="text-green-400">cat file.txt  # 正向显示<br>tac file.txt  # 反向显示</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-2">head / tail</h4>
+                                        <div class="code-block p-3 mb-2">
+                                            <code class="text-green-400">head -10 file.txt  # 前10行<br>tail -10 file.txt  # 后10行</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-2">more / less</h4>
+                                        <div class="code-block p-3 mb-2">
+                                            <code class="text-green-400">more file.txt  # 分页显示<br>less file.txt  # 更好的分页</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-2">rev / od</h4>
+                                        <div class="code-block p-3 mb-2">
+                                            <code class="text-green-400">rev file.txt  # 反转每行<br>od -c file.txt  # 八进制显示</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900 dark:to-red-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-compress-arrows-alt mr-2 text-orange-500"></i>
+                                    归档和压缩
+                                </h3>
+                                <div>
+                                    <h4 class="font-semibold mb-2">tar - 归档和解归档</h4>
+                                    <div class="code-block p-3 mb-2">
+                                        <code class="text-green-400"># 创建归档<br>tar -cvf archive.tar files/<br><br># 解归档<br>tar -xvf archive.tar<br><br># 创建压缩归档<br>tar -czvf archive.tar.gz files/<br><br># 解压缩归档<br>tar -xzvf archive.tar.gz</code>
+                                    </div>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300 mt-2">
+                                        参数说明：c(创建)、x(提取)、v(详细)、f(文件)、z(gzip压缩)
                                     </p>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </section>
 
-                <!-- 文档CRUD操作 -->
-                <section id="mongodb-crud" class="section-content">
-                    <div class="content-card rounded-xl p-8 mb-8">
-                        <h2 class="text-3xl font-bold mb-6 text-red-600">
-                            <i class="fas fa-edit mr-3"></i>
-                            文档的CRUD操作
-                        </h2>
-                        
-                        <div class="space-y-8">
-                            <!-- 插入和查询操作 -->
-                            <div>
-                                <h3 class="text-xl font-semibold mb-4 text-red-700 dark:text-red-400">
-                                    <i class="fas fa-plus mr-2"></i>
-                                    插入和查询文档
+                            <div class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900 dark:to-purple-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-exchange-alt mr-2 text-indigo-500"></i>
+                                    管道和重定向
                                 </h3>
-                                <div class="code-block p-4">
-                                    <pre><code><span class="text-gray-400">> // 向students集合插入文档</span>
-<span class="text-yellow-400">> db.students.insert({stuid: 1001, name: '骆昊', age: 40})</span>
-<span class="text-blue-400">WriteResult({ "nInserted" : 1 })</span>
-<span class="text-gray-400">> // 向students集合插入文档</span>
-<span class="text-yellow-400">> db.students.save({stuid: 1002, name: '王大锤', tel: '13012345678', gender: '男'})</span>
-<span class="text-blue-400">WriteResult({ "nInserted" : 1 })</span>
-<span class="text-gray-400">> // 查看所有文档</span>
-<span class="text-yellow-400">> db.students.find()</span>
-<span class="text-green-400">{ "_id" : ObjectId("5b13c72e006ad854460ee70b"), "stuid" : 1001, "name" : "骆昊", "age" : 38 }
-{ "_id" : ObjectId("5b13c790006ad854460ee70c"), "stuid" : 1002, "name" : "王大锤", "tel" : "13012345678", "gender" : "男" }</span></code></pre>
-                                </div>
-                            </div>
-
-                            <!-- 更新操作 -->
-                            <div>
-                                <h3 class="text-xl font-semibold mb-4 text-red-700 dark:text-red-400">
-                                    <i class="fas fa-sync mr-2"></i>
-                                    更新文档
-                                </h3>
-                                <div class="code-block p-4">
-                                    <pre><code><span class="text-gray-400">> // 更新stuid为1001的文档</span>
-<span class="text-yellow-400">> db.students.update({stuid: 1001}, {'$set': {tel: '13566778899', gender: '男'}})</span>
-<span class="text-blue-400">WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })</span>
-<span class="text-gray-400">> // 插入或更新stuid为1003的文档</span>
-<span class="text-yellow-400">> db.students.update({stuid: 1003}, {'$set': {name: '白元芳', tel: '13022223333', gender: '男'}}, upsert=true)</span>
-<span class="text-blue-400">WriteResult({
-        "nMatched" : 0,
-        "nUpserted" : 1,
-        "nModified" : 0,</span></code></pre>
-                                </div>
-                            </div>
-
-                            <!-- 查询和索引操作 -->
-                            <div>
-                                <h3 class="text-xl font-semibold mb-4 text-red-700 dark:text-red-400">
-                                    <i class="fas fa-search mr-2"></i>
-                                    查询和索引操作
-                                </h3>
-                                <div class="code-block p-4">
-                                    <pre><code><span class="text-blue-400">{ "stuid" : 1002, "name" : "王大锤" }
-{ "stuid" : 1001, "name" : "骆昊" }</span>
-<span class="text-gray-400">> // 在指定的一个或多个字段上创建索引</span>
-<span class="text-yellow-400">> db.students.ensureIndex({name: 1})</span>
-<span class="text-blue-400">{
-        "createdCollectionAutomatically" : false,
-        "numIndexesBefore" : 1,
-        "numIndexesAfter" : 2,
-        "ok" : 1
-}</span></code></pre>
+                                <div>
+                                    <h4 class="font-semibold mb-2">xargs - 将标准输入转成命令行参数</h4>
+                                    <div class="code-block p-3 mb-2">
+                                        <code class="text-green-400"># 查找并删除HTML文件<br>find . -type f -name "*.html" | xargs rm -f<br><br># 将多行内容变成一行<br>xargs &lt; a.txt &gt; b.txt</code>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </section>
 
-                <!-- Redis操作示例 -->
-                <section id="redis-examples" class="section-content">
+                <!-- 系统信息 -->
+                <section id="system-info" class="section-content">
                     <div class="content-card rounded-xl p-8 mb-8">
-                        <h2 class="text-3xl font-bold mb-6 text-red-500">
-                            <i class="fas fa-memory mr-3"></i>
-                            Redis操作示例
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-server mr-3 text-orange-500"></i>
+                            系统信息
                         </h2>
                         
-                        <p class="text-lg mb-6 leading-relaxed">
-                            Redis是一个高性能的键值对数据库，以下是一些基本操作示例：
-                        </p>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+                                    系统基本信息
+                                </h3>
+                                <div class="space-y-3">
+                                    <div>
+                                        <h4 class="font-semibold mb-1">uname - 系统信息</h4>
+                                        <div class="code-block p-2 text-sm">
+                                            <code class="text-green-400">uname -a  # 所有信息</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">whoami - 当前用户</h4>
+                                        <div class="code-block p-2 text-sm">
+                                            <code class="text-green-400">whoami</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">date - 系统时间</h4>
+                                        <div class="code-block p-2 text-sm">
+                                            <code class="text-green-400">date</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
 
+                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-memory mr-2 text-green-500"></i>
+                                    资源监控
+                                </h3>
+                                <div class="space-y-3">
+                                    <div>
+                                        <h4 class="font-semibold mb-1">top - 进程监控</h4>
+                                        <div class="code-block p-2 text-sm">
+                                            <code class="text-green-400">top</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">ps - 进程列表</h4>
+                                        <div class="code-block p-2 text-sm">
+                                            <code class="text-green-400">ps aux</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">df - 磁盘使用</h4>
+                                        <div class="code-block p-2 text-sm">
+                                            <code class="text-green-400">df -h</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 网络工具 -->
+                <section id="network-tools" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-network-wired mr-3 text-cyan-500"></i>
+                            网络工具
+                        </h2>
+                        
                         <div class="space-y-6">
-                            <!-- 字符串操作 -->
-                            <div>
-                                <h3 class="text-xl font-semibold mb-4 text-red-600 dark:text-red-400">
-                                    <i class="fas fa-font mr-2"></i>
-                                    字符串操作
+                            <div class="bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900 dark:to-blue-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-download mr-2 text-cyan-500"></i>
+                                    网络下载
                                 </h3>
-                                <div class="code-block p-4">
-                                    <pre><code><span class="text-yellow-400">127.0.0.1:6379> set username admin</span>
-<span class="text-green-400">OK</span>
-<span class="text-yellow-400">127.0.0.1:6379> get username</span>
-<span class="text-blue-400">"admin"</span>
-<span class="text-yellow-400">127.0.0.1:6379> set password "123456" ex 300</span>
-<span class="text-green-400">OK</span>
-<span class="text-yellow-400">127.0.0.1:6379> get password</span>
-<span class="text-blue-400">"123456"</span>
-<span class="text-yellow-400">127.0.0.1:6379> ttl username</span>
-<span class="text-blue-400">(integer) -1</span>
-<span class="text-yellow-400">127.0.0.1:6379> ttl password</span>
-<span class="text-blue-400">(integer) 286</span></code></pre>
+                                <div>
+                                    <h4 class="font-semibold mb-2">wget - 网络下载工具</h4>
+                                    <div class="code-block p-3 mb-2">
+                                        <code class="text-green-400">wget http://example.com/file.zip<br>wget -b http://example.com/file.zip  # 后台下载<br>wget -O /path/to/save http://example.com/file.zip  # 指定保存路径<br>wget -r http://example.com/  # 递归下载</code>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- 哈希操作 -->
-                            <div>
-                                <h3 class="text-xl font-semibold mb-4 text-red-600 dark:text-red-400">
-                                    <i class="fas fa-hashtag mr-2"></i>
-                                    哈希操作
+                            <div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-envelope mr-2 text-purple-500"></i>
+                                    邮件工具
                                 </h3>
-                                <div class="code-block p-4">
-                                    <pre><code><span class="text-yellow-400">127.0.0.1:6379> hset stu1 name hao</span>
-<span class="text-blue-400">(integer) 0</span>
-<span class="text-yellow-400">127.0.0.1:6379> hset stu1 age 38</span>
-<span class="text-blue-400">(integer) 1</span>
-<span class="text-yellow-400">127.0.0.1:6379> hset stu1 gender male</span>
-<span class="text-blue-400">(integer) 1</span>
-<span class="text-yellow-400">127.0.0.1:6379> hgetall stu1</span>
-<span class="text-green-400">1) "name"
-2) "hao"
-3) "age"
-4) "38"
-5) "gender"
-6) "male"</span>
-<span class="text-yellow-400">127.0.0.1:6379> hvals stu1</span>
-<span class="text-green-400">1) "hao"
-2) "38"
-3) "male"</span>
-<span class="text-yellow-400">127.0.0.1:6379> hmset stu2 name wang age 18 gender female tel 13566778899</span>
-<span class="text-green-400">OK</span>
-<span class="text-yellow-400">127.0.0.1:6379> hgetall stu2</span>
-<span class="text-green-400">1) "name"
-2) "wang"
-3) "age"
-4) "18"
-5) "gender"
-6) "female"
-7) "tel"
-8) "13566778899"</span></code></pre>
+                                <div>
+                                    <h4 class="font-semibold mb-2">mail - 发送和接收邮件</h4>
+                                    <div class="code-block p-3">
+                                        <code class="text-green-400">mail user@example.com</code>
+                                    </div>
                                 </div>
                             </div>
 
-                            <!-- 列表操作 -->
-                            <div>
-                                <h3 class="text-xl font-semibold mb-4 text-red-600 dark:text-red-400">
-                                    <i class="fas fa-list mr-2"></i>
-                                    列表操作
+                            <div class="bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-900 dark:to-teal-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-network-wired mr-2 text-green-500"></i>
+                                    网络配置
                                 </h3>
-                                <div class="code-block p-4">
-                                    <pre><code><span class="text-yellow-400">127.0.0.1:6379> lpush nums 1 2 3 4 5</span>
-<span class="text-blue-400">(integer) 5</span>
-<span class="text-yellow-400">127.0.0.1:6379> lrange nums 0 -1</span>
-<span class="text-green-400">1) "5"
-2) "4"
-3) "3"
-4) "2"
-5) "1"</span>
-<span class="text-yellow-400">127.0.0.1:6379> lpop nums</span>
-<span class="text-blue-400">"5"</span>
-<span class="text-yellow-400">127.0.0.1:6379> lpop nums</span>
-<span class="text-blue-400">"4"</span>
-<span class="text-yellow-400">127.0.0.1:6379> rpop nums</span>
-<span class="text-blue-400">"1"</span>
-<span class="text-yellow-400">127.0.0.1:6379> rpop nums</span>
-<span class="text-blue-400">"2"</span></code></pre>
+                                <div>
+                                    <h4 class="font-semibold mb-2">ifconfig - 网络配置工具（旧）</h4>
+                                    <div class="code-block p-3 mb-2">
+                                        <code class="text-green-400">ifconfig eth0</code>
+                                    </div>
+                                    <div class="code-block p-3 text-sm">
+                                        <code class="text-gray-300">eth0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500<br>        inet 172.18.61.250  netmask 255.255.240.0  broadcast 172.18.63.255<br>        ether 00:16:3e:02:b6:46  txqueuelen 1000  (Ethernet)<br>        RX packets 1067841  bytes 1296732947 (1.2 GiB)<br>        RX errors 0  dropped 0  overruns 0  frame 0<br>        TX packets 409912  bytes 43569163 (41.5 MiB)<br>        TX errors 0  dropped 0 overruns 0  carrier 0  collisions</code>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </section>
 
+                <!-- Shell脚本 -->
+                <section id="shell-scripts" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-code mr-3 text-pink-500"></i>
+                            Shell脚本
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-900 dark:to-rose-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-file-code mr-2 text-pink-500"></i>
+                                    脚本示例1：自动创建文件夹和文件
+                                </h3>
+                                <div class="code-block p-4 text-sm overflow-x-auto">
+                                    <code class="text-gray-300">#!/usr/bin/bash<br>printf '输入文件夹名: '<br>read dir<br>printf '输入文件名: '<br>read file<br>printf '输入文件数量(&lt;1000): '<br>read num<br>if [ $num -ge 1000 ]<br>then<br>    echo '文件数量不能超过1000'<br>else<br>    if [ -e $dir -a -d $dir ]<br>    then<br>        rm -rf $dir<br>    else<br>        if [ -e $dir -a -f $dir ]<br>        then<br>            rm -f $dir<br>        fi<br>    fi<br>    mkdir -p $dir<br>    index=1<br>    while [ $index -le $num ]<br>    do<br>        if [ $index -lt 10 ]<br>        then<br>            pre='00'<br>        elif [ $index -lt 100 ]<br>        then<br>            pre='0'<br>        else<br>            pre=''<br>        fi<br>        touch $dir'/'$file'_'$pre$index<br>        index=$[ index + 1 ]<br>    done<br>fi</code>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900 dark:to-purple-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-download mr-2 text-indigo-500"></i>
+                                    脚本示例2：自动安装Redis
+                                </h3>
+                                <div class="code-block p-4 text-sm overflow-x-auto">
+                                    <code class="text-gray-300">#!/usr/bin/bash<br>install_redis() {<br>    if ! which redis-server > /dev/null<br>    then<br>        cd /root<br>        wget $1$2'.tar.gz' >> install.log<br>        gunzip /root/$2'.tar.gz'<br>        tar -xf /root/$2'.tar'<br>        cd /root/$2<br>        make >> install.log<br>        make install >> install.log<br>        echo '安装完成'<br>    else<br>        echo '已经安装过Redis'<br>    fi<br>}<br><br>install_redis 'http://download.redis.io/releases/' $1</code>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900 dark:to-orange-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-lightbulb mr-2 text-yellow-500"></i>
+                                    Shell脚本要点
+                                </h3>
+                                <ul class="space-y-2 text-gray-700 dark:text-gray-300">
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                                        <span>脚本文件以 <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">#!/usr/bin/bash</code> 开头</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                                        <span>使用 <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">read</code> 命令读取用户输入</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                                        <span>使用 <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">if-then-else</code> 进行条件判断</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                                        <span>使用 <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">while</code> 循环处理重复任务</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                                        <span>函数定义和调用提高代码复用性</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 相关资源 -->
+                <section id="resources" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-book mr-3 text-gray-500"></i>
+                            相关资源
+                        </h2>
+                        
+                        <div class="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800 dark:to-slate-800 p-6 rounded-lg">
+                            <h3 class="text-lg font-semibold mb-4 flex items-center">
+                                <i class="fas fa-keyboard mr-2 text-gray-500"></i>
+                                Linux命令行常用快捷键
+                            </h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="space-y-2">
+                                    <div class="flex justify-between items-center p-2 bg-white dark:bg-gray-700 rounded">
+                                        <kbd class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-sm">Ctrl + C</kbd>
+                                        <span class="text-sm">终止当前命令</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-2 bg-white dark:bg-gray-700 rounded">
+                                        <kbd class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-sm">Ctrl + D</kbd>
+                                        <span class="text-sm">退出当前Shell</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-2 bg-white dark:bg-gray-700 rounded">
+                                        <kbd class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-sm">Ctrl + L</kbd>
+                                        <span class="text-sm">清屏</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-2 bg-white dark:bg-gray-700 rounded">
+                                        <kbd class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-sm">Ctrl + A</kbd>
+                                        <span class="text-sm">光标移到行首</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between items-center p-2 bg-white dark:bg-gray-700 rounded">
+                                        <kbd class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-sm">Ctrl + E</kbd>
+                                        <span class="text-sm">光标移到行尾</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-2 bg-white dark:bg-gray-700 rounded">
+                                        <kbd class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-sm">↑ / ↓</kbd>
+                                        <span class="text-sm">历史命令</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-2 bg-white dark:bg-gray-700 rounded">
+                                        <kbd class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-sm">Tab</kbd>
+                                        <span class="text-sm">自动补全</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-2 bg-white dark:bg-gray-700 rounded">
+                                        <kbd class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-sm">Ctrl + R</kbd>
+                                        <span class="text-sm">搜索历史命令</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Floating TOC -->
+    <div class="floating-toc">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 max-w-xs">
+            <h3 class="text-sm font-semibold mb-2 text-gray-900 dark:text-white">快速导航</h3>
+            <div class="space-y-1 text-xs">
+                <a href="#overview" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">Linux概述</a>
+                <a href="#advantages" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">系统优点</a>
+                <a href="#distributions" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">发行版本</a>
+                <a href="#filesystem" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">文件系统</a>
+                <a href="#basic-commands" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">基础命令</a>
+                <a href="#file-operations" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">文件操作</a>
+                <a href="#text-processing" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">文本处理</a>
+                <a href="#system-info" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">系统信息</a>
+                <a href="#network-tools" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">网络工具</a>
+                <a href="#shell-scripts" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">Shell脚本</a>
+                <a href="#resources" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">相关资源</a>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-gray-50 dark:bg-gray-900 py-8 mt-16">
-        <div class="max-w-4xl mx-auto px-6 text-center">
-            <div class="flex justify-center items-center mb-4">
-                <i class="fas fa-database text-2xl text-blue-500 mr-3"></i>
-                <h3 class="text-xl font-bold">NoSQL数据库入门教程</h3>
-            </div>
-            <p class="text-gray-600 dark:text-gray-400 mb-4">
-                掌握现代数据存储技术，开启大数据时代的学习之旅
-            </p>
-            <div class="flex justify-center space-x-6 text-sm text-gray-500">
-                <span><i class="fas fa-code mr-1"></i>实战代码</span>
-                <span><i class="fas fa-book mr-1"></i>系统学习</span>
-                <span><i class="fas fa-lightbulb mr-1"></i>深入理解</span>
-            </div>
-        </div>
-    </footer>
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 opacity-0 pointer-events-none">
+        <i class="fas fa-arrow-up"></i>
+    </button>
 
     <script>
         // Theme Toggle
@@ -756,28 +988,29 @@ students</span>
         const currentTheme = savedTheme || systemTheme;
         
         html.setAttribute('data-theme', currentTheme);
-        updateThemeIcon(currentTheme);
+        if (currentTheme === 'dark') {
+            html.classList.add('dark');
+        }
         
         themeToggle.addEventListener('click', () => {
-            const currentTheme = html.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
-            html.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeIcon(newTheme);
+            const isDark = html.classList.contains('dark');
+            if (isDark) {
+                html.classList.remove('dark');
+                html.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
         });
-        
-        function updateThemeIcon(theme) {
-            const icon = themeToggle.querySelector('i');
-            icon.className = theme === 'dark' ? 'fas fa-sun text-yellow-500' : 'fas fa-moon text-gray-600';
-        }
 
         // Mobile Menu Toggle
-        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const menuToggle = document.getElementById('menuToggle');
         const sidebar = document.getElementById('sidebar');
         
-        mobileMenuToggle.addEventListener('click', () => {
-            sidebar.classList.toggle('open');
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
         });
 
         // Navigation
@@ -787,91 +1020,80 @@ students</span>
         navItems.forEach(item => {
             item.addEventListener('click', (e) => {
                 e.preventDefault();
+                const targetSection = item.getAttribute('data-section');
                 
                 // Remove active class from all nav items and sections
                 navItems.forEach(nav => nav.classList.remove('active'));
-                sections.forEach(section => {
-                    section.classList.remove('active');
-                    section.style.display = 'none';
-                });
+                sections.forEach(section => section.classList.remove('active'));
                 
-                // Add active class to clicked nav item
+                // Add active class to clicked nav item and corresponding section
                 item.classList.add('active');
-                
-                // Show corresponding section
-                const targetId = item.getAttribute('href').substring(1);
-                const targetSection = document.getElementById(targetId);
-                if (targetSection) {
-                    targetSection.style.display = 'block';
-                    targetSection.classList.add('active', 'fade-in');
-                    
-                    // Scroll to top of content
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
+                document.getElementById(targetSection).classList.add('active');
                 
                 // Close mobile menu
-                sidebar.classList.remove('open');
+                sidebar.classList.add('-translate-x-full');
+                
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         });
 
-        // Close mobile menu when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
-                sidebar.classList.remove('open');
+        // Scroll Indicator
+        const scrollIndicator = document.getElementById('scrollIndicator');
+        
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset;
+            const docHeight = document.body.offsetHeight - window.innerHeight;
+            const scrollPercent = scrollTop / docHeight;
+            scrollIndicator.style.transform = `scaleX(${scrollPercent})`;
+        });
+
+        // Back to Top Button
+        const backToTop = document.getElementById('backToTop');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTop.classList.remove('opacity-0', 'pointer-events-none');
+                backToTop.classList.add('opacity-100');
+            } else {
+                backToTop.classList.add('opacity-0', 'pointer-events-none');
+                backToTop.classList.remove('opacity-100');
             }
         });
+        
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
 
-        // Smooth scrolling for better UX
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
+        // Initialize first section as active
+        document.querySelector('[data-section="overview"]').classList.add('active');
+        
+        // Smooth scrolling for floating TOC
+        document.querySelectorAll('.floating-toc a').forEach(link => {
+            link.addEventListener('click', (e) => {
                 e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
+                const targetId = link.getAttribute('href').substring(1);
+                const targetSection = targetId;
+                
+                // Update navigation
+                navItems.forEach(nav => nav.classList.remove('active'));
+                sections.forEach(section => section.classList.remove('active'));
+                
+                document.querySelector(`[data-section="${targetSection}"]`).classList.add('active');
+                document.getElementById(targetSection).classList.add('active');
+                
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         });
 
-        // Add hover effects to code blocks
-        document.querySelectorAll('.code-block').forEach(block => {
-            block.addEventListener('mouseenter', () => {
-                block.style.transform = 'scale(1.01)';
-                block.style.transition = 'transform 0.2s ease';
+        // Add hover effects to content cards
+        document.querySelectorAll('.content-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-4px)';
             });
             
-            block.addEventListener('mouseleave', () => {
-                block.style.transform = 'scale(1)';
-            });
-        });
-
-        // Add copy functionality to code blocks
-        document.querySelectorAll('.code-block').forEach(block => {
-            const copyBtn = document.createElement('button');
-            copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
-            copyBtn.className = 'absolute top-2 right-2 p-2 bg-gray-700 hover:bg-gray-600 text-white rounded opacity-0 transition-opacity duration-200';
-            
-            block.style.position = 'relative';
-            block.appendChild(copyBtn);
-            
-            block.addEventListener('mouseenter', () => {
-                copyBtn.style.opacity = '1';
-            });
-            
-            block.addEventListener('mouseleave', () => {
-                copyBtn.style.opacity = '0';
-            });
-            
-            copyBtn.addEventListener('click', () => {
-                const code = block.querySelector('code').textContent;
-                navigator.clipboard.writeText(code).then(() => {
-                    copyBtn.innerHTML = '<i class="fas fa-check"></i>';
-                    setTimeout(() => {
-                        copyBtn.innerHTML = '<i class="fas fa-copy"></i>';
-                    }, 2000);
-                });
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
             });
         });
     </script>
