@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>玩转Linux操作系统 - 完整学习教程</title>
+    
+    <!-- External Resources -->
+    <link href="https://cdn.staticfile.org/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.staticfile.org/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@latest/dist/mermaid.min.js"></script>
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --border-color: #e5e7eb;
+        }
+
+        [data-theme="dark"] {
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --border-color: #374151;
+        }
+
+        * {
+            font-family: 'Noto Sans SC', Tahoma, Arial, Roboto, "Droid Sans", "Helvetica Neue", "Droid Sans Fallback", "Heiti SC", "Hiragino Sans GB", Simsun, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .hero-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .dark .hero-gradient {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3730a3 100%);
+        }
+
+        .content-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .content-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .dark .content-card:hover {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .sidebar {
+            background-color: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+        }
+
+        .nav-item {
+            transition: all 0.2s ease;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            background-color: var(--bg-primary);
+            border-left-color: var(--primary-color);
+        }
+
+        .nav-item.active {
+            background-color: var(--bg-primary);
+            border-left-color: var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .code-block {
+            background-color: #1f2937;
+            color: #f9fafb;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        .dark .code-block {
+            background-color: #0f172a;
+        }
+
+        .section-content {
+            display: none;
+        }
+
+        .section-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .floating-toc {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 40;
+        }
+
+        @media (max-width: 1024px) {
+            .floating-toc {
+                display: none;
+            }
+        }
+
+        .scroll-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            transform-origin: left;
+            transform: scaleX(0);
+            z-index: 50;
+        }
+    </style>
+</head>
+<body class="min-h-screen">
+    <!-- Scroll Indicator -->
+    <div class="scroll-indicator" id="scrollIndicator"></div>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-30 bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-700">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fab fa-linux text-3xl text-blue-600"></i>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Linux操作系统教程</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <button id="themeToggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                    <i class="fas fa-moon dark:hidden"></i>
+                    <i class="fas fa-sun hidden dark:inline"></i>
+                </button>
+                <button id="menuToggle" class="lg:hidden p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="flex">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar fixed lg:sticky top-16 left-0 w-80 h-screen overflow-y-auto z-20 transform -translate-x-full lg:translate-x-0 transition-transform">
+            <div class="p-6">
+                <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
+                    <i class="fas fa-list-ul mr-2"></i>目录导航
+                </h2>
+                <nav class="space-y-2">
+                    <a href="#overview" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="overview">
+                        <i class="fas fa-info-circle mr-3 text-blue-500"></i>Linux概述
+                    </a>
+                    <a href="#advantages" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="advantages">
+                        <i class="fas fa-star mr-3 text-yellow-500"></i>系统优点
+                    </a>
+                    <a href="#distributions" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="distributions">
+                        <i class="fas fa-layer-group mr-3 text-green-500"></i>发行版本
+                    </a>
+                    <a href="#filesystem" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="filesystem">
+                        <i class="fas fa-folder-tree mr-3 text-purple-500"></i>文件系统
+                    </a>
+                    <a href="#basic-commands" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="basic-commands">
+                        <i class="fas fa-terminal mr-3 text-red-500"></i>基础命令
+                    </a>
+                    <a href="#file-operations" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="file-operations">
+                        <i class="fas fa-file-alt mr-3 text-indigo-500"></i>文件操作
+                    </a>
+                    <a href="#text-processing" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="text-processing">
+                        <i class="fas fa-edit mr-3 text-teal-500"></i>文本处理
+                    </a>
+                    <a href="#system-info" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="system-info">
+                        <i class="fas fa-server mr-3 text-orange-500"></i>系统信息
+                    </a>
+                    <a href="#network-tools" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="network-tools">
+                        <i class="fas fa-network-wired mr-3 text-cyan-500"></i>网络工具
+                    </a>
+                    <a href="#shell-scripts" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="shell-scripts">
+                        <i class="fas fa-code mr-3 text-pink-500"></i>Shell脚本
+                    </a>
+                    <a href="#resources" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="resources">
+                        <i class="fas fa-book mr-3 text-gray-500"></i>相关资源
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 lg:ml-0">
+            <!-- Hero Section -->
+            <section class="hero-gradient text-white py-20">
+                <div class="container mx-auto px-6 text-center">
+                    <div class="max-w-4xl mx-auto">
+                        <h1 class="text-5xl md:text-6xl font-bold mb-6">
+                            <i class="fab fa-linux mr-4"></i>
+                            玩转Linux操作系统
+                        </h1>
+                        <p class="text-xl md:text-2xl mb-8 opacity-90">
+                            从零开始掌握Linux系统，成为命令行高手
+                        </p>
+                        <div class="flex flex-wrap justify-center gap-4 text-sm">
+                            <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                                <i class="fas fa-terminal mr-2"></i>命令行操作
+                            </span>
+                            <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                                <i class="fas fa-folder mr-2"></i>文件系统
+                            </span>
+                            <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                                <i class="fas fa-code mr-2"></i>Shell脚本
+                            </span>
+                            <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                                <i class="fas fa-network-wired mr-2"></i>网络工具
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Content Sections -->
+            <div class="container mx-auto px-6 py-12">
+                <!-- Linux概述 -->
+                <section id="overview" class="section-content active">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-info-circle mr-3 text-blue-500"></i>
+                            Linux概述
+                        </h2>
+                        <div class="prose prose-lg max-w-none">
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+                                Linux是一个通用操作系统。一个操作系统要负责任务调度、内存分配、处理外围设备I/O等操作。操作系统通常由内核（运行其他程序，管理像磁盘、打印机等硬件设备的核心程序）和系统程序（设备驱动、底层库、shell、服务程序等）两部分组成。
+                            </p>
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                Linux内核是芬兰人Linus Torvalds开发的，于1991年9月发布。而Linux操作系统作为Internet时代的产物，它是由全世界许多开发者共同合作开发的，是一个自由的操作系统（注意自由和免费并不是同一个概念）。
+                            </p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Linux系统优点 -->
+                <section id="advantages" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-star mr-3 text-yellow-500"></i>
+                            Linux系统优点
+                        </h2>
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 p-6 rounded-lg">
+                                <h3 class="font-semibold mb-2 flex items-center">
+                                    <i class="fas fa-microchip mr-2 text-blue-500"></i>
+                                    通用性强
+                                </h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-300">通用操作系统，不跟特定的硬件绑定</p>
+                            </div>
+                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 p-6 rounded-lg">
+                                <h3 class="font-semibold mb-2 flex items-center">
+                                    <i class="fas fa-code mr-2 text-green-500"></i>
+                                    可移植性
+                                </h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-300">用C语言编写，可移植性强，有内核编程接口</p>
+                            </div>
+                            <div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900 p-6 rounded-lg">
+                                <h3 class="font-semibold mb-2 flex items-center">
+                                    <i class="fas fa-users mr-2 text-purple-500"></i>
+                                    多用户多任务
+                                </h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-300">支持多用户和多任务，支持安全的分层文件系统</p>
+                            </div>
+                            <div class="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900 dark:to-red-900 p-6 rounded-lg">
+                                <h3 class="font-semibold mb-2 flex items-center">
+                                    <i class="fas fa-tools mr-2 text-orange-500"></i>
+                                    功能完善
+                                </h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-300">大量的实用程序，完善的网络功能以及强大的支持文档</p>
+                            </div>
+                            <div class="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900 dark:to-cyan-900 p-6 rounded-lg md:col-span-2">
+                                <h3 class="font-semibold mb-2 flex items-center">
+                                    <i class="fas fa-shield-alt mr-2 text-teal-500"></i>
+                                    安全稳定
+                                </h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-300">可靠的安全性和良好的稳定性，对开发者更友好</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Linux系统发行版本 -->
+                <section id="distributions" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-layer-group mr-3 text-green-500"></i>
+                            Linux系统发行版本
+                        </h2>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div class="bg-red-50 dark:bg-red-900 p-4 rounded-lg text-center">
+                                <i class="fab fa-redhat text-3xl text-red-600 mb-2"></i>
+                                <h3 class="font-semibold">Redhat</h3>
+                            </div>
+                            <div class="bg-orange-50 dark:bg-orange-900 p-4 rounded-lg text-center">
+                                <i class="fab fa-ubuntu text-3xl text-orange-600 mb-2"></i>
+                                <h3 class="font-semibold">Ubuntu</h3>
+                            </div>
+                            <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg text-center">
+                                <i class="fab fa-centos text-3xl text-blue-600 mb-2"></i>
+                                <h3 class="font-semibold">CentOS</h3>
+                            </div>
+                            <div class="bg-indigo-50 dark:bg-indigo-900 p-4 rounded-lg text-center">
+                                <i class="fab fa-fedora text-3xl text-indigo-600 mb-2"></i>
+                                <h3 class="font-semibold">Fedora</h3>
+                            </div>
+                            <div class="bg-pink-50 dark:bg-pink-900 p-4 rounded-lg text-center">
+                                <i class="fab fa-debian text-3xl text-pink-600 mb-2"></i>
+                                <h3 class="font-semibold">Debian</h3>
+                            </div>
+                            <div class="bg-green-50 dark:bg-green-900 p-4 rounded-lg text-center">
+                                <i class="fab fa-suse text-3xl text-green-600 mb-2"></i>
+                                <h3 class="font-semibold">openSUSE</h3>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 文件系统 -->
+                <section id="filesystem" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-folder-tree mr-3 text-purple-500"></i>
+                            文件系统
+                        </h2>
+                        
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-file mr-2 text-blue-500"></i>
+                                文件和路径
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">命名规则</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">文件名的最大长度与文件系统类型有关，一般情况下，文件名不应该超过255个字符，虽然绝大多数的字符都可以用于文件名，但是最好使用英文大小写字母、数字、下划线、点这样的符号。文件名中虽然可以使用空格，但应该尽可能避免使用空格，否则在输入文件名时需要用将文件名放在双引号中或者通过`\`对空格进行转义。</p>
+                                </div>
+                                <div class="bg-green-50 dark:bg-green-900 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">扩展名</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">在Linux系统下文件的扩展名是可选的，但是使用扩展名有助于对文件内容的理解。有些应用程序要通过扩展名来识别文件，但是更多的应用程序并不依赖文件的扩展名，就像`file`命令在识别文件时并不是依据扩展名来判定文件的类型。</p>
+                                </div>
+                                <div class="bg-yellow-50 dark:bg-yellow-900 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">隐藏文件</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">以点开头的文件在Linux系统中是隐藏文件（不可见文件）。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-sitemap mr-2 text-purple-500"></i>
+                                目录结构
+                            </h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="space-y-2">
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/bin</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">基本命令的二进制文件</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/boot</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">引导加载程序的静态文件</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/dev</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">设备文件</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-yellow-50 dark:bg-yellow-900 rounded">
+                                        <code class="font-mono text-sm font-semibold text-yellow-600 w-16">/etc</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">配置文件</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/home</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">普通用户主目录的父目录</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/lib</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">共享库文件</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/lib64</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">共享64位库文件</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/media</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">自动识别设备的挂载目录</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/mnt</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">临时挂载文件系统的挂载点</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/opt</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">可选插件软件包安装位置</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/proc</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">内核和进程信息</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-red-50 dark:bg-red-900 rounded">
+                                        <code class="font-mono text-sm font-semibold text-red-600 w-16">/root</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">超级管理员用户主目录</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/run</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">存放系统运行时需要的东西</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/sbin</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">超级用户的二进制文件</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/sys</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">设备的伪文件系统</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/tmp</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">临时文件夹</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-green-50 dark:bg-green-900 rounded">
+                                        <code class="font-mono text-sm font-semibold text-green-600 w-16">/usr</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">用户应用目录</span>
+                                    </div>
+                                    <div class="flex items-center p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                                        <code class="font-mono text-sm font-semibold text-blue-600 w-16">/var</code>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">变量数据目录</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 基础命令 -->
+                <section id="basic-commands" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-terminal mr-3 text-red-500"></i>
+                            基础命令
+                        </h2>
+                        
+                        <div class="mb-6">
+                            <p class="text-gray-700 dark:text-gray-300 mb-4">Linux系统的命令通常都是如下所示的格式：</p>
+                            <div class="code-block p-4 mb-4">
+                                <code class="text-green-400">命令名称 [命名参数] [命令对象]</code>
+                            </div>
+                        </div>
+
+                        <div class="mb-8">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-question-circle mr-2 text-blue-500"></i>
+                                获取帮助
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">man命令 - 查看命令手册</h4>
+                                    <div class="code-block p-3 mb-3">
+                                        <code class="text-green-400">man ls</code>
+                                    </div>
+                                    <div class="overflow-x-auto">
+                                        <table class="w-full text-sm">
+                                            <thead>
+                                                <tr class="border-b border-gray-300 dark:border-gray-600">
+                                                    <th class="text-left py-2 px-3 font-semibold">手册标题</th>
+                                                    <th class="text-left py-2 px-3 font-semibold">功能说明</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody class="text-gray-600 dark:text-gray-300">
+                                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                                    <td class="py-2 px-3 font-mono">NAME</td>
+                                                    <td class="py-2 px-3">命令的说明和介绍</td>
+                                                </tr>
+                                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                                    <td class="py-2 px-3 font-mono">SYNOPSIS</td>
+                                                    <td class="py-2 px-3">使用该命令的基本语法</td>
+                                                </tr>
+                                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                                    <td class="py-2 px-3 font-mono">DESCRIPTION</td>
+                                                    <td class="py-2 px-3">使用该命令的详细描述，各个参数的作用</td>
+                                                </tr>
+                                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                                    <td class="py-2 px-3 font-mono">OPTIONS</td>
+                                                    <td class="py-2 px-3">命令相关参数选项的说明</td>
+                                                </tr>
+                                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                                    <td class="py-2 px-3 font-mono">EXAMPLES</td>
+                                                    <td class="py-2 px-3">使用该命令的参考例子</td>
+                                                </tr>
+                                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                                    <td class="py-2 px-3 font-mono">EXIT STATUS</td>
+                                                    <td class="py-2 px-3">命令结束的退出状态码，通常0表示成功执行</td>
+                                                </tr>
+                                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                                    <td class="py-2 px-3 font-mono">SEE ALSO</td>
+                                                    <td class="py-2 px-3">和命令相关的其他命令或信息</td>
+                                                </tr>
+                                                <tr class="border-b border-gray-200 dark:border-gray-700">
+                                                    <td class="py-2 px-3 font-mono">BUGS</td>
+                                                    <td class="py-2 px-3">和命令相关的缺陷的描述</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="py-2 px-3 font-mono">AUTHOR</td>
+                                                    <td class="py-2 px-3">该命令的作者介绍</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 文件操作 -->
+                <section id="file-operations" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-file-alt mr-3 text-indigo-500"></i>
+                            文件操作
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-plus-circle mr-2 text-blue-500"></i>
+                                    创建和删除文件/目录
+                                </h3>
+                                <div class="space-y-3">
+                                    <div>
+                                        <h4 class="font-semibold mb-2">mkdir - 创建目录</h4>
+                                        <div class="code-block p-3 mb-2">
+                                            <code class="text-green-400">mkdir test<br>mkdir -p a/b/c  # 递归创建目录</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-2">touch - 创建空白文件或修改文件时间</h4>
+                                        <div class="code-block p-3 mb-2">
+                                            <code class="text-green-400">touch newfile.txt</code>
+                                        </div>
+                                        <p class="text-sm text-gray-600 dark:text-gray-300">Linux系统中一个文件有三种时间：更改内容的时间(mtime)、更改权限的时间(ctime)、最后访问时间(atime)</p>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-2">rm - 删除文件和目录</h4>
+                                        <div class="code-block p-3 mb-2">
+                                            <code class="text-green-400">rm file.txt<br>rm -i file.txt  # 交互式删除<br>rm -r directory  # 递归删除目录<br>rm -f file.txt  # 强制删除</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-arrows-alt mr-2 text-green-500"></i>
+                                    切换和查看目录
+                                </h3>
+                                <div class="space-y-3">
+                                    <div>
+                                        <h4 class="font-semibold mb-2">cd - 切换目录</h4>
+                                        <div class="code-block p-3 mb-2">
+                                            <code class="text-green-400">cd /home/user  # 绝对路径<br>cd ../  # 返回上一级目录<br>cd ~  # 返回用户主目录</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-2">pwd - 显示当前工作目录</h4>
+                                        <div class="code-block p-3">
+                                            <code class="text-green-400">pwd</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-list mr-2 text-purple-500"></i>
+                                    查看目录内容
+                                </h3>
+                                <div>
+                                    <h4 class="font-semibold mb-2">ls - 列出目录内容</h4>
+                                    <div class="code-block p-3 mb-2">
+                                        <code class="text-green-400">ls  # 基本列表<br>ls -l  # 长格式显示<br>ls -a  # 显示隐藏文件<br>ls -R  # 递归显示<br>ls -d  # 只显示目录<br>ls -S  # 按大小排序<br>ls -t  # 按时间排序</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 文本处理 -->
+                <section id="text-processing" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-edit mr-3 text-teal-500"></i>
+                            文本处理
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900 dark:to-cyan-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-eye mr-2 text-teal-500"></i>
+                                    查看文件内容
+                                </h3>
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div>
+                                        <h4 class="font-semibold mb-2">cat / tac</h4>
+                                        <div class="code-block p-3 mb-2">
+                                            <code class="text-green-400">cat file.txt  # 正向显示<br>tac file.txt  # 反向显示</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-2">head / tail</h4>
+                                        <div class="code-block p-3 mb-2">
+                                            <code class="text-green-400">head -10 file.txt  # 前10行<br>tail -10 file.txt  # 后10行</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-2">more / less</h4>
+                                        <div class="code-block p-3 mb-2">
+                                            <code class="text-green-400">more file.txt  # 分页显示<br>less file.txt  # 更好的分页</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-2">rev / od</h4>
+                                        <div class="code-block p-3 mb-2">
+                                            <code class="text-green-400">rev file.txt  # 反转每行<br>od -c file.txt  # 八进制显示</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-orange-50 to-red-50 dark:from-orange-900 dark:to-red-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-compress-arrows-alt mr-2 text-orange-500"></i>
+                                    归档和压缩
+                                </h3>
+                                <div>
+                                    <h4 class="font-semibold mb-2">tar - 归档和解归档</h4>
+                                    <div class="code-block p-3 mb-2">
+                                        <code class="text-green-400"># 创建归档<br>tar -cvf archive.tar files/<br><br># 解归档<br>tar -xvf archive.tar<br><br># 创建压缩归档<br>tar -czvf archive.tar.gz files/<br><br># 解压缩归档<br>tar -xzvf archive.tar.gz</code>
+                                    </div>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300 mt-2">
+                                        参数说明：c(创建)、x(提取)、v(详细)、f(文件)、z(gzip压缩)
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900 dark:to-purple-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-exchange-alt mr-2 text-indigo-500"></i>
+                                    管道和重定向
+                                </h3>
+                                <div>
+                                    <h4 class="font-semibold mb-2">xargs - 将标准输入转成命令行参数</h4>
+                                    <div class="code-block p-3 mb-2">
+                                        <code class="text-green-400"># 查找并删除HTML文件<br>find . -type f -name "*.html" | xargs rm -f<br><br># 将多行内容变成一行<br>xargs &lt; a.txt &gt; b.txt</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 系统信息 -->
+                <section id="system-info" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-server mr-3 text-orange-500"></i>
+                            系统信息
+                        </h2>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+                                    系统基本信息
+                                </h3>
+                                <div class="space-y-3">
+                                    <div>
+                                        <h4 class="font-semibold mb-1">uname - 系统信息</h4>
+                                        <div class="code-block p-2 text-sm">
+                                            <code class="text-green-400">uname -a  # 所有信息</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">whoami - 当前用户</h4>
+                                        <div class="code-block p-2 text-sm">
+                                            <code class="text-green-400">whoami</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">date - 系统时间</h4>
+                                        <div class="code-block p-2 text-sm">
+                                            <code class="text-green-400">date</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-memory mr-2 text-green-500"></i>
+                                    资源监控
+                                </h3>
+                                <div class="space-y-3">
+                                    <div>
+                                        <h4 class="font-semibold mb-1">top - 进程监控</h4>
+                                        <div class="code-block p-2 text-sm">
+                                            <code class="text-green-400">top</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">ps - 进程列表</h4>
+                                        <div class="code-block p-2 text-sm">
+                                            <code class="text-green-400">ps aux</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold mb-1">df - 磁盘使用</h4>
+                                        <div class="code-block p-2 text-sm">
+                                            <code class="text-green-400">df -h</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 网络工具 -->
+                <section id="network-tools" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-network-wired mr-3 text-cyan-500"></i>
+                            网络工具
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900 dark:to-blue-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-download mr-2 text-cyan-500"></i>
+                                    网络下载
+                                </h3>
+                                <div>
+                                    <h4 class="font-semibold mb-2">wget - 网络下载工具</h4>
+                                    <div class="code-block p-3 mb-2">
+                                        <code class="text-green-400">wget http://example.com/file.zip<br>wget -b http://example.com/file.zip  # 后台下载<br>wget -O /path/to/save http://example.com/file.zip  # 指定保存路径<br>wget -r http://example.com/  # 递归下载</code>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-envelope mr-2 text-purple-500"></i>
+                                    邮件工具
+                                </h3>
+                                <div>
+                                    <h4 class="font-semibold mb-2">mail - 发送和接收邮件</h4>
+                                    <div class="code-block p-3">
+                                        <code class="text-green-400">mail user@example.com</code>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-900 dark:to-teal-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-network-wired mr-2 text-green-500"></i>
+                                    网络配置
+                                </h3>
+                                <div>
+                                    <h4 class="font-semibold mb-2">ifconfig - 网络配置工具（旧）</h4>
+                                    <div class="code-block p-3 mb-2">
+                                        <code class="text-green-400">ifconfig eth0</code>
+                                    </div>
+                                    <div class="code-block p-3 text-sm">
+                                        <code class="text-gray-300">eth0: flags=4163&lt;UP,BROADCAST,RUNNING,MULTICAST&gt;  mtu 1500<br>        inet 172.18.61.250  netmask 255.255.240.0  broadcast 172.18.63.255<br>        ether 00:16:3e:02:b6:46  txqueuelen 1000  (Ethernet)<br>        RX packets 1067841  bytes 1296732947 (1.2 GiB)<br>        RX errors 0  dropped 0  overruns 0  frame 0<br>        TX packets 409912  bytes 43569163 (41.5 MiB)<br>        TX errors 0  dropped 0 overruns 0  carrier 0  collisions</code>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Shell脚本 -->
+                <section id="shell-scripts" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-code mr-3 text-pink-500"></i>
+                            Shell脚本
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="bg-gradient-to-r from-pink-50 to-rose-50 dark:from-pink-900 dark:to-rose-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-file-code mr-2 text-pink-500"></i>
+                                    脚本示例1：自动创建文件夹和文件
+                                </h3>
+                                <div class="code-block p-4 text-sm overflow-x-auto">
+                                    <code class="text-gray-300">#!/usr/bin/bash<br>printf '输入文件夹名: '<br>read dir<br>printf '输入文件名: '<br>read file<br>printf '输入文件数量(&lt;1000): '<br>read num<br>if [ $num -ge 1000 ]<br>then<br>    echo '文件数量不能超过1000'<br>else<br>    if [ -e $dir -a -d $dir ]<br>    then<br>        rm -rf $dir<br>    else<br>        if [ -e $dir -a -f $dir ]<br>        then<br>            rm -f $dir<br>        fi<br>    fi<br>    mkdir -p $dir<br>    index=1<br>    while [ $index -le $num ]<br>    do<br>        if [ $index -lt 10 ]<br>        then<br>            pre='00'<br>        elif [ $index -lt 100 ]<br>        then<br>            pre='0'<br>        else<br>            pre=''<br>        fi<br>        touch $dir'/'$file'_'$pre$index<br>        index=$[ index + 1 ]<br>    done<br>fi</code>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900 dark:to-purple-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-download mr-2 text-indigo-500"></i>
+                                    脚本示例2：自动安装Redis
+                                </h3>
+                                <div class="code-block p-4 text-sm overflow-x-auto">
+                                    <code class="text-gray-300">#!/usr/bin/bash<br>install_redis() {<br>    if ! which redis-server > /dev/null<br>    then<br>        cd /root<br>        wget $1$2'.tar.gz' >> install.log<br>        gunzip /root/$2'.tar.gz'<br>        tar -xf /root/$2'.tar'<br>        cd /root/$2<br>        make >> install.log<br>        make install >> install.log<br>        echo '安装完成'<br>    else<br>        echo '已经安装过Redis'<br>    fi<br>}<br><br>install_redis 'http://download.redis.io/releases/' $1</code>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-yellow-50 to-orange-50 dark:from-yellow-900 dark:to-orange-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-lightbulb mr-2 text-yellow-500"></i>
+                                    Shell脚本要点
+                                </h3>
+                                <ul class="space-y-2 text-gray-700 dark:text-gray-300">
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                                        <span>脚本文件以 <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">#!/usr/bin/bash</code> 开头</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                                        <span>使用 <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">read</code> 命令读取用户输入</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                                        <span>使用 <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">if-then-else</code> 进行条件判断</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                                        <span>使用 <code class="bg-gray-200 dark:bg-gray-700 px-1 rounded">while</code> 循环处理重复任务</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fas fa-check-circle text-green-500 mr-2 mt-1"></i>
+                                        <span>函数定义和调用提高代码复用性</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 相关资源 -->
+                <section id="resources" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-book mr-3 text-gray-500"></i>
+                            相关资源
+                        </h2>
+                        
+                        <div class="bg-gradient-to-r from-gray-50 to-slate-50 dark:from-gray-800 dark:to-slate-800 p-6 rounded-lg">
+                            <h3 class="text-lg font-semibold mb-4 flex items-center">
+                                <i class="fas fa-keyboard mr-2 text-gray-500"></i>
+                                Linux命令行常用快捷键
+                            </h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="space-y-2">
+                                    <div class="flex justify-between items-center p-2 bg-white dark:bg-gray-700 rounded">
+                                        <kbd class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-sm">Ctrl + C</kbd>
+                                        <span class="text-sm">终止当前命令</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-2 bg-white dark:bg-gray-700 rounded">
+                                        <kbd class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-sm">Ctrl + D</kbd>
+                                        <span class="text-sm">退出当前Shell</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-2 bg-white dark:bg-gray-700 rounded">
+                                        <kbd class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-sm">Ctrl + L</kbd>
+                                        <span class="text-sm">清屏</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-2 bg-white dark:bg-gray-700 rounded">
+                                        <kbd class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-sm">Ctrl + A</kbd>
+                                        <span class="text-sm">光标移到行首</span>
+                                    </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex justify-between items-center p-2 bg-white dark:bg-gray-700 rounded">
+                                        <kbd class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-sm">Ctrl + E</kbd>
+                                        <span class="text-sm">光标移到行尾</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-2 bg-white dark:bg-gray-700 rounded">
+                                        <kbd class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-sm">↑ / ↓</kbd>
+                                        <span class="text-sm">历史命令</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-2 bg-white dark:bg-gray-700 rounded">
+                                        <kbd class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-sm">Tab</kbd>
+                                        <span class="text-sm">自动补全</span>
+                                    </div>
+                                    <div class="flex justify-between items-center p-2 bg-white dark:bg-gray-700 rounded">
+                                        <kbd class="bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded text-sm">Ctrl + R</kbd>
+                                        <span class="text-sm">搜索历史命令</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Floating TOC -->
+    <div class="floating-toc">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 max-w-xs">
+            <h3 class="text-sm font-semibold mb-2 text-gray-900 dark:text-white">快速导航</h3>
+            <div class="space-y-1 text-xs">
+                <a href="#overview" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">Linux概述</a>
+                <a href="#advantages" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">系统优点</a>
+                <a href="#distributions" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">发行版本</a>
+                <a href="#filesystem" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">文件系统</a>
+                <a href="#basic-commands" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">基础命令</a>
+                <a href="#file-operations" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">文件操作</a>
+                <a href="#text-processing" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">文本处理</a>
+                <a href="#system-info" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">系统信息</a>
+                <a href="#network-tools" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">网络工具</a>
+                <a href="#shell-scripts" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">Shell脚本</a>
+                <a href="#resources" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">相关资源</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 opacity-0 pointer-events-none">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        
+        // Check for saved theme preference or default to system preference
+        const savedTheme = localStorage.getItem('theme');
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        const currentTheme = savedTheme || systemTheme;
+        
+        html.setAttribute('data-theme', currentTheme);
+        if (currentTheme === 'dark') {
+            html.classList.add('dark');
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            const isDark = html.classList.contains('dark');
+            if (isDark) {
+                html.classList.remove('dark');
+                html.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // Mobile Menu Toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+        
+        menuToggle.addEventListener('click', () => {
+            sidebar.classList.toggle('-translate-x-full');
+        });
+
+        // Navigation
+        const navItems = document.querySelectorAll('.nav-item');
+        const sections = document.querySelectorAll('.section-content');
+        
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetSection = item.getAttribute('data-section');
+                
+                // Remove active class from all nav items and sections
+                navItems.forEach(nav => nav.classList.remove('active'));
+                sections.forEach(section => section.classList.remove('active'));
+                
+                // Add active class to clicked nav item and corresponding section
+                item.classList.add('active');
+                document.getElementById(targetSection).classList.add('active');
+                
+                // Close mobile menu
+                sidebar.classList.add('-translate-x-full');
+                
+                // Scroll to top
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+
+        // Scroll Indicator
+        const scrollIndicator = document.getElementById('scrollIndicator');
+        
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset;
+            const docHeight = document.body.offsetHeight - window.innerHeight;
+            const scrollPercent = scrollTop / docHeight;
+            scrollIndicator.style.transform = `scaleX(${scrollPercent})`;
+        });
+
+        // Back to Top Button
+        const backToTop = document.getElementById('backToTop');
+        
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTop.classList.remove('opacity-0', 'pointer-events-none');
+                backToTop.classList.add('opacity-100');
+            } else {
+                backToTop.classList.add('opacity-0', 'pointer-events-none');
+                backToTop.classList.remove('opacity-100');
+            }
+        });
+        
+        backToTop.addEventListener('click', () => {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Initialize first section as active
+        document.querySelector('[data-section="overview"]').classList.add('active');
+        
+        // Smooth scrolling for floating TOC
+        document.querySelectorAll('.floating-toc a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                const targetSection = targetId;
+                
+                // Update navigation
+                navItems.forEach(nav => nav.classList.remove('active'));
+                sections.forEach(section => section.classList.remove('active'));
+                
+                document.querySelector(`[data-section="${targetSection}"]`).classList.add('active');
+                document.getElementById(targetSection).classList.add('active');
+                
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+
+        // Add hover effects to content cards
+        document.querySelectorAll('.content-card').forEach(card => {
+            card.addEventListener('mouseenter', () => {
+                card.style.transform = 'translateY(-4px)';
+            });
+            
+            card.addEventListener('mouseleave', () => {
+                card.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>
