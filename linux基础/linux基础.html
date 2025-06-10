@@ -21,6 +21,9 @@
             --bg-primary: #ffffff;
             --bg-secondary: #f9fafb;
             --border-color: #e5e7eb;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
         }
 
         [data-theme="dark"] {
@@ -32,7 +35,9 @@
         }
 
         * {
-            font-family: 'Noto Sans SC', Tahoma, Arial, Roboto, "Droid Sans", "Helvetica Neue", "Droid Sans Fallback", "Heiti SC", "Hiragino Sans GB", Simsun, sans-serif;
+            font-family: 'Noto Sans SC', Tahoma, Arial, Roboto, "Droid Sans", 
+                         "Helvetica Neue", "Droid Sans Fallback", "Heiti SC", 
+                         "Hiragino Sans GB", Simsun, sans-serif;
         }
 
         body {
@@ -72,6 +77,7 @@
         .nav-item {
             transition: all 0.2s ease;
             border-left: 3px solid transparent;
+            position: relative;
         }
 
         .nav-item:hover {
@@ -85,16 +91,35 @@
             color: var(--primary-color);
         }
 
+        .nav-item.active::after {
+            content: '';
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 6px;
+            height: 6px;
+            background-color: var(--primary-color);
+            border-radius: 50%;
+        }
+
         .code-block {
             background-color: #1f2937;
             color: #f9fafb;
             border-radius: 8px;
             overflow-x: auto;
+            position: relative;
         }
 
         .dark .code-block {
             background-color: #0f172a;
         }
+
+        .code-container {
+            position: relative;
+        }
+
+
 
         .section-content {
             display: none;
@@ -110,19 +135,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .floating-toc {
-            position: fixed;
-            right: 2rem;
-            top: 50%;
-            transform: translateY(-50%);
-            z-index: 40;
-        }
 
-        @media (max-width: 1024px) {
-            .floating-toc {
-                display: none;
-            }
-        }
 
         .scroll-indicator {
             position: fixed;
@@ -135,6 +148,126 @@
             transform: scaleX(0);
             z-index: 50;
         }
+
+
+
+        /* 面包屑导航 */
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .breadcrumb-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .breadcrumb-separator {
+            color: var(--text-secondary);
+        }
+
+
+
+        /* 提示工具 */
+        .tooltip {
+            position: relative;
+            display: inline-block;
+        }
+
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 200px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 8px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -100px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 12px;
+        }
+
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        /* 响应式改进 */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 100%;
+                max-width: 320px;
+            }
+            
+            .nav-item {
+                padding: 16px;
+                font-size: 16px;
+            }
+            
+            .content-card {
+                margin: 16px;
+                padding: 16px;
+            }
+            
+            .code-block {
+                font-size: 14px;
+            }
+        }
+
+        /* 可访问性改进 */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        /* 焦点样式 */
+        .nav-item:focus,
+        button:focus,
+        input:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        /* 打印样式 */
+        @media print {
+            .sidebar,
+            .scroll-indicator,
+            header {
+                display: none !important;
+            }
+            
+            .section-content {
+                display: block !important;
+            }
+            
+            body {
+                font-size: 12pt;
+                line-height: 1.4;
+            }
+            
+            .content-card {
+                box-shadow: none;
+                border: 1px solid #ccc;
+                page-break-inside: avoid;
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -143,98 +276,163 @@
 
     <!-- Header -->
     <header class="sticky top-0 z-30 bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-700">
-        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
-            <div class="flex items-center space-x-3">
-                <i class="fab fa-linux text-3xl text-blue-600"></i>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Linux操作系统教程</h1>
+        <div class="container mx-auto px-4 py-4">
+            <div class="flex justify-between items-center mb-4">
+                <div class="flex items-center space-x-3">
+                    <i class="fab fa-linux text-3xl text-blue-600"></i>
+                    <h1 class="text-2xl font-bold text-gray-900 dark:text-white">Linux操作系统教程</h1>
+                </div>
+                <div class="flex items-center space-x-4">
+                    <button id="menuToggle" 
+                            class="lg:hidden p-2 rounded-lg bg-gray-100 dark:bg-gray-800 tooltip" 
+                            aria-label="打开菜单">
+                        <i class="fas fa-bars"></i>
+                        <span class="tooltiptext">打开导航菜单</span>
+                    </button>
+                </div>
             </div>
-            <div class="flex items-center space-x-4">
-                <button id="themeToggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
-                    <i class="fas fa-moon dark:hidden"></i>
-                    <i class="fas fa-sun hidden dark:inline"></i>
-                </button>
-                <button id="menuToggle" class="lg:hidden p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
-                    <i class="fas fa-bars"></i>
-                </button>
-            </div>
+            
+            <!-- 面包屑导航 -->
+            <nav class="breadcrumb" aria-label="面包屑导航">
+                <div class="breadcrumb-item">
+                    <i class="fas fa-home text-blue-500"></i>
+                    <span>首页</span>
+                </div>
+                <span class="breadcrumb-separator">/</span>
+                <div class="breadcrumb-item">
+                    <span id="currentSection">Linux概述</span>
+                </div>
+            </nav>
         </div>
     </header>
 
     <div class="flex">
         <!-- Sidebar -->
-        <aside id="sidebar" class="sidebar fixed lg:sticky top-16 left-0 w-80 h-screen overflow-y-auto z-20 transform -translate-x-full lg:translate-x-0 transition-transform">
-            <div class="p-6">
-                <h2 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">
-                    <i class="fas fa-list-ul mr-2"></i>目录导航
-                </h2>
-                <nav class="space-y-2">
-                    <a href="#overview" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="overview">
+        <aside id="sidebar" 
+               class="sidebar fixed lg:sticky top-16 left-0 w-80 h-screen 
+                      overflow-y-auto z-20 transform -translate-x-full 
+                      lg:translate-x-0 transition-transform">
+            <div class="p-6 relative">
+
+                
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-lg font-semibold text-gray-900 dark:text-white">
+                        <i class="fas fa-list-ul mr-2"></i>目录导航
+                    </h2>
+
+                </div>
+                
+
+                
+                <nav class="space-y-2" role="navigation" aria-label="主导航">
+                    <a href="#overview" 
+                       class="nav-item block px-4 py-3 rounded-lg cursor-pointer" 
+                       data-section="overview">
                         <i class="fas fa-info-circle mr-3 text-blue-500"></i>Linux概述
                     </a>
-                    <a href="#advantages" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="advantages">
+                    <a href="#advantages" 
+                       class="nav-item block px-4 py-3 rounded-lg cursor-pointer" 
+                       data-section="advantages">
                         <i class="fas fa-star mr-3 text-yellow-500"></i>系统优点
                     </a>
-                    <a href="#distributions" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="distributions">
+                    <a href="#distributions" 
+                       class="nav-item block px-4 py-3 rounded-lg cursor-pointer" 
+                       data-section="distributions">
                         <i class="fas fa-layer-group mr-3 text-green-500"></i>发行版本
                     </a>
-                    <a href="#filesystem" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="filesystem">
+                    <a href="#filesystem" 
+                       class="nav-item block px-4 py-3 rounded-lg cursor-pointer" 
+                       data-section="filesystem">
                         <i class="fas fa-folder-tree mr-3 text-purple-500"></i>文件系统
                     </a>
-                    <a href="#basic-commands" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="basic-commands">
+                    <a href="#basic-commands" 
+                       class="nav-item block px-4 py-3 rounded-lg cursor-pointer" 
+                       data-section="basic-commands">
                         <i class="fas fa-terminal mr-3 text-red-500"></i>基础命令
                     </a>
-                    <a href="#file-operations" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="file-operations">
+                    <a href="#file-operations" 
+                       class="nav-item block px-4 py-3 rounded-lg cursor-pointer" 
+                       data-section="file-operations">
                         <i class="fas fa-file-alt mr-3 text-indigo-500"></i>文件操作
                     </a>
-                    <a href="#text-processing" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="text-processing">
+                    <a href="#text-processing" 
+                       class="nav-item block px-4 py-3 rounded-lg cursor-pointer" 
+                       data-section="text-processing">
                         <i class="fas fa-edit mr-3 text-teal-500"></i>文本处理
                     </a>
-                    <a href="#system-info" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="system-info">
+                    <a href="#system-info" 
+                       class="nav-item block px-4 py-3 rounded-lg cursor-pointer" 
+                       data-section="system-info">
                         <i class="fas fa-server mr-3 text-orange-500"></i>系统信息
                     </a>
-                    <a href="#network-tools" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="network-tools">
+                    <a href="#network-tools" 
+                       class="nav-item block px-4 py-3 rounded-lg cursor-pointer" 
+                       data-section="network-tools">
                         <i class="fas fa-network-wired mr-3 text-cyan-500"></i>网络工具
                     </a>
-                    <a href="#user-management" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="user-management">
+                    <a href="#user-management" 
+                       class="nav-item block px-4 py-3 rounded-lg cursor-pointer" 
+                       data-section="user-management">
                         <i class="fas fa-users mr-3 text-blue-600"></i>用户管理
                     </a>
-                    <a href="#security-management" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="security-management">
+                    <a href="#security-management" 
+                       class="nav-item block px-4 py-3 rounded-lg cursor-pointer" 
+                       data-section="security-management">
                         <i class="fas fa-shield-alt mr-3 text-red-600"></i>安全管理
                     </a>
-                    <a href="#firewall-config" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="firewall-config">
+                    <a href="#firewall-config" 
+                       class="nav-item block px-4 py-3 rounded-lg cursor-pointer" 
+                       data-section="firewall-config">
                         <i class="fas fa-fire mr-3 text-orange-600"></i>防火墙配置
                     </a>
-                    <a href="#pipes-redirection" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="pipes-redirection">
-                        <i class="fas fa-exchange-alt mr-3 text-green-600"></i>管道和重定向
-                    </a>
-                    <a href="#aliases" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="aliases">
-                        <i class="fas fa-link mr-3 text-yellow-600"></i>别名
-                    </a>
-                    <a href="#vim-editor" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="vim-editor">
+                    <a href="#vim-editor" 
+                       class="nav-item block px-4 py-3 rounded-lg cursor-pointer" 
+                       data-section="vim-editor">
                         <i class="fas fa-edit mr-3 text-purple-600"></i>编辑器vim
                     </a>
-                    <a href="#software-installation" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="software-installation">
+                    <a href="#software-installation" 
+                       class="nav-item block px-4 py-3 rounded-lg cursor-pointer" 
+                       data-section="software-installation">
                         <i class="fas fa-download mr-3 text-indigo-600"></i>软件安装和配置
                     </a>
-                    <a href="#service-configuration" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="service-configuration">
+                    <a href="#service-config" 
+                       class="nav-item block px-4 py-3 rounded-lg cursor-pointer" 
+                       data-section="service-config">
                         <i class="fas fa-cogs mr-3 text-red-600"></i>配置服务
                     </a>
-                    <a href="#scheduled-tasks" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="scheduled-tasks">
+                    <a href="#scheduled-tasks" 
+                       class="nav-item block px-4 py-3 rounded-lg cursor-pointer" 
+                       data-section="scheduled-tasks">
                         <i class="fas fa-clock mr-3 text-orange-600"></i>计划任务
                     </a>
-                    <a href="#network-management" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="network-management">
+                    <a href="#network-access" 
+                       class="nav-item block px-4 py-3 rounded-lg cursor-pointer" 
+                       data-section="network-access">
                         <i class="fas fa-wifi mr-3 text-cyan-600"></i>网络访问和管理
                     </a>
-                    <a href="#process-management" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="process-management">
+                    <a href="#process-management" 
+                       class="nav-item block px-4 py-3 rounded-lg cursor-pointer" 
+                       data-section="process-management">
                         <i class="fas fa-tasks mr-3 text-pink-600"></i>进程管理
                     </a>
-                    <a href="#system-diagnosis" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="system-diagnosis">
+                    <a href="#system-diagnosis" 
+                       class="nav-item block px-4 py-3 rounded-lg cursor-pointer" 
+                       data-section="system-diagnosis">
                         <i class="fas fa-stethoscope mr-3 text-teal-600"></i>系统诊断
                     </a>
-                    <a href="#shell-scripts" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="shell-scripts">
-                        <i class="fas fa-code mr-3 text-gray-600"></i>Shell脚本
+                    <a href="#shell-scripts" 
+                       class="nav-item block px-4 py-3 rounded-lg cursor-pointer" 
+                       data-section="shell-scripts">
+                        <i class="fas fa-code mr-3 text-gray-500"></i>Shell脚本
                     </a>
-                    <a href="#resources" class="nav-item block px-4 py-3 rounded-lg cursor-pointer" data-section="resources">
+                    <a href="#learning-tips" 
+                       class="nav-item block px-4 py-3 rounded-lg cursor-pointer" 
+                       data-section="learning-tips">
+                        <i class="fas fa-lightbulb mr-3 text-yellow-500"></i>学习建议
+                    </a>
+                    <a href="#resources" 
+                       class="nav-item block px-4 py-3 rounded-lg cursor-pointer" 
+                       data-section="resources">
                         <i class="fas fa-book mr-3 text-gray-500"></i>相关资源
                     </a>
                 </nav>
@@ -281,7 +479,90 @@
                             <i class="fas fa-info-circle mr-3 text-blue-500"></i>
                             Linux概述
                         </h2>
+                        
+                        <!-- 操作系统发展史 -->
+                        <div class="mb-8">
+                            <h3 class="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+                                <i class="fas fa-history mr-2 text-indigo-500"></i>
+                                操作系统发展史
+                            </h3>
+                            <div class="prose prose-lg max-w-none">
+                                <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
+                                    只有硬件没有软件的计算机系统被称之为"裸机"，我们很难用"裸机"来完成计算机日常的工作（如存储和运算），所以必须用特定的软件来控制硬件的工作。最靠近计算机硬件的软件是系统软件，其中最为重要的就是"操作系统"。"操作系统"是控制和管理整个计算机硬件和软件资源、实现资源分配和任务调配、为系统用户以及其他软件提供接口和环境的程序的集合。
+                                </p>
+                                
+                                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg mb-6">
+                                    <h4 class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">没有操作系统（手工操作）</h4>
+                                    <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                        在计算机诞生之初没有操作系统的年代，人们先把程序纸带（或卡片）装上计算机，然后启动输入机把程序送入计算机，接着通过控制台开关启动程序运行。当程序执行完毕，打印机输出计算的结果，用户卸下并取走纸带（或卡片）。第二个用户上机，重复同样的步骤。在整个过程中用户独占机器，CPU等待手工操作，资源利用率极低。
+                                    </p>
+                                </div>
+                                
+                                <div class="bg-blue-50 dark:bg-blue-900 p-6 rounded-lg mb-6">
+                                    <h4 class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">批处理系统</h4>
+                                    <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                        首先启动计算机上的一个监督程序，在监督程序的控制下，计算机能够自动的、成批的处理一个或多个用户的作业。完成一批作业后，监督程度又从输入机读取作业存入磁带机。按照上面的步骤重复处理任务。监督程序不停的处理各个作业，实现了作业的自动转接，减少了作业的建立时间和手工操作时间，提高了计算机资源的利用率。批处理系统又可以分为单道批处理系统、多道批处理系统、联机批处理系统、脱机批处理系统。
+                                    </p>
+                                </div>
+                                
+                                <div class="bg-green-50 dark:bg-green-900 p-6 rounded-lg mb-6">
+                                    <h4 class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">分时系统和实时系统</h4>
+                                    <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                        分时系统是把处理器的运行时间分成很短的时间片，按时间片轮流把处理机分配给各联机作业使用。若某个作业在分配给它的时间片内不能完成其计算，则该作业暂时中断，把处理机让给另一作业使用，等待下一轮调度时再继续其运行。由于计算机速度很快，作业运行轮转得很快，给每个用户的感觉是他独占了一台计算机。而每个用户可以通过自己的终端向系统发出各种操作控制命令，在充分的人机交互情况下，完成作业的运行。为了解决分时系统不能及时响应用户指令的情况，又出现了能够在在严格的时间范围内完成事件处理，及时响应随机外部事件的实时系统。
+                                    </p>
+                                </div>
+                                
+                                <div class="bg-purple-50 dark:bg-purple-900 p-6 rounded-lg mb-6">
+                                    <h4 class="text-lg font-semibold mb-3 text-gray-800 dark:text-gray-200">通用操作系统发展历程</h4>
+                                    <div class="space-y-4">
+                                        <div class="border-l-4 border-blue-500 pl-4">
+                                            <p class="font-semibold text-gray-800 dark:text-gray-200">1960s</p>
+                                            <p class="text-gray-700 dark:text-gray-300">IBM的System/360系列的机器有了统一的操作系统OS/360。</p>
+                                        </div>
+                                        <div class="border-l-4 border-green-500 pl-4">
+                                            <p class="font-semibold text-gray-800 dark:text-gray-200">1965年</p>
+                                            <p class="text-gray-700 dark:text-gray-300">AT&T的贝尔实验室加入GE和MIT的合作计划开始开发MULTICS。</p>
+                                        </div>
+                                        <div class="border-l-4 border-yellow-500 pl-4">
+                                            <p class="font-semibold text-gray-800 dark:text-gray-200">1969年</p>
+                                            <p class="text-gray-700 dark:text-gray-300">MULTICS项目失败，Ken Tompson赋闲在家，为了玩"Space Travel"游戏用汇编语言在当时已经被淘汰的PDP-7上开发了Unics。</p>
+                                            <p class="text-sm text-gray-600 dark:text-gray-400 italic mt-2">注：很难想象，Unix这么伟大的系统，居然是一个赋闲在家的程序员（关键是老婆回娘家还带上了孩子）在一台被淘汰的设备上为了玩游戏开发出来的。</p>
+                                        </div>
+                                        <div class="border-l-4 border-red-500 pl-4">
+                                            <p class="font-semibold text-gray-800 dark:text-gray-200">1970年~1971年</p>
+                                            <p class="text-gray-700 dark:text-gray-300">Ken Tompson和Dennis Ritchie用B语言在PDP-11上重写了Unics，并在Brian Kernighan的建议下将其更名为Unix。</p>
+                                        </div>
+                                        <div class="border-l-4 border-indigo-500 pl-4">
+                                            <p class="font-semibold text-gray-800 dark:text-gray-200">1972年~1973年</p>
+                                            <p class="text-gray-700 dark:text-gray-300">Dennis Ritchie发明了C语言来取代可移植性较差的B语言，并开启了用C语言重写Unix的工作。</p>
+                                        </div>
+                                        <div class="border-l-4 border-pink-500 pl-4">
+                                            <p class="font-semibold text-gray-800 dark:text-gray-200">1974年</p>
+                                            <p class="text-gray-700 dark:text-gray-300">Unix推出了里程碑意义的第5版，几乎完全用C语言来实现。</p>
+                                        </div>
+                                        <div class="border-l-4 border-gray-500 pl-4">
+                                            <p class="font-semibold text-gray-800 dark:text-gray-200">1979年</p>
+                                            <p class="text-gray-700 dark:text-gray-300">从Unix第7版开始，AT&T发布新的使用条款，将Unix私有化。</p>
+                                        </div>
+                                        <div class="border-l-4 border-teal-500 pl-4">
+                                            <p class="font-semibold text-gray-800 dark:text-gray-200">1987年</p>
+                                            <p class="text-gray-700 dark:text-gray-300">Andrew S. Tanenbaum教授为了能在课堂上为学生讲解操作系统运作的细节，决定在不使用任何AT&T的源代码前提下，自行开发与Unix兼容的操作系统以避免版权上的争议，该系统被命名为Minix。</p>
+                                        </div>
+                                        <div class="border-l-4 border-orange-500 pl-4">
+                                            <p class="font-semibold text-gray-800 dark:text-gray-200">1991年</p>
+                                            <p class="text-gray-700 dark:text-gray-300">Linus Torvalds就读于芬兰赫尔辛基大学期间，尝试在Minix上做一些开发工作，但因为Minix只是作为教学用途的操作系统，功能并不强大，为了方便在学校的新闻组和邮件系统中读写和下载文件，Linus编写了磁盘驱动程序和文件系统，这些东西形成了Linux系统内核的雏形。</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Linux系统介绍 -->
                         <div class="prose prose-lg max-w-none">
+                            <h3 class="text-2xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+                                <i class="fab fa-linux mr-2 text-blue-500"></i>
+                                Linux系统介绍
+                            </h3>
                             <p class="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
                                 Linux是一个通用操作系统。一个操作系统要负责任务调度、内存分配、处理外围设备I/O等操作。操作系统通常由内核（运行其他程序，管理像磁盘、打印机等硬件设备的核心程序）和系统程序（设备驱动、底层库、shell、服务程序等）两部分组成。
                             </p>
@@ -328,7 +609,9 @@
                                 </h3>
                                 <p class="text-sm text-gray-600 dark:text-gray-300">大量的实用程序，完善的网络功能以及强大的支持文档</p>
                             </div>
-                            <div class="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900 dark:to-cyan-900 p-6 rounded-lg md:col-span-2">
+                            <div class="bg-gradient-to-r from-teal-50 to-cyan-50 
+                        dark:from-teal-900 dark:to-cyan-900 
+                        p-6 rounded-lg md:col-span-2">
                                 <h3 class="font-semibold mb-2 flex items-center">
                                     <i class="fas fa-shield-alt mr-2 text-teal-500"></i>
                                     安全稳定
@@ -636,8 +919,10 @@
                                 </h3>
                                 <div>
                                     <h4 class="font-semibold mb-2">ls - 列出目录内容</h4>
-                                    <div class="code-block p-3 mb-2">
-                                        <code class="text-green-400">ls  # 基本列表<br>ls -l  # 长格式显示<br>ls -a  # 显示隐藏文件<br>ls -R  # 递归显示<br>ls -d  # 只显示目录<br>ls -S  # 按大小排序<br>ls -t  # 按时间排序</code>
+                                    <div class="code-block">
+                                        <div class="p-3">
+                                            <code class="text-green-400">ls  # 基本列表<br>ls -l  # 长格式显示<br>ls -a  # 显示隐藏文件<br>ls -R  # 递归显示<br>ls -d  # 只显示目录<br>ls -S  # 按大小排序<br>ls -t  # 按时间排序</code>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -662,14 +947,18 @@
                                 <div class="grid md:grid-cols-2 gap-4">
                                     <div>
                                         <h4 class="font-semibold mb-2">cat / tac</h4>
-                                        <div class="code-block p-3 mb-2">
-                                            <code class="text-green-400">cat file.txt  # 正向显示<br>tac file.txt  # 反向显示</code>
+                                        <div class="code-block">
+                                            <div class="p-3">
+                                                <code class="text-green-400">cat file.txt  # 正向显示<br>tac file.txt  # 反向显示</code>
+                                            </div>
                                         </div>
                                     </div>
                                     <div>
                                         <h4 class="font-semibold mb-2">head / tail</h4>
-                                        <div class="code-block p-3 mb-2">
-                                            <code class="text-green-400">head -10 file.txt  # 前10行<br>tail -10 file.txt  # 后10行</code>
+                                        <div class="code-block">
+                                            <div class="p-3">
+                                                <code class="text-green-400">head -10 file.txt  # 前10行<br>tail -10 file.txt  # 后10行</code>
+                                            </div>
                                         </div>
                                     </div>
                                     <div>
@@ -694,8 +983,10 @@
                                 </h3>
                                 <div>
                                     <h4 class="font-semibold mb-2">tar - 归档和解归档</h4>
-                                    <div class="code-block p-3 mb-2">
-                                        <code class="text-green-400"># 创建归档<br>tar -cvf archive.tar files/<br><br># 解归档<br>tar -xvf archive.tar<br><br># 创建压缩归档<br>tar -czvf archive.tar.gz files/<br><br># 解压缩归档<br>tar -xzvf archive.tar.gz</code>
+                                    <div class="code-block">
+                                        <div class="p-3">
+                                            <code class="text-green-400"># 创建归档<br>tar -cvf archive.tar files/<br><br># 解归档<br>tar -xvf archive.tar<br><br># 创建压缩归档<br>tar -czvf archive.tar.gz files/<br><br># 解压缩归档<br>tar -xzvf archive.tar.gz</code>
+                                        </div>
                                     </div>
                                     <p class="text-sm text-gray-600 dark:text-gray-300 mt-2">
                                         参数说明：c(创建)、x(提取)、v(详细)、f(文件)、z(gzip压缩)
@@ -1242,23 +1533,23 @@ ipcs -s</code>
                                     <div>
                                         <h4 class="font-medium mb-2">useradd - 创建新用户</h4>
                                         <div class="code-block p-4">
-                                            <code># 创建基本用户
-                                            useradd username
-                                            
-                                            # 创建用户并指定主目录
-                                            useradd -d /home/custom_dir username
-                                            
-                                            # 创建用户并指定用户组
+                                            <code># 创建基本用户<br>
+                                            useradd username<br>
+                                            <br>
+                                            # 创建用户并指定主目录<br>
+                                            useradd -d /home/custom_dir username<br>
+                                            <br>
+                                            # 创建用户并指定用户组<br>
                                             useradd -g groupname username</code>
                                         </div>
                                     </div>
                                     <div>
                                         <h4 class="font-medium mb-2">userdel - 删除用户</h4>
                                         <div class="code-block p-4">
-                                            <code># 删除用户但保留主目录
-                                            userdel username
-                                            
-                                            # 删除用户及其主目录
+                                            <code># 删除用户但保留主目录<br>
+                                            userdel username<br>
+                                            <br>
+                                            # 删除用户及其主目录<br>
                                             userdel -r username</code>
                                         </div>
                                     </div>
@@ -1274,32 +1565,32 @@ ipcs -s</code>
                                     <div>
                                         <h4 class="font-medium mb-2">passwd - 修改用户密码</h4>
                                         <div class="code-block p-4">
-                                            <code># 修改当前用户密码
-                                            passwd
-                                            
-                                            # 修改指定用户密码
-                                            passwd username
-                                            
-                                            # 锁定用户账户
-                                            passwd -l username
-                                            
-                                            # 解锁用户账户
-                                            passwd -u username
-                                            
-                                            # 清除用户密码
+                                            <code># 修改当前用户密码<br>
+                                            passwd<br>
+                                            <br>
+                                            # 修改指定用户密码<br>
+                                            passwd username<br>
+                                            <br>
+                                            # 锁定用户账户<br>
+                                            passwd -l username<br>
+                                            <br>
+                                            # 解锁用户账户<br>
+                                            passwd -u username<br>
+                                            <br>
+                                            # 清除用户密码<br>
                                             passwd -d username</code>
                                         </div>
                                     </div>
                                     <div>
                                         <h4 class="font-medium mb-2">chage - 设置密码过期策略</h4>
                                         <div class="code-block p-4">
-                                            <code># 查看用户密码策略
-                                            chage -l username
-                                            
-                                            # 设置密码100天后过期，过期前15天通知，过期后7天禁用账户
-                                            chage -M 100 -W 15 -I 7 username
-                                            
-                                            # 设置密码立即过期（强制用户下次登录时修改密码）
+                                            <code># 查看用户密码策略<br>
+                                            chage -l username<br>
+                                            <br>
+                                            # 设置密码100天后过期，过期前15天通知，过期后7天禁用账户<br>
+                                            chage -M 100 -W 15 -I 7 username<br>
+                                            <br>
+                                            # 设置密码立即过期（强制用户下次登录时修改密码）<br>
                                             chage -d 0 username</code>
                                         </div>
                                     </div>
@@ -1315,26 +1606,26 @@ ipcs -s</code>
                                     <div>
                                         <h4 class="font-medium mb-2">groupadd / groupdel - 创建和删除用户组</h4>
                                         <div class="code-block p-4">
-                                            <code># 创建新用户组
-                                            groupadd groupname
-                                            
-                                            # 删除用户组
+                                            <code># 创建新用户组<br>
+                                            groupadd groupname<br>
+                                            <br>
+                                            # 删除用户组<br>
                                             groupdel groupname</code>
                                         </div>
                                     </div>
                                     <div>
                                         <h4 class="font-medium mb-2">usermod - 修改用户账户</h4>
                                         <div class="code-block p-4">
-                                            <code># 将用户添加到附加组
-                                            usermod -a -G groupname username
-                                            
-                                            # 修改用户主组
-                                            usermod -g groupname username
-                                            
-                                            # 修改用户登录Shell
-                                            usermod -s /bin/bash username
-                                            
-                                            # 修改用户主目录
+                                            <code># 将用户添加到附加组<br>
+                                            usermod -a -G groupname username<br>
+                                            <br>
+                                            # 修改用户主组<br>
+                                            usermod -g groupname username<br>
+                                            <br>
+                                            # 修改用户登录Shell<br>
+                                            usermod -s /bin/bash username<br>
+                                            <br>
+                                            # 修改用户主目录<br>
                                             usermod -d /new/home/dir username</code>
                                         </div>
                                     </div>
@@ -1350,42 +1641,42 @@ ipcs -s</code>
                                     <div>
                                         <h4 class="font-medium mb-2">su - 切换用户</h4>
                                         <div class="code-block p-4">
-                                            <code># 切换到root用户
-                                            su
-                                            
-                                            # 切换到指定用户
-                                            su username
-                                            
-                                            # 切换到指定用户并使用其环境
+                                            <code># 切换到root用户<br>
+                                            su<br>
+                                            <br>
+                                            # 切换到指定用户<br>
+                                            su username<br>
+                                            <br>
+                                            # 切换到指定用户并使用其环境<br>
                                             su - username</code>
                                         </div>
                                     </div>
                                     <div>
                                         <h4 class="font-medium mb-2">sudo - 以管理员身份执行命令</h4>
                                         <div class="code-block p-4">
-                                            <code># 以root权限执行命令
-                                            sudo command
-                                            
-                                            # 以指定用户身份执行命令
-                                            sudo -u username command
-                                            
-                                            # 编辑sudoers文件
+                                            <code># 以root权限执行命令<br>
+                                            sudo command<br>
+                                            <br>
+                                            # 以指定用户身份执行命令<br>
+                                            sudo -u username command<br>
+                                            <br>
+                                            # 编辑sudoers文件<br>
                                             visudo</code>
                                         </div>
                                     </div>
                                     <div>
                                         <h4 class="font-medium mb-2">id / groups - 查看用户信息</h4>
                                         <div class="code-block p-4">
-                                            <code># 显示当前用户ID和组信息
-                                            id
-                                            
-                                            # 显示指定用户ID和组信息
-                                            id username
-                                            
-                                            # 显示当前用户所属的组
-                                            groups
-                                            
-                                            # 显示指定用户所属的组
+                                            <code># 显示当前用户ID和组信息<br>
+                                            id<br>
+                                            <br>
+                                            # 显示指定用户ID和组信息<br>
+                                            id username<br>
+                                            <br>
+                                            # 显示当前用户所属的组<br>
+                                            groups<br>
+                                            <br>
+                                            # 显示指定用户所属的组<br>
                                             groups username</code>
                                         </div>
                                     </div>
@@ -1419,29 +1710,29 @@ ipcs -s</code>
                                     <div>
                                         <h4 class="font-medium mb-2">chmod - 修改文件权限</h4>
                                         <div class="code-block p-4">
-                                            <code># 使用数字模式修改权限
-                                            chmod 755 file.txt  # rwxr-xr-x
-                                            
-                                            # 使用符号模式修改权限
-                                            chmod u+x,g+w,o-r file.txt
-                                            
-                                            # 递归修改目录及其内容的权限
+                                            <code># 使用数字模式修改权限<br>
+                                            chmod 755 file.txt  # rwxr-xr-x<br>
+                                            <br>
+                                            # 使用符号模式修改权限<br>
+                                            chmod u+x,g+w,o-r file.txt<br>
+                                            <br>
+                                            # 递归修改目录及其内容的权限<br>
                                             chmod -R 750 directory/</code>
                                         </div>
                                     </div>
                                     <div>
                                         <h4 class="font-medium mb-2">chown / chgrp - 修改文件所有者和组</h4>
                                         <div class="code-block p-4">
-                                            <code># 修改文件所有者
-                                            chown username file.txt
-                                            
-                                            # 同时修改文件所有者和组
-                                            chown username:groupname file.txt
-                                            
-                                            # 递归修改目录及其内容的所有者
-                                            chown -R username:groupname directory/
-                                            
-                                            # 只修改文件所属组
+                                            <code># 修改文件所有者<br>
+                                            chown username file.txt<br>
+                                            <br>
+                                            # 同时修改文件所有者和组<br>
+                                            chown username:groupname file.txt<br>
+                                            <br>
+                                            # 递归修改目录及其内容的所有者<br>
+                                            chown -R username:groupname directory/<br>
+                                            <br>
+                                            # 只修改文件所属组<br>
                                             chgrp groupname file.txt</code>
                                         </div>
                                     </div>
@@ -1457,40 +1748,40 @@ ipcs -s</code>
                                     <div>
                                         <h4 class="font-medium mb-2">ssh - 安全远程连接</h4>
                                         <div class="code-block p-4">
-                                            <code># 连接到远程服务器
-                                            ssh username@hostname
-                                            
-                                            # 使用指定端口连接
-                                            ssh -p 2222 username@hostname
-                                            
-                                            # 使用密钥认证连接
+                                            <code># 连接到远程服务器<br>
+                                            ssh username@hostname<br>
+                                            <br>
+                                            # 使用指定端口连接<br>
+                                            ssh -p 2222 username@hostname<br>
+                                            <br>
+                                            # 使用密钥认证连接<br>
                                             ssh -i /path/to/private_key username@hostname</code>
                                         </div>
                                     </div>
                                     <div>
                                         <h4 class="font-medium mb-2">scp - 安全文件传输</h4>
                                         <div class="code-block p-4">
-                                            <code># 从本地复制文件到远程服务器
-                                            scp file.txt username@hostname:/remote/directory/
-                                            
-                                            # 从远程服务器复制文件到本地
-                                            scp username@hostname:/remote/file.txt /local/directory/
-                                            
-                                            # 递归复制目录
+                                            <code># 从本地复制文件到远程服务器<br>
+                                            scp file.txt username@hostname:/remote/directory/<br>
+                                            <br>
+                                            # 从远程服务器复制文件到本地<br>
+                                            scp username@hostname:/remote/file.txt /local/directory/<br>
+                                            <br>
+                                            # 递归复制目录<br>
                                             scp -r directory/ username@hostname:/remote/directory/</code>
                                         </div>
                                     </div>
                                     <div>
                                         <h4 class="font-medium mb-2">sftp - 安全文件传输协议</h4>
                                         <div class="code-block p-4">
-                                            <code># 连接到远程SFTP服务器
-                                            sftp username@hostname
-                                            
-                                            # SFTP常用命令
-                                            ls        # 列出远程目录内容
-                                            cd        # 切换远程目录
-                                            get file  # 下载文件
-                                            put file  # 上传文件
+                                            <code># 连接到远程SFTP服务器<br>
+                                            sftp username@hostname<br>
+                                            <br>
+                                            # SFTP常用命令<br>
+                                            ls        # 列出远程目录内容<br>
+                                            cd        # 切换远程目录<br>
+                                            get file  # 下载文件<br>
+                                            put file  # 上传文件<br>
                                             bye       # 退出SFTP</code>
                                         </div>
                                     </div>
@@ -1506,28 +1797,1151 @@ ipcs -s</code>
                                     <div>
                                         <h4 class="font-medium mb-2">last / lastb - 登录记录查看</h4>
                                         <div class="code-block p-4">
-                                            <code># 查看成功登录记录
-                                            last
-                                            
-                                            # 查看指定用户的登录记录
-                                            last username
-                                            
-                                            # 查看失败的登录尝试
+                                            <code># 查看成功登录记录<br>
+                                            last<br>
+                                            <br>
+                                            # 查看指定用户的登录记录<br>
+                                            last username<br>
+                                            <br>
+                                            # 查看失败的登录尝试<br>
                                             lastb</code>
                                         </div>
                                     </div>
                                     <div>
                                         <h4 class="font-medium mb-2">w / who - 当前登录用户</h4>
                                         <div class="code-block p-4">
-                                            <code># 显示当前登录用户及其活动
-                                            w
-                                            
-                                            # 显示当前登录用户
-                                            who
-                                            
-                                            # 显示当前用户名和登录时间
-                                            whoami
+                                            <code># 显示当前登录用户及其活动<br>
+                                            w<br>
+                                            <br>
+                                            # 显示当前登录用户<br>
+                                            who<br>
+                                            <br>
+                                            # 显示当前用户名和登录时间<br>
+                                            whoami<br>
                                             who am i</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- vim编辑器 -->
+                <section id="vim-editor" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-edit mr-3 text-purple-600"></i>
+                            vim编辑器
+                        </h2>
+                        
+                        <div class="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 p-6 rounded-lg mb-6">
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                vim是Linux系统中最强大的文本编辑器之一，具有丰富的功能和高度的可定制性。掌握vim的基本操作对于Linux系统管理和开发工作至关重要。
+                            </p>
+                        </div>
+                        
+                        <div class="grid gap-6">
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-play mr-2 text-green-500"></i>
+                                    启动和退出
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">启动vim</h4>
+                                        <div class="code-block p-4">
+                                            <code># 启动vim<br>
+vim<br>
+<br>
+# 打开指定文件<br>
+vim filename<br>
+<br>
+# 打开文件并跳转到指定行<br>
+vim +10 filename<br>
+<br>
+# 以只读模式打开文件<br>
+vim -R filename</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium mb-2">保存和退出</h4>
+                                        <div class="code-block p-4">
+                                            <code># 保存文件<br>
+:w<br>
+<br>
+# 另存为<br>
+:w filename<br>
+<br>
+# 退出vim<br>
+:q<br>
+<br>
+# 保存并退出<br>
+:wq 或 :x<br>
+<br>
+# 强制退出（不保存）<br>
+:q!</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-layer-group mr-2 text-blue-500"></i>
+                                    vim模式
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">三种主要模式</h4>
+                                        <ul class="space-y-2 text-gray-700 dark:text-gray-300 list-disc pl-5">
+                                            <li><strong>命令模式（Normal Mode）</strong>：默认模式，用于执行命令</li>
+                                            <li><strong>插入模式（Insert Mode）</strong>：用于输入文本</li>
+                                            <li><strong>可视模式（Visual Mode）</strong>：用于选择文本</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium mb-2">模式切换</h4>
+                                        <div class="code-block p-4">
+                                            <code># 进入插入模式<br>
+i    # 在光标前插入<br>
+a    # 在光标后插入<br>
+o    # 在下一行插入<br>
+O    # 在上一行插入<br>
+<br>
+# 返回命令模式<br>
+Esc<br>
+<br>
+# 进入可视模式<br>
+v    # 字符选择<br>
+V    # 行选择<br>
+Ctrl+v    # 块选择</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-mouse-pointer mr-2 text-yellow-500"></i>
+                                    光标移动
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">基本移动</h4>
+                                        <div class="code-block p-4">
+                                            <code># 方向键移动<br>
+h    # 左移<br>
+j    # 下移<br>
+k    # 上移<br>
+l    # 右移<br>
+<br>
+# 单词移动<br>
+w    # 移动到下一个单词开头<br>
+b    # 移动到上一个单词开头<br>
+e    # 移动到当前单词结尾<br>
+<br>
+# 行内移动<br>
+0    # 移动到行首<br>
+$    # 移动到行尾<br>
+^    # 移动到行首第一个非空字符</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium mb-2">快速跳转</h4>
+                                        <div class="code-block p-4">
+                                            <code># 文件内跳转<br>
+gg   # 跳转到文件开头<br>
+G    # 跳转到文件结尾<br>
+:n   # 跳转到第n行<br>
+Ctrl+f    # 向下翻页<br>
+Ctrl+b    # 向上翻页<br></code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-edit mr-2 text-red-500"></i>
+                                    文本编辑
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">删除操作</h4>
+                                        <div class="code-block p-4">
+                                            <code># 删除字符<br>
+x    # 删除光标处字符<br>
+X    # 删除光标前字符<br>
+<br>
+# 删除单词<br>
+dw   # 删除一个单词<br>
+dd   # 删除整行<br>
+D    # 删除到行尾<br>
+<br>
+# 删除多行<br>
+3dd  # 删除3行<br></code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium mb-2">复制和粘贴</h4>
+                                        <div class="code-block p-4">
+                                            <code># 复制<br>
+yy   # 复制当前行<br>
+3yy  # 复制3行<br>
+yw   # 复制一个单词<br>
+<br>
+# 粘贴<br>
+p    # 在光标后粘贴<br>
+P    # 在光标前粘贴<br>
+<br>
+# 剪切<br>
+dd   # 剪切当前行<br></code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-search mr-2 text-indigo-500"></i>
+                                    查找和替换
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">查找</h4>
+                                        <div class="code-block p-4">
+                                            <code># 向下查找<br>
+/pattern<br>
+<br>
+# 向上查找<br>
+?pattern<br>
+<br>
+# 查找下一个<br>
+n<br>
+<br>
+# 查找上一个<br>
+N<br></code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium mb-2">替换</h4>
+                                        <div class="code-block p-4">
+                                            <code># 替换当前行第一个匹配<br>
+:s/old/new/<br>
+<br>
+# 替换当前行所有匹配<br>
+:s/old/new/g<br>
+<br>
+# 替换全文所有匹配<br>
+:%s/old/new/g<br>
+<br>
+# 替换时确认<br>
+:%s/old/new/gc<br></code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 软件安装和配置 -->
+                <section id="software-installation" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-download mr-3 text-green-600"></i>
+                            软件安装和配置
+                        </h2>
+                        
+                        <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900/20 dark:to-emerald-900/20 p-6 rounded-lg mb-6">
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                Linux系统提供多种软件安装方式，包括包管理器、源代码编译安装等。掌握这些方法对于系统管理和软件部署非常重要。
+                            </p>
+                        </div>
+                        
+                        <div class="grid gap-6">
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-box mr-2 text-blue-500"></i>
+                                    包管理工具
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">yum包管理器（CentOS/RHEL）</h4>
+                                        <div class="code-block p-4">
+                                            <code># 安装软件包<br>
+yum install package_name<br>
+<br>
+# 卸载软件包<br>
+yum remove package_name<br>
+<br>
+# 更新软件包<br>
+yum update package_name<br>
+<br>
+# 更新所有软件包<br>
+yum update<br>
+<br>
+# 搜索软件包<br>
+yum search keyword<br>
+<br>
+# 查看软件包信息<br>
+yum info package_name<br>
+<br>
+# 列出已安装的软件包<br>
+yum list installed</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium mb-2">rpm包管理器</h4>
+                                        <div class="code-block p-4">
+                                            <code># 安装rpm包<br>
+rpm -ivh package.rpm<br>
+<br>
+# 卸载rpm包<br>
+rpm -e package_name<br>
+<br>
+# 查询已安装的包<br>
+rpm -qa<br>
+<br>
+# 查询包信息<br>
+rpm -qi package_name<br>
+<br>
+# 查询包文件列表<br>
+rpm -ql package_name<br></code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-code mr-2 text-purple-500"></i>
+                                    源代码编译安装
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">安装Python</h4>
+                                        <div class="code-block p-4">
+                                            <code># 下载Python源代码<br>
+wget https://www.python.org/ftp/python/3.9.1/Python-3.9.1.tgz<br>
+
+# 解压<br>
+tar -xzf Python-3.9.1.tgz<br>
+cd Python-3.9.1<br>
+<br>
+# 配置编译选项<br>
+./configure --prefix=/usr/local/python3 --enable-optimizations<br>
+<br>
+# 编译和安装<br>
+make && make install<br>
+<br>
+# 创建软链接<br>
+ln -s /usr/local/python3/bin/python3 /usr/bin/python3<br>
+ln -s /usr/local/python3/bin/pip3 /usr/bin/pip3</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium mb-2">安装Redis</h4>
+                                        <div class="code-block p-4">
+                                            <code># 下载Redis源代码<br>
+wget http://download.redis.io/releases/redis-6.2.1.tar.gz<br>
+<br>
+# 解压<br>
+tar -xzf redis-6.2.1.tar.gz<br>
+cd redis-6.2.1<br>
+<br>
+# 编译<br>
+make<br>
+<br>
+# 安装<br>
+make install<br>
+<br>
+# 创建配置目录<br>
+mkdir /etc/redis<br>
+cp redis.conf /etc/redis/<br>
+<br>
+# 启动Redis服务器<br>
+redis-server /etc/redis/redis.conf</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 配置服务 -->
+                <section id="service-config" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-cogs mr-3 text-blue-600"></i>
+                            配置服务
+                        </h2>
+                        
+                        <div class="bg-gradient-to-r from-blue-50 to-cyan-50 dark:from-blue-900/20 dark:to-cyan-900/20 p-6 rounded-lg mb-6">
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                Linux系统服务管理是系统管理的重要组成部分，包括启动、停止、重启服务以及设置开机自启动等操作。
+                            </p>
+                        </div>
+                        
+                        <div class="grid gap-6">
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-play-circle mr-2 text-green-500"></i>
+                                    systemctl命令
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">服务管理</h4>
+                                        <div class="code-block p-4">
+                                            <code># 启动服务<br>
+systemctl start service_name<br>
+<br>
+# 停止服务<br>
+systemctl stop service_name<br>
+<br>
+# 重启服务<br>
+systemctl restart service_name<br>
+<br>
+# 重新加载配置<br>
+systemctl reload service_name<br>
+<br>
+# 查看服务状态<br>
+systemctl status service_name<br>
+<br>
+# 查看所有服务状态<br>
+systemctl list-units --type=service</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium mb-2">开机自启动</h4>
+                                        <div class="code-block p-4">
+                                            <code># 启用开机自启动<br>
+systemctl enable service_name<br>
+<br>
+# 禁用开机自启动<br>
+systemctl disable service_name<br>
+<br>
+# 查看是否启用自启动<br>
+systemctl is-enabled service_name<br>
+<br>
+# 查看所有自启动服务<br>
+systemctl list-unit-files --type=service</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-file-alt mr-2 text-purple-500"></i>
+                                    创建自定义服务
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">服务文件示例</h4>
+                                        <div class="code-block p-4">
+                                            <code># 创建服务文件 /etc/systemd/system/myapp.service<br>
+[Unit]<br>
+Description=My Application<br>
+After=network.target<br>
+<br>
+[Service]<br>
+Type=simple<br>
+User=myuser<br>
+WorkingDirectory=/opt/myapp<br>
+ExecStart=/opt/myapp/start.sh<br>
+Restart=always<br>
+RestartSec=10<br>
+<br>
+[Install]<br>
+WantedBy=multi-user.target</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium mb-2">激活自定义服务</h4>
+                                        <div class="code-block p-4">
+                                            <code># 重新加载systemd配置<br>
+systemctl daemon-reload<br>
+<br>
+# 启动服务<br>
+systemctl start myapp<br>
+<br>
+# 启用开机自启动<br>
+systemctl enable myapp<br>
+<br>
+# 查看服务状态<br>
+systemctl status myapp</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 计划任务 -->
+                <section id="scheduled-tasks" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-clock mr-3 text-orange-600"></i>
+                            计划任务
+                        </h2>
+                        
+                        <div class="bg-gradient-to-r from-orange-50 to-amber-50 dark:from-orange-900/20 dark:to-amber-900/20 p-6 rounded-lg mb-6">
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                Linux提供了强大的任务调度功能，可以在指定时间自动执行命令或脚本，包括一次性任务和周期性任务。
+                            </p>
+                        </div>
+                        
+                        <div class="grid gap-6">
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-calendar-alt mr-2 text-blue-500"></i>
+                                    crontab定时任务
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">crontab命令</h4>
+                                        <div class="code-block p-4">
+                                            <code># 编辑当前用户的crontab<br>
+crontab -e<br>
+<br>
+# 查看当前用户的crontab<br>
+crontab -l<br>
+<br>
+# 删除当前用户的crontab<br>
+crontab -r<br>
+<br>
+# 编辑指定用户的crontab（需要root权限）<br>
+crontab -u username -e</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium mb-2">crontab时间格式</h4>
+                                        <div class="code-block p-4">
+                                            <code># 格式：分 时 日 月 周 命令<br>
+# *    *  *  *  *  command<br>
+# │    │  │  │  │<br>
+# │    │  │  │  └─── 星期几 (0-7, 0和7都表示周日)<br>
+# │    │  │  └────── 月份 (1-12)<br>
+# │    │  └───────── 日期 (1-31)<br>
+# │    └──────────── 小时 (0-23)<br>
+# └───────────────── 分钟 (0-59)<br>
+
+# 示例<br>
+0 2 * * * /backup.sh          # 每天凌晨2点执行备份<br>
+*/5 * * * * /check.sh          # 每5分钟执行一次检查<br>
+0 0 1 * * /monthly.sh          # 每月1号执行<br>
+0 9-17 * * 1-5 /workday.sh     # 工作日9-17点每小时执行</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-stopwatch mr-2 text-green-500"></i>
+                                    at一次性任务
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">at命令</h4>
+                                        <div class="code-block p-4">
+                                            <code># 在指定时间执行命令<br>
+at 14:30<br>
+at> echo "Hello World" > /tmp/hello.txt<br>
+at> Ctrl+D<br>
+
+# 在指定日期时间执行<br>
+at 2:30 PM tomorrow<br>
+at 10:00 AM 2023-12-25<br>
+<br>
+# 查看待执行的任务<br>
+atq<br>
+
+# 删除任务<br>
+atrm job_number</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 网络访问和管理 -->
+                <section id="network-access" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-network-wired mr-3 text-cyan-600"></i>
+                            网络访问和管理
+                        </h2>
+                        
+                        <div class="bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-900/20 dark:to-blue-900/20 p-6 rounded-lg mb-6">
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                Linux提供了丰富的网络工具，用于网络配置、连接测试、文件传输和网络监控等操作。
+                            </p>
+                        </div>
+                        
+                        <div class="grid gap-6">
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-terminal mr-2 text-green-500"></i>
+                                    远程连接
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">SSH远程登录</h4>
+                                        <div class="code-block p-4">
+                                            <code># 连接远程主机<br>
+ssh username@hostname<br>
+ssh username@192.168.1.100<br>
+<br>
+# 指定端口连接<br>
+ssh -p 2222 username@hostname<br>
+<br>
+# 使用密钥连接<br>
+ssh -i ~/.ssh/private_key username@hostname<br>
+<br>
+# 生成SSH密钥对<br>
+ssh-keygen -t rsa -b 4096<br>
+<br>
+# 复制公钥到远程主机<br>
+ssh-copy-id username@hostname</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-download mr-2 text-blue-500"></i>
+                                    文件下载和传输
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">wget下载文件</h4>
+                                        <div class="code-block p-4">
+                                            <code># 下载文件<br>
+wget http://example.com/file.zip<br>
+<br>
+# 后台下载<br>
+wget -b http://example.com/file.zip<br>
+<br>
+# 断点续传<br>
+wget -c http://example.com/file.zip<br>
+<br>
+# 下载整个网站<br>
+wget -r -p -np -k http://example.com/</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium mb-2">scp文件传输</h4>
+                                        <div class="code-block p-4">
+                                            <code># 上传文件到远程主机<br>
+scp local_file username@hostname:/remote/path/<br>
+<br>
+# 从远程主机下载文件<br>
+scp username@hostname:/remote/file /local/path/<br>
+<br>
+# 传输目录<br>
+scp -r local_dir username@hostname:/remote/path/<br>
+<br>
+# 指定端口传输<br>
+scp -P 2222 file username@hostname:/path/</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium mb-2">rsync同步</h4>
+                                        <div class="code-block p-4">
+                                            <code># 同步目录<br>
+rsync -av source/ destination/<br>
+<br>
+# 远程同步<br>
+rsync -av local_dir/ username@hostname:/remote/dir/<br>
+<br>
+# 删除目标中多余的文件<br>
+rsync -av --delete source/ destination/<br>
+<br>
+# 排除特定文件<br>
+rsync -av --exclude='*.log' source/ destination/</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-wifi mr-2 text-purple-500"></i>
+                                    网络配置和测试
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">网络接口配置</h4>
+                                        <div class="code-block p-4">
+                                            <code># 查看网络接口<br>
+ifconfig<br>
+ip addr show<br>
+<br>
+# 配置IP地址<br>
+ifconfig eth0 192.168.1.100 netmask 255.255.255.0<br>
+ip addr add 192.168.1.100/24 dev eth0<br>
+<br>
+# 启用/禁用网络接口<br>
+ifconfig eth0 up<br>
+ifconfig eth0 down<br>
+ip link set eth0 up<br>
+ip link set eth0 down</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium mb-2">网络连通性测试</h4>
+                                        <div class="code-block p-4">
+                                            <code># ping测试<br>
+ping google.com<br>
+ping -c 4 192.168.1.1<br>
+<br>
+# 路由跟踪<br>
+traceroute google.com<br>
+<br>
+# 端口连通性测试<br>
+telnet hostname 80<br>
+nc -zv hostname 80</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 进程管理 -->
+                <section id="process-management" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-tasks mr-3 text-red-600"></i>
+                            进程管理
+                        </h2>
+                        
+                        <div class="bg-gradient-to-r from-red-50 to-pink-50 dark:from-red-900/20 dark:to-pink-900/20 p-6 rounded-lg mb-6">
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                进程管理是Linux系统管理的核心技能，包括查看进程状态、控制进程执行、管理后台任务等操作。
+                            </p>
+                        </div>
+                        
+                        <div class="grid gap-6">
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-list mr-2 text-blue-500"></i>
+                                    查看进程
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">ps命令</h4>
+                                        <div class="code-block p-4">
+                                            <code># 查看当前用户进程<br>
+ps<br>
+<br>
+# 查看所有进程<br>
+ps aux<br>
+ps -ef<br>
+<br>
+# 查看进程树<br>
+ps auxf<br>
+pstree<br>
+<br>
+# 查找特定进程<br>
+ps aux | grep process_name<br>
+pgrep process_name</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium mb-2">top命令</h4>
+                                        <div class="code-block p-4">
+                                            <code># 实时查看进程<br>
+top<br>
+<br>
+# 查看特定用户的进程<br>
+top -u username<br>
+<br>
+# 按CPU使用率排序<br>
+top -o %CPU<br>
+
+# 按内存使用率排序<br>
+top -o %MEM</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-stop-circle mr-2 text-red-500"></i>
+                                    终止进程
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">kill命令</h4>
+                                        <div class="code-block p-4">
+                                            <code># 终止进程（SIGTERM）
+kill PID
+
+# 强制终止进程（SIGKILL）
+kill -9 PID
+kill -KILL PID
+
+# 按名称终止进程
+killall process_name
+pkill process_name
+
+# 查看可用信号
+kill -l</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-play mr-2 text-green-500"></i>
+                                    后台进程管理
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">后台运行</h4>
+                                        <div class="code-block p-4">
+                                            <code># 后台运行命令
+command &
+
+# 将当前进程放到后台
+Ctrl+Z
+bg
+
+# 查看后台任务
+jobs
+
+# 将后台任务调到前台
+fg %job_number
+
+# 让进程在后台继续运行
+bg %job_number</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium mb-2">nohup命令</h4>
+                                        <div class="code-block p-4">
+                                            <code># 忽略挂起信号运行命令
+nohup command &
+
+# 重定向输出
+nohup command > output.log 2>&1 &
+
+# 查看nohup输出
+tail -f nohup.out</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 系统诊断 -->
+                <section id="system-diagnosis" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-stethoscope mr-3 text-teal-600"></i>
+                            系统诊断
+                        </h2>
+                        
+                        <div class="bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20 p-6 rounded-lg mb-6">
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                系统诊断工具帮助管理员监控系统性能、诊断问题和优化系统运行状态。
+                            </p>
+                        </div>
+                        
+                        <div class="grid gap-6">
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-memory mr-2 text-blue-500"></i>
+                                    内存和CPU监控
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">内存使用情况</h4>
+                                        <div class="code-block p-4">
+                                            <code># 查看内存使用情况
+free -h
+
+# 实时监控内存
+watch -n 1 free -h
+
+# 查看虚拟内存统计
+vmstat
+vmstat 1 5  # 每秒显示一次，共5次</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium mb-2">CPU使用情况</h4>
+                                        <div class="code-block p-4">
+                                            <code># 查看CPU信息
+lscpu
+cat /proc/cpuinfo
+
+# 监控CPU使用率
+mpstat
+mpstat 1 5  # 每秒显示一次，共5次
+
+# 查看系统负载
+uptime
+w</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-hdd mr-2 text-green-500"></i>
+                                    磁盘I/O监控
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">磁盘使用情况</h4>
+                                        <div class="code-block p-4">
+                                            <code># 查看磁盘空间使用
+df -h
+
+# 查看目录大小
+du -sh /path/to/directory
+du -h --max-depth=1 /
+
+# 查看磁盘I/O统计
+iostat
+iostat -x 1 5  # 每秒显示一次，共5次</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-bug mr-2 text-red-500"></i>
+                                    系统日志和调试
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">系统日志</h4>
+                                        <div class="code-block p-4">
+                                            <code># 查看系统消息
+dmesg
+dmesg | tail
+
+# 查看系统日志
+journalctl
+journalctl -f  # 实时查看
+journalctl -u service_name  # 查看特定服务日志
+
+# 查看登录日志
+last
+lastb  # 查看失败登录</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium mb-2">进程调试</h4>
+                                        <div class="code-block p-4">
+                                            <code># 跟踪系统调用
+strace command
+strace -p PID
+
+# 查看进程内存映射
+pmap PID
+
+# 查看进程打开的文件
+lsof -p PID
+lsof /path/to/file</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Shell脚本 -->
+                <section id="shell-scripts" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-code mr-3 text-indigo-600"></i>
+                            Shell脚本
+                        </h2>
+                        
+                        <div class="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-900/20 dark:to-purple-900/20 p-6 rounded-lg mb-6">
+                            <p class="text-gray-700 dark:text-gray-300 leading-relaxed">
+                                Shell脚本是Linux系统自动化的重要工具，可以将多个命令组合成脚本文件，实现复杂的系统管理任务。
+                            </p>
+                        </div>
+                        
+                        <div class="grid gap-6">
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-file-code mr-2 text-blue-500"></i>
+                                    基础语法
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">脚本结构</h4>
+                                        <div class="code-block p-4">
+                                            <code>#!/bin/bash
+# 这是一个Shell脚本示例
+
+# 变量定义
+name="World"
+number=42
+
+# 输出
+echo "Hello, $name!"
+echo "Number is: $number"
+
+# 命令执行
+date
+whoami</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium mb-2">条件判断</h4>
+                                        <div class="code-block p-4">
+                                            <code>#!/bin/bash
+
+# if语句
+if [ $# -eq 0 ]; then
+    echo "没有提供参数"
+else
+    echo "参数个数: $#"
+fi
+
+# 文件判断
+if [ -f "/etc/passwd" ]; then
+    echo "文件存在"
+fi
+
+# 数值比较
+if [ $number -gt 10 ]; then
+    echo "数字大于10"
+fi</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-repeat mr-2 text-green-500"></i>
+                                    循环和函数
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">for循环</h4>
+                                        <div class="code-block p-4">
+                                            <code>#!/bin/bash
+
+# 遍历文件列表
+for file in *.txt; do
+    echo "处理文件: $file"
+done
+
+# 数字循环
+for i in {1..10}; do
+    echo "数字: $i"
+done
+
+# C风格循环
+for ((i=1; i<=10; i++)); do
+    echo "计数: $i"
+done</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium mb-2">函数定义</h4>
+                                        <div class="code-block p-4">
+                                            <code>#!/bin/bash
+
+# 函数定义
+backup_file() {
+    local source_file=$1
+    local backup_dir=$2
+    
+    if [ -f "$source_file" ]; then
+        cp "$source_file" "$backup_dir/"
+        echo "备份完成: $source_file"
+    else
+        echo "文件不存在: $source_file"
+    fi
+}
+
+# 调用函数
+backup_file "/etc/passwd" "/backup"</code>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-tools mr-2 text-purple-500"></i>
+                                    实用脚本示例
+                                </h3>
+                                <div class="space-y-4">
+                                    <div>
+                                        <h4 class="font-medium mb-2">系统监控脚本</h4>
+                                        <div class="code-block p-4">
+                                            <code>#!/bin/bash
+# 系统监控脚本
+
+echo "=== 系统监控报告 ==="
+echo "时间: $(date)"
+echo
+
+echo "=== CPU使用率 ==="
+top -bn1 | grep "Cpu(s)" | awk '{print $2}' | cut -d'%' -f1
+
+echo "=== 内存使用情况 ==="
+free -h
+
+echo "=== 磁盘使用情况 ==="
+df -h
+
+echo "=== 系统负载 ==="
+uptime</code>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-medium mb-2">自动备份脚本</h4>
+                                        <div class="code-block p-4">
+                                            <code>#!/bin/bash
+# 自动备份脚本
+
+SOURCE_DIR="/home/user/documents"
+BACKUP_DIR="/backup"
+DATE=$(date +%Y%m%d_%H%M%S)
+BACKUP_FILE="backup_$DATE.tar.gz"
+
+# 创建备份目录
+mkdir -p "$BACKUP_DIR"
+
+# 创建压缩备份
+tar -czf "$BACKUP_DIR/$BACKUP_FILE" "$SOURCE_DIR"
+
+if [ $? -eq 0 ]; then
+    echo "备份成功: $BACKUP_FILE"
+    # 删除7天前的备份
+    find "$BACKUP_DIR" -name "backup_*.tar.gz" -mtime +7 -delete
+else
+    echo "备份失败"
+    exit 1
+fi</code>
                                         </div>
                                     </div>
                                 </div>
@@ -1560,23 +2974,23 @@ ipcs -s</code>
                                     <div>
                                         <h4 class="font-medium mb-2">systemctl - 管理防火墙服务</h4>
                                         <div class="code-block p-4">
-                                            <code># 启动防火墙服务
-                                            systemctl start firewalld
-                                            
-                                            # 停止防火墙服务
-                                            systemctl stop firewalld
-                                            
-                                            # 重启防火墙服务
-                                            systemctl restart firewalld
-                                            
-                                            # 查看防火墙状态
-                                            systemctl status firewalld
-                                            
-                                            # 设置开机自启动
-                                            systemctl enable firewalld
-                                            
-                                            # 禁用开机自启动
-                                            systemctl disable firewalld</code>
+                                            <code># 启动防火墙服务<br>
+                                            systemctl start firewalld<br>
+                                            <br>
+                                            # 停止防火墙服务<br>
+                                            systemctl stop firewalld<br>
+                                            <br>
+                                            # 重启防火墙服务<br>
+                                            systemctl restart firewalld<br>
+                                            <br>
+                                            # 查看防火墙状态<br>
+                                            systemctl status firewalld<br>
+                                            <br>
+                                            # 设置开机自启动<br>
+                                            systemctl enable firewalld<br>
+                                            <br>
+                                            # 禁用开机自启动<br>
+                                            systemctl disable firewalld<br></code>
                                         </div>
                                     </div>
                                 </div>
@@ -1591,48 +3005,48 @@ ipcs -s</code>
                                     <div>
                                         <h4 class="font-medium mb-2">firewall-cmd - 防火墙配置工具</h4>
                                         <div class="code-block p-4">
-                                            <code># 查看防火墙状态
-                                            firewall-cmd --state
-                                            
-                                            # 查看活动区域
-                                            firewall-cmd --get-active-zones
-                                            
-                                            # 查看默认区域
-                                            firewall-cmd --get-default-zone
-                                            
-                                            # 设置默认区域
-                                            firewall-cmd --set-default-zone=public
-                                            
-                                            # 查看区域的所有设置
-                                            firewall-cmd --zone=public --list-all
-                                            
-                                            # 查看所有可用服务
-                                            firewall-cmd --get-services</code>
+                                            <code># 查看防火墙状态<br>
+                                            firewall-cmd --state<br>
+                                            <br>
+                                            # 查看活动区域<br>
+                                            firewall-cmd --get-active-zones<br>
+                                            <br>
+                                            # 查看默认区域<br>
+                                            firewall-cmd --get-default-zone<br>
+                                            <br>
+                                            # 设置默认区域<br>
+                                            firewall-cmd --set-default-zone=public<br>
+                                            <br>
+                                            # 查看区域的所有设置<br>
+                                            firewall-cmd --zone=public --list-all<br>
+                                            <br>
+                                            # 查看所有可用服务<br>
+                                            firewall-cmd --get-service<br></code>
                                         </div>
                                     </div>
                                     <div>
                                         <h4 class="font-medium mb-2">管理端口和服务</h4>
                                         <div class="code-block p-4">
-                                            <code># 临时开放端口
-                                            firewall-cmd --zone=public --add-port=80/tcp
-                                            
-                                            # 永久开放端口
-                                            firewall-cmd --permanent --zone=public --add-port=80/tcp
-                                            
-                                            # 临时关闭端口
-                                            firewall-cmd --zone=public --remove-port=80/tcp
-                                            
-                                            # 永久关闭端口
-                                            firewall-cmd --permanent --zone=public --remove-port=80/tcp
-                                            
-                                            # 临时开放服务
-                                            firewall-cmd --zone=public --add-service=http
-                                            
-                                            # 永久开放服务
-                                            firewall-cmd --permanent --zone=public --add-service=http
-                                            
-                                            # 重新加载防火墙配置
-                                            firewall-cmd --reload</code>
+                                            <code># 临时开放端口<br>
+                                            firewall-cmd --zone=public --add-port=80/tcp<br>
+                                            <br>
+                                            # 永久开放端口<br>
+                                            firewall-cmd --permanent --zone=public --add-port=80/tcp<br>
+                                            <br>
+                                            # 临时关闭端口<br>
+                                            firewall-cmd --zone=public --remove-port=80/tcp<br>
+                                            <br>
+                                            # 永久关闭端口<br>
+                                            firewall-cmd --permanent --zone=public --remove-port=80/tcp<br>
+                                            <br>
+                                            # 临时开放服务<br>
+                                            firewall-cmd --zone=public --add-service=http<br>
+                                            <br>
+                                            # 永久开放服务<br>
+                                            firewall-cmd --permanent --zone=public --add-service=http<br>
+                                            <br>
+                                            # 重新加载防火墙配置<br>
+                                            firewall-cmd --reload<br></code>
                                         </div>
                                     </div>
                                 </div>
@@ -1647,26 +3061,26 @@ ipcs -s</code>
                                     <div>
                                         <h4 class="font-medium mb-2">iptables - 传统防火墙工具</h4>
                                         <div class="code-block p-4">
-                                            <code># 查看当前规则
-                                            iptables -L
-                                            
-                                            # 查看详细规则（包含计数器和接口）
-                                            iptables -L -v
-                                            
-                                            # 添加允许规则
-                                            iptables -A INPUT -p tcp --dport 22 -j ACCEPT
-                                            
-                                            # 添加拒绝规则
-                                            iptables -A INPUT -p tcp --dport 23 -j DROP
-                                            
-                                            # 删除规则（按规则号）
-                                            iptables -D INPUT 1
-                                            
-                                            # 保存规则
-                                            iptables-save > /etc/iptables/rules.v4
-                                            
-                                            # 恢复规则
-                                            iptables-restore < /etc/iptables/rules.v4</code>
+                                            <code># 查看当前规则<br>
+                                            iptables -L<br>
+                                            <br>
+                                            # 查看详细规则（包含计数器和接口）<br>
+                                            iptables -L -v<br>
+                                            <br>
+                                            # 添加允许规则<br>
+                                            iptables -A INPUT -p tcp --dport 22 -j ACCEPT<br>
+                                            <br>
+                                            # 添加拒绝规则<br>
+                                            iptables -A INPUT -p tcp --dport 23 -j DROP<br>
+                                            <br>
+                                            # 删除规则（按规则号）<br>
+                                            iptables -D INPUT 1<br>
+                                            <br>
+                                            # 保存规则<br>
+                                            iptables-save > /etc/iptables/rules.v4<br>
+                                            <br>
+                                            # 恢复规则<br>
+                                            iptables-restore < /etc/iptables/rules.v4<br></code>
                                         </div>
                                     </div>
                                 </div>
@@ -1689,6 +3103,74 @@ ipcs -s</code>
                                             <li>定期备份防火墙配置</li>
                                             <li>使用永久规则（--permanent）确保系统重启后规则仍然有效</li>
                                         </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 学习建议 -->
+                <section id="learning-tips" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white flex items-center">
+                            <i class="fas fa-lightbulb mr-3 text-yellow-500"></i>
+                            学习建议
+                        </h2>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900 dark:to-indigo-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-graduation-cap mr-2 text-blue-500"></i>
+                                    初学者建议
+                                </h3>
+                                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                                    <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-1"></i>从基础命令开始，逐步掌握</li>
+                                    <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-1"></i>多动手实践，在虚拟机中练习</li>
+                                    <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-1"></i>理解文件系统和权限概念</li>
+                                    <li class="flex items-start"><i class="fas fa-check text-green-500 mr-2 mt-1"></i>学会使用man命令查看帮助</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-900 dark:to-emerald-900 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-exclamation-triangle mr-2 text-orange-500"></i>
+                                    常见错误
+                                </h3>
+                                <ul class="space-y-2 text-sm text-gray-600 dark:text-gray-300">
+                                    <li class="flex items-start"><i class="fas fa-times text-red-500 mr-2 mt-1"></i>忘记使用sudo执行管理员命令</li>
+                                    <li class="flex items-start"><i class="fas fa-times text-red-500 mr-2 mt-1"></i>路径错误，注意绝对路径和相对路径</li>
+                                    <li class="flex items-start"><i class="fas fa-times text-red-500 mr-2 mt-1"></i>文件权限不足，无法读写文件</li>
+                                    <li class="flex items-start"><i class="fas fa-times text-red-500 mr-2 mt-1"></i>命令参数顺序错误</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-6 bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900 dark:to-pink-900 p-6 rounded-lg">
+                            <h3 class="text-lg font-semibold mb-3 flex items-center">
+                                <i class="fas fa-rocket mr-2 text-purple-500"></i>
+                                进阶学习路径
+                            </h3>
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div class="text-center">
+                                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+                                        <i class="fas fa-terminal text-2xl text-blue-500 mb-2"></i>
+                                        <h4 class="font-semibold">Shell编程</h4>
+                                        <p class="text-xs text-gray-600 dark:text-gray-400">学习Bash脚本编写</p>
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+                                        <i class="fas fa-server text-2xl text-green-500 mb-2"></i>
+                                        <h4 class="font-semibold">系统管理</h4>
+                                        <p class="text-xs text-gray-600 dark:text-gray-400">服务器配置和维护</p>
+                                    </div>
+                                </div>
+                                <div class="text-center">
+                                    <div class="bg-white dark:bg-gray-800 p-4 rounded-lg shadow">
+                                        <i class="fas fa-network-wired text-2xl text-purple-500 mb-2"></i>
+                                        <h4 class="font-semibold">网络配置</h4>
+                                        <p class="text-xs text-gray-600 dark:text-gray-400">网络服务和安全</p>
                                     </div>
                                 </div>
                             </div>
@@ -1865,61 +3347,12 @@ ipcs -s</code>
         </main>
     </div>
 
-    <!-- Floating TOC -->
-    <div class="floating-toc">
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 max-w-xs">
-            <h3 class="text-sm font-semibold mb-2 text-gray-900 dark:text-white">快速导航</h3>
-            <div class="space-y-1 text-xs">
-                <a href="#overview" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">Linux概述</a>
-                <a href="#advantages" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">系统优点</a>
-                <a href="#distributions" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">发行版本</a>
-                <a href="#filesystem" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">文件系统</a>
-                <a href="#basic-commands" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">基础命令</a>
-                <a href="#file-operations" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">文件操作</a>
-                <a href="#text-processing" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">文本处理</a>
-                <a href="#system-info" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">系统信息</a>
-                <a href="#network-tools" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">网络工具</a>
-                <a href="#user-management" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">用户管理</a>
-                <a href="#security-management" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">安全管理</a>
-                <a href="#firewall-config" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">防火墙配置</a>
-                <a href="#shell-scripts" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">Shell脚本</a>
-                <a href="#resources" class="block text-blue-600 hover:text-blue-800 dark:text-blue-400">相关资源</a>
-            </div>
-        </div>
-    </div>
 
-    <!-- Back to Top Button -->
-    <button id="backToTop" class="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-all duration-300 opacity-0 pointer-events-none">
-        <i class="fas fa-arrow-up"></i>
-    </button>
+
+
 
     <script>
-        // Theme Toggle
-        const themeToggle = document.getElementById('themeToggle');
-        const html = document.documentElement;
-        
-        // Check for saved theme preference or default to system preference
-        const savedTheme = localStorage.getItem('theme');
-        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        const currentTheme = savedTheme || systemTheme;
-        
-        html.setAttribute('data-theme', currentTheme);
-        if (currentTheme === 'dark') {
-            html.classList.add('dark');
-        }
-        
-        themeToggle.addEventListener('click', () => {
-            const isDark = html.classList.contains('dark');
-            if (isDark) {
-                html.classList.remove('dark');
-                html.setAttribute('data-theme', 'light');
-                localStorage.setItem('theme', 'light');
-            } else {
-                html.classList.add('dark');
-                html.setAttribute('data-theme', 'dark');
-                localStorage.setItem('theme', 'dark');
-            }
-        });
+
 
         // Mobile Menu Toggle
         const menuToggle = document.getElementById('menuToggle');
@@ -1936,21 +3369,32 @@ ipcs -s</code>
         navItems.forEach(item => {
             item.addEventListener('click', (e) => {
                 e.preventDefault();
-                const targetSection = item.getAttribute('data-section');
+                let targetSection = item.getAttribute('data-section');
                 
-                // Remove active class from all nav items and sections
-                navItems.forEach(nav => nav.classList.remove('active'));
-                sections.forEach(section => section.classList.remove('active'));
+                // 如果data-section对应的元素不存在，尝试使用href属性
+                if (!document.getElementById(targetSection)) {
+                    const href = item.getAttribute('href');
+                    if (href && href.startsWith('#')) {
+                        targetSection = href.substring(1);
+                    }
+                }
                 
-                // Add active class to clicked nav item and corresponding section
-                item.classList.add('active');
-                document.getElementById(targetSection).classList.add('active');
-                
-                // Close mobile menu
-                sidebar.classList.add('-translate-x-full');
-                
-                // Scroll to top
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                // 只有当目标section存在时才进行切换
+                if (document.getElementById(targetSection)) {
+                    // Remove active class from all nav items and sections
+                    navItems.forEach(nav => nav.classList.remove('active'));
+                    sections.forEach(section => section.classList.remove('active'));
+                    
+                    // Add active class to clicked nav item and corresponding section
+                    item.classList.add('active');
+                    document.getElementById(targetSection).classList.add('active');
+                    
+                    // Close mobile menu
+                    sidebar.classList.add('-translate-x-full');
+                    
+                    // Scroll to top
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
             });
         });
 
@@ -1964,22 +3408,7 @@ ipcs -s</code>
             scrollIndicator.style.transform = `scaleX(${scrollPercent})`;
         });
 
-        // Back to Top Button
-        const backToTop = document.getElementById('backToTop');
-        
-        window.addEventListener('scroll', () => {
-            if (window.pageYOffset > 300) {
-                backToTop.classList.remove('opacity-0', 'pointer-events-none');
-                backToTop.classList.add('opacity-100');
-            } else {
-                backToTop.classList.add('opacity-0', 'pointer-events-none');
-                backToTop.classList.remove('opacity-100');
-            }
-        });
-        
-        backToTop.addEventListener('click', () => {
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        });
+
 
         // Initialize first section as active
         document.querySelector('[data-section="overview"]').classList.add('active');
@@ -2010,6 +3439,22 @@ ipcs -s</code>
             
             card.addEventListener('mouseleave', () => {
                 card.style.transform = 'translateY(0)';
+            });
+        });
+        
+
+        
+
+        
+        // 监听章节切换
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                
+                // 更新面包屑
+                const currentSection = document.getElementById('currentSection');
+                if (currentSection) {
+                    currentSection.textContent = item.textContent.trim();
+                }
             });
         });
     </script>
