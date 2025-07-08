@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kubernetes进阶实践 - 第三天学习教程</title>
+    
+    <!-- External CSS -->
+    <link href="https://cdn.staticfile.org/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.staticfile.org/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --secondary-color: #1e40af;
+            --accent-color: #3b82f6;
+            --text-primary: #1f2937;
+            --text-secondary: #6b7280;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f9fafb;
+            --border-color: #e5e7eb;
+        }
+
+        [data-theme="dark"] {
+            --text-primary: #f9fafb;
+            --text-secondary: #d1d5db;
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --border-color: #374151;
+        }
+
+        * {
+            font-family: 'Noto Sans SC', Tahoma, Arial, Roboto, "Droid Sans", "Helvetica Neue", "Droid Sans Fallback", "Heiti SC", "Hiragino Sans GB", Simsun, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .hero-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .dark .hero-gradient {
+            background: linear-gradient(135deg, #4c1d95 0%, #1e1b4b 100%);
+        }
+
+        .content-card {
+            background-color: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .content-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+
+        .dark .content-card:hover {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .nav-item {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .nav-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .code-block {
+            background-color: #1e293b;
+            color: #e2e8f0;
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        .dark .code-block {
+            background-color: #0f172a;
+        }
+
+        .section-content {
+            display: none;
+        }
+
+        .section-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .floating-toc {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 40;
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        @media (max-width: 1024px) {
+            .floating-toc {
+                display: none;
+            }
+        }
+
+        .scroll-indicator {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            transform-origin: left;
+            transform: scaleX(0);
+            z-index: 50;
+        }
+    </style>
+</head>
+<body class="transition-colors duration-300">
+    <!-- Scroll Indicator -->
+    <div class="scroll-indicator" id="scrollIndicator"></div>
+
+    <!-- Header -->
+    <header class="sticky top-0 z-30 bg-white dark:bg-gray-900 shadow-lg border-b border-gray-200 dark:border-gray-700">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <i class="fab fa-kubernetes text-3xl text-blue-600"></i>
+                <h1 class="text-2xl font-bold text-gray-800 dark:text-white">Kubernetes进阶实践</h1>
+            </div>
+            <button id="themeToggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                <i class="fas fa-moon dark:hidden"></i>
+                <i class="fas fa-sun hidden dark:inline"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient text-white py-20">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-5xl md:text-6xl font-bold mb-6">
+                <i class="fas fa-rocket mr-4"></i>
+                Kubernetes进阶实践
+            </h1>
+            <p class="text-xl md:text-2xl mb-8 opacity-90">第三天 - 深入掌握K8s核心技术</p>
+            <div class="flex flex-wrap justify-center gap-4 text-sm">
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                    <i class="fas fa-database mr-2"></i>ETCD数据访问
+                </span>
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                    <i class="fas fa-network-wired mr-2"></i>集群网络模型
+                </span>
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                    <i class="fas fa-shield-alt mr-2"></i>认证与授权
+                </span>
+                <span class="bg-white bg-opacity-20 px-4 py-2 rounded-full">
+                    <i class="fas fa-helm mr-2"></i>Helm管理
+                </span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 py-12">
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- Sidebar Navigation -->
+            <aside class="lg:w-1/4">
+                <div class="content-card rounded-xl p-6 sticky top-24">
+                    <h3 class="text-xl font-bold mb-6 flex items-center">
+                        <i class="fas fa-list-ul mr-3 text-blue-600"></i>
+                        课程目录
+                    </h3>
+                    <nav class="space-y-2">
+                        <div class="nav-item active px-4 py-3 rounded-lg text-sm font-medium" data-section="overview">
+                            <i class="fas fa-eye mr-2"></i>课程概览
+                        </div>
+                        <div class="nav-item px-4 py-3 rounded-lg text-sm font-medium" data-section="etcd">
+                            <i class="fas fa-database mr-2"></i>ETCD数据访问
+                        </div>
+                        <div class="nav-item px-4 py-3 rounded-lg text-sm font-medium" data-section="scheduler">
+                            <i class="fas fa-cogs mr-2"></i>调度策略实践
+                        </div>
+                        <div class="nav-item px-4 py-3 rounded-lg text-sm font-medium" data-section="network">
+                            <i class="fas fa-network-wired mr-2"></i>集群网络模型
+                        </div>
+                        <div class="nav-item px-4 py-3 rounded-lg text-sm font-medium" data-section="auth">
+                            <i class="fas fa-shield-alt mr-2"></i>认证与授权
+                        </div>
+                        <div class="nav-item px-4 py-3 rounded-lg text-sm font-medium" data-section="helm">
+                            <i class="fab fa-helm mr-2"></i>Helm管理
+                        </div>
+                        <div class="nav-item px-4 py-3 rounded-lg text-sm font-medium" data-section="storage">
+                            <i class="fas fa-hdd mr-2"></i>分布式存储
+                        </div>
+                        <div class="nav-item px-4 py-3 rounded-lg text-sm font-medium" data-section="metrics">
+                            <i class="fas fa-chart-line mr-2"></i>Metrics Server
+                        </div>
+                        <div class="nav-item px-4 py-3 rounded-lg text-sm font-medium" data-section="summary">
+                            <i class="fas fa-graduation-cap mr-2"></i>课程小结
+                        </div>
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="lg:w-3/4">
+                <!-- Overview Section -->
+                <section id="overview" class="section-content active">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 flex items-center">
+                            <i class="fas fa-eye mr-4 text-blue-600"></i>
+                            第三天 Kubernetes进阶实践
+                        </h2>
+                        <p class="text-lg mb-6 leading-relaxed">
+                            本章介绍Kubernetes的进阶内容，包含Kubernetes集群调度、CNI插件、认证授权安全体系、分布式存储的对接、Helm的使用等，让学员可以更加深入的学习Kubernetes的核心内容。
+                        </p>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-blue-900 dark:to-indigo-900 p-6 rounded-lg">
+                                <h4 class="font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-database mr-2 text-blue-600"></i>
+                                    数据与调度
+                                </h4>
+                                <ul class="space-y-2 text-sm">
+                                    <li>• ETCD数据的访问</li>
+                                    <li>• kube-scheduler调度策略实践</li>
+                                    <li>• 预选与优选流程</li>
+                                    <li>• 生产中常用的调度配置实践</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="bg-gradient-to-br from-green-50 to-emerald-100 dark:from-green-900 dark:to-emerald-900 p-6 rounded-lg">
+                                <h4 class="font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-network-wired mr-2 text-green-600"></i>
+                                    网络与安全
+                                </h4>
+                                <ul class="space-y-2 text-sm">
+                                    <li>• CNI介绍及集群网络选型</li>
+                                    <li>• Flannel网络模型的实现</li>
+                                    <li>• APIServer安全控制模型</li>
+                                    <li>• RBAC权限管理</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="bg-gradient-to-br from-purple-50 to-violet-100 dark:from-purple-900 dark:to-violet-900 p-6 rounded-lg">
+                                <h4 class="font-semibold mb-3 flex items-center">
+                                    <i class="fab fa-helm mr-2 text-purple-600"></i>
+                                    应用管理
+                                </h4>
+                                <ul class="space-y-2 text-sm">
+                                    <li>• Helm工作原理详解</li>
+                                    <li>• Helm的模板开发</li>
+                                    <li>• 使用Helm部署Harbor仓库</li>
+                                </ul>
+                            </div>
+                            
+                            <div class="bg-gradient-to-br from-orange-50 to-red-100 dark:from-orange-900 dark:to-red-900 p-6 rounded-lg">
+                                <h4 class="font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-hdd mr-2 text-orange-600"></i>
+                                    存储与监控
+                                </h4>
+                                <ul class="space-y-2 text-sm">
+                                    <li>• PV、PVC介绍</li>
+                                    <li>• 对接CephFS分布式存储</li>
+                                    <li>• StorageClass动态存储卷</li>
+                                    <li>• Metrics Server监控</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ETCD Section -->
+                <section id="etcd" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 flex items-center">
+                            <i class="fas fa-database mr-4 text-blue-600"></i>
+                            ETCD数据的访问
+                        </h2>
+                        <p class="text-lg mb-6 leading-relaxed">
+                            ETCD是Kubernetes集群的核心数据存储，所有的集群状态信息都存储在ETCD中。理解ETCD的数据结构和访问方式对于深入理解Kubernetes至关重要。
+                        </p>
+                        
+                        <div class="bg-yellow-50 dark:bg-yellow-900 border-l-4 border-yellow-400 p-4 mb-6">
+                            <div class="flex">
+                                <i class="fas fa-lightbulb text-yellow-400 mr-3 mt-1"></i>
+                                <div>
+                                    <p class="font-semibold">重要提示</p>
+                                    <p class="text-sm mt-1">直接操作ETCD数据需要谨慎，建议在测试环境中进行学习和实验。</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Scheduler Section -->
+                <section id="scheduler" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 flex items-center">
+                            <i class="fas fa-cogs mr-4 text-green-600"></i>
+                            kube-scheduler调度策略实践
+                        </h2>
+                        
+                        <div class="space-y-8">
+                            <div>
+                                <h3 class="text-2xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-filter mr-3 text-blue-500"></i>
+                                    预选与优选流程
+                                </h3>
+                                <p class="mb-4 leading-relaxed">
+                                    Kubernetes调度器通过两个主要阶段来为Pod选择最合适的节点：预选（Filtering）和优选（Scoring）。
+                                </p>
+                                
+                                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                                    <div class="bg-blue-50 dark:bg-blue-900 p-6 rounded-lg">
+                                        <h4 class="font-semibold mb-3 text-blue-700 dark:text-blue-300">预选阶段（Filtering）</h4>
+                                        <ul class="space-y-2 text-sm">
+                                            <li>• 过滤不满足Pod要求的节点</li>
+                                            <li>• 检查资源需求（CPU、内存）</li>
+                                            <li>• 验证节点选择器</li>
+                                            <li>• 检查污点和容忍度</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="bg-green-50 dark:bg-green-900 p-6 rounded-lg">
+                                        <h4 class="font-semibold mb-3 text-green-700 dark:text-green-300">优选阶段（Scoring）</h4>
+                                        <ul class="space-y-2 text-sm">
+                                            <li>• 对候选节点进行评分</li>
+                                            <li>• 考虑资源利用率</li>
+                                            <li>• 评估亲和性规则</li>
+                                            <li>• 选择得分最高的节点</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-2xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-tools mr-3 text-purple-500"></i>
+                                    生产中常用的调度配置实践
+                                </h3>
+                                <p class="mb-4 leading-relaxed">
+                                    在生产环境中，合理的调度配置能够提高集群资源利用率，确保应用的高可用性和性能。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Network Section -->
+                <section id="network" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 flex items-center">
+                            <i class="fas fa-network-wired mr-4 text-indigo-600"></i>
+                            k8s集群网络模型
+                        </h2>
+                        
+                        <div class="space-y-8">
+                            <div>
+                                <h3 class="text-2xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-plug mr-3 text-blue-500"></i>
+                                    CNI介绍及集群网络选型
+                                </h3>
+                                <p class="mb-4 leading-relaxed">
+                                    CSI k8s没有分布式存储，只能对接其他厂商，所以制定了csi接口对接所有厂商的分布式存储
+                                </p>
+                                <p class="mb-6 leading-relaxed">
+                                    容器网络接口（Container Network Interface），实现kubernetes集群的Pod网络通信及管理。包括：
+                                </p>
+                                
+                                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg mb-6">
+                                    <h4 class="font-semibold mb-4">CNI组件说明</h4>
+                                    <ul class="space-y-3">
+                                        <li class="flex items-start">
+                                            <i class="fas fa-circle text-blue-500 text-xs mt-2 mr-3"></i>
+                                            <div>
+                                                <strong>CNI Plugin</strong>负责给容器配置网络，它包括两个基本的接口：
+                                                <ul class="mt-2 ml-4 space-y-1 text-sm">
+                                                    <li>配置网络: AddNetwork(net NetworkConfig, rt RuntimeConf) (types.Result, error)</li>
+                                                    <li>清理网络: DelNetwork(net NetworkConfig, rt RuntimeConf) error</li>
+                                                </ul>
+                                            </div>
+                                        </li>
+                                        <li class="flex items-start">
+                                            <i class="fas fa-circle text-green-500 text-xs mt-2 mr-3"></i>
+                                            <div>
+                                                <strong>IPAM Plugin</strong>负责给容器分配IP地址，主要实现包括host-local和dhcp。
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                                
+                                <div class="bg-blue-50 dark:bg-blue-900 p-6 rounded-lg mb-6">
+                                    <h4 class="font-semibold mb-4 text-blue-700 dark:text-blue-300">容器网络创建流程</h4>
+                                    <ol class="space-y-2 text-sm">
+                                        <li>1. kubelet先创建pause容器生成对应的network namespace</li>
+                                        <li>2. 调用网络driver，因为配置的是CNI，所以会调用CNI相关代码，识别CNI的配置目录为/etc/cni/net.d</li>
+                                        <li>3. CNI driver根据配置调用具体的CNI插件，二进制调用，可执行文件目录为/opt/cni/bin</li>
+                                        <li>4. CNI插件给pause容器配置正确的网络，pod中其他的容器都是用pause的网络</li>
+                                    </ol>
+                                </div>
+                                
+                                <div class="bg-green-50 dark:bg-green-900 p-6 rounded-lg">
+                                    <h4 class="font-semibold mb-4 text-green-700 dark:text-green-300">网络插件选型</h4>
+                                    <div class="space-y-4">
+                                        <div>
+                                            <strong>通用类型：</strong>flannel、calico等，部署使用简单
+                                        </div>
+                                        <div>
+                                            <strong>其他类型：</strong>根据具体的网络环境及网络需求选择，比如
+                                            <ul class="mt-2 ml-4 space-y-1 text-sm">
+                                                <li>• 公有云机器，可以选择厂商与网络插件的定制Backend，如AWS、阿里、腾讯针对flannel均有自己的插件，也有AWS ECS CNI</li>
+                                                <li>• 私有云厂商，比如Vmware NSX-T等</li>
+                                                <li>• 网络性能等，MacVlan</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-2xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-route mr-3 text-purple-500"></i>
+                                    Flannel网络模型的实现
+                                </h3>
+                                
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    <div class="bg-purple-50 dark:bg-purple-900 p-6 rounded-lg">
+                                        <h4 class="font-semibold mb-3 text-purple-700 dark:text-purple-300">
+                                            <i class="fas fa-layer-group mr-2"></i>
+                                            vxlan Backend
+                                        </h4>
+                                        <p class="text-sm">
+                                            使用VXLAN技术实现跨主机容器网络通信，通过UDP封装实现二层网络在三层网络上的传输。
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="bg-orange-50 dark:bg-orange-900 p-6 rounded-lg">
+                                        <h4 class="font-semibold mb-3 text-orange-700 dark:text-orange-300">
+                                            <i class="fas fa-server mr-2"></i>
+                                            hostgw Backend
+                                        </h4>
+                                        <p class="text-sm">
+                                            直接利用主机路由表进行跨主机通信，性能更好但要求主机在同一个二层网络中。
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Auth Section -->
+                <section id="auth" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 flex items-center">
+                            <i class="fas fa-shield-alt mr-4 text-red-600"></i>
+                            集群认证与授权
+                        </h2>
+                        
+                        <div class="space-y-8">
+                            <div>
+                                <h3 class="text-2xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-key mr-3 text-blue-500"></i>
+                                    APIServer安全控制模型
+                                </h3>
+                                <p class="mb-6 leading-relaxed">
+                                    Kubernetes APIServer提供了完整的安全控制机制，包括认证、授权和准入控制三个层次。
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-2xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-terminal mr-3 text-green-500"></i>
+                                    Kubectl的认证授权
+                                </h3>
+                                <p class="mb-6 leading-relaxed">
+                                    kubectl作为Kubernetes的命令行工具，需要通过适当的认证机制来访问集群资源。
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-2xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-users-cog mr-3 text-purple-500"></i>
+                                    RBAC
+                                </h3>
+                                <p class="mb-4 leading-relaxed">
+                                    基于角色的访问控制（Role-Based Access Control）是Kubernetes推荐的授权机制。
+                                </p>
+                                
+                                <div class="code-block p-4 mb-6">
+                                    <pre class="text-sm"><code>Annotations:  rbac.authorization.kubernetes.io/autoupdate: true
+PolicyRule:
+  Resources  Non-Resource URLs  Resource Names  Verbs
+  ---------  -----------------  --------------  -----
+  *.*        []                 []              [*]
+             [*]                []              [*]</code></pre>
+                                </div>
+                                
+                                <p class="text-sm text-gray-600 dark:text-gray-400 mb-6">
+                                    非资源类，如查看集群健康状态。
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-2xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-robot mr-3 text-indigo-500"></i>
+                                    kubelet的认证授权
+                                </h3>
+                                <p class="mb-6 leading-relaxed">
+                                    kubelet作为节点代理，需要适当的权限来管理Pod和与APIServer通信。
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-2xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-id-card mr-3 text-orange-500"></i>
+                                    Service Account
+                                </h3>
+                                <p class="mb-6 leading-relaxed">
+                                    Service Account为Pod提供身份标识，使Pod能够安全地访问Kubernetes API。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Helm Section -->
+                <section id="helm" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 flex items-center">
+                            <i class="fab fa-helm mr-4 text-blue-600"></i>
+                            使用Helm管理复杂应用的部署
+                        </h2>
+                        
+                        <div class="space-y-8">
+                            <div>
+                                <h3 class="text-2xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-cog mr-3 text-blue-500"></i>
+                                    Helm工作原理详解
+                                </h3>
+                                <p class="mb-6 leading-relaxed">
+                                    Helm是Kubernetes的包管理器，它简化了复杂应用的部署和管理过程。
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-2xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-code mr-3 text-green-500"></i>
+                                    Helm的模板开发
+                                </h3>
+                                <p class="mb-6 leading-relaxed">
+                                    通过Helm模板，可以创建可重用、可配置的Kubernetes应用包。
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-2xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-anchor mr-3 text-purple-500"></i>
+                                    实战：使用Helm部署Harbor仓库
+                                </h3>
+                                <p class="mb-6 leading-relaxed">
+                                    Harbor是企业级Docker镜像仓库，通过Helm可以快速部署和配置Harbor服务。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Storage Section -->
+                <section id="storage" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 flex items-center">
+                            <i class="fas fa-hdd mr-4 text-green-600"></i>
+                            kubernetes对接分布式存储
+                        </h2>
+                        
+                        <div class="space-y-8">
+                            <div>
+                                <h3 class="text-2xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-database mr-3 text-blue-500"></i>
+                                    pv、pvc介绍
+                                </h3>
+                                <p class="mb-6 leading-relaxed">
+                                    PersistentVolume (PV) 和 PersistentVolumeClaim (PVC) 是Kubernetes中管理存储资源的核心概念。
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-2xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-network-wired mr-3 text-green-500"></i>
+                                    k8s集群如何使用cephfs作为分布式存储后端
+                                </h3>
+                                <p class="mb-6 leading-relaxed">
+                                    CephFS提供了高可用、可扩展的分布式文件系统，可以作为Kubernetes的持久化存储后端。
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-2xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-magic mr-3 text-purple-500"></i>
+                                    利用storageClass实现动态存储卷的管理
+                                </h3>
+                                <p class="mb-6 leading-relaxed">
+                                    StorageClass允许管理员定义不同类型的存储，实现存储卷的动态供应。
+                                </p>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-2xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-rocket mr-3 text-orange-500"></i>
+                                    实战：使用分布式存储实现有状态应用的部署
+                                </h3>
+                                <p class="mb-6 leading-relaxed">
+                                    有状态应用需要持久化存储来保存数据，分布式存储为此提供了可靠的解决方案。
+                                </p>
+                                
+                                <div class="code-block p-4 mb-6">
+                                    <pre class="text-sm"><code>claimRoot: /volumes/kubernetes</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Metrics Section -->
+                <section id="metrics" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 flex items-center">
+                            <i class="fas fa-chart-line mr-4 text-purple-600"></i>
+                            Metric Server
+                        </h2>
+                        
+                        <div class="space-y-8">
+                            <div>
+                                <h3 class="text-2xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-info-circle mr-3 text-blue-500"></i>
+                                    官方介绍
+                                </h3>
+                                
+                                <div class="code-block p-4 mb-6">
+                                    <pre class="text-sm"><code>...
+Metric server collects metrics from the Summary API, exposed by Kubelet on each node.
+
+Metrics Server registered in the main API server through Kubernetes aggregator, which was introduced in Kubernetes 1.7
+...</code></pre>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-2xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-download mr-3 text-green-500"></i>
+                                    安装
+                                </h3>
+                                <p class="mb-4 leading-relaxed">
+                                    官方代码仓库地址：https://github.com/kubernetes-sigs/metrics-server
+                                </p>
+                                <p class="mb-4 leading-relaxed">
+                                    Depending on your cluster setup, you may also need to change flags passed to the Metrics Server container. Most useful flags:
+                                </p>
+                                
+                                <ul class="mb-6 space-y-2 text-sm">
+                                    <li>• <code class="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">--kubelet-preferred-address-types</code> - The priority of node address types used when determining an address for connecting to a particular node (default [Hostname,InternalDNS,InternalIP,ExternalDNS,ExternalIP])</li>
+                                    <li>• <code class="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">--kubelet-insecure-tls</code> - Do not verify the CA of serving certificates presented by Kubelets. For testing purposes only.</li>
+                                    <li>• <code class="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">--requestheader-client-ca-file</code> - Specify a root certificate bundle for verifying client certificates on incoming requests.</li>
+                                </ul>
+                                
+                                <div class="code-block p-4 mb-6">
+                                    <pre class="text-sm"><code>$ wget https://github.com/kubernetes-sigs/metrics-server/releases/download/v0.3.6/components.yaml</code></pre>
+                                </div>
+                                
+                                <p class="mb-4 font-semibold">修改args参数：</p>
+                                
+                                <div class="code-block p-4 mb-6">
+                                    <pre class="text-sm"><code>...
+ 84       containers:
+ 85       - name: metrics-server
+ 86         image: registry.aliyuncs.com/google_containers/metrics-server-amd64:v0.3.6</code></pre>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <h3 class="text-2xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-chart-bar mr-3 text-purple-500"></i>
+                                    kubelet的指标采集
+                                </h3>
+                                <p class="mb-4 leading-relaxed">
+                                    无论是 heapster还是 metric-server，都只是数据的中转和聚合，两者都是调用的 kubelet 的 api 接口获取的数据，而 kubelet 代码中实际采集指标的是 cadvisor 模块，你可以在 node 节点访问 10250 端口获取监控数据：
+                                </p>
+                                
+                                <ul class="mb-6 space-y-2">
+                                    <li>• <strong>Kubelet Summary metrics:</strong> https://127.0.0.1:10250/metrics，暴露 node、pod 汇总数据</li>
+                                    <li>• <strong>Cadvisor metrics:</strong> https://127.0.0.1:10250/metrics/cadvisor，暴露 container 维度数据</li>
+                                </ul>
+                                
+                                <p class="mb-4 font-semibold">调用示例：</p>
+                                
+                                <div class="code-block p-4 mb-6">
+                                    <pre class="text-sm"><code># 示例代码将在这里显示具体的调用方法</code></pre>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Summary Section -->
+                <section id="summary" class="section-content">
+                    <div class="content-card rounded-xl p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 flex items-center">
+                            <i class="fas fa-graduation-cap mr-4 text-indigo-600"></i>
+                            课程小结
+                        </h2>
+                        
+                        <p class="text-lg mb-8 leading-relaxed">
+                            使用k8s的进阶内容。
+                        </p>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="space-y-6">
+                                <div class="bg-blue-50 dark:bg-blue-900 p-6 rounded-lg">
+                                    <h4 class="font-semibold mb-3 flex items-center text-blue-700 dark:text-blue-300">
+                                        <i class="fas fa-database mr-2"></i>
+                                        数据存储与调度
+                                    </h4>
+                                    <ol class="space-y-2 text-sm">
+                                        <li>1. 学习k8s在etcd中数据的存储，掌握etcd的基本操作命令</li>
+                                        <li>2. 理解k8s调度的过程，预选及优先。影响调度策略的设置</li>
+                                    </ol>
+                                </div>
+                                
+                                <div class="bg-green-50 dark:bg-green-900 p-6 rounded-lg">
+                                    <h4 class="font-semibold mb-3 flex items-center text-green-700 dark:text-green-300">
+                                        <i class="fas fa-network-wired mr-2"></i>
+                                        网络与认证
+                                    </h4>
+                                    <ol class="space-y-2 text-sm" start="3">
+                                        <li>3. Flannel网络的原理学习，了解网络的流向，帮助定位问题</li>
+                                        <li>4. 认证与授权，掌握kubectl、kubelet、rbac及二次开发如何调度API</li>
+                                    </ol>
+                                </div>
+                            </div>
+                            
+                            <div class="space-y-6">
+                                <div class="bg-purple-50 dark:bg-purple-900 p-6 rounded-lg">
+                                    <h4 class="font-semibold mb-3 flex items-center text-purple-700 dark:text-purple-300">
+                                        <i class="fas fa-chart-line mr-2"></i>
+                                        监控与扩缩容
+                                    </h4>
+                                    <ol class="space-y-2 text-sm" start="5">
+                                        <li>5. 利用HPA进行业务动态扩缩容，通过metrics-server了解整个k8s的监控体系</li>
+                                    </ol>
+                                </div>
+                                
+                                <div class="bg-orange-50 dark:bg-orange-900 p-6 rounded-lg">
+                                    <h4 class="font-semibold mb-3 flex items-center text-orange-700 dark:text-orange-300">
+                                        <i class="fas fa-tools mr-2"></i>
+                                        存储与应用管理
+                                    </h4>
+                                    <ol class="space-y-2 text-sm" start="6">
+                                        <li>6. PV + PVC</li>
+                                        <li>7. Helm</li>
+                                    </ol>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="mt-8 bg-gradient-to-r from-blue-500 to-purple-600 text-white p-6 rounded-lg text-center">
+                            <h3 class="text-xl font-bold mb-2">
+                                <i class="fas fa-trophy mr-2"></i>
+                                恭喜完成Kubernetes进阶实践学习！
+                            </h3>
+                            <p class="text-sm opacity-90">
+                                您已经掌握了Kubernetes的核心进阶技术，可以在生产环境中应用这些知识。
+                            </p>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Floating TOC -->
+    <div class="floating-toc">
+        <div class="content-card rounded-lg p-4 w-48">
+            <h4 class="font-semibold mb-3 text-sm">快速导航</h4>
+            <nav class="space-y-1 text-xs">
+                <div class="nav-item px-2 py-1 rounded text-xs" data-section="overview">课程概览</div>
+                <div class="nav-item px-2 py-1 rounded text-xs" data-section="etcd">ETCD数据</div>
+                <div class="nav-item px-2 py-1 rounded text-xs" data-section="scheduler">调度策略</div>
+                <div class="nav-item px-2 py-1 rounded text-xs" data-section="network">网络模型</div>
+                <div class="nav-item px-2 py-1 rounded text-xs" data-section="auth">认证授权</div>
+                <div class="nav-item px-2 py-1 rounded text-xs" data-section="helm">Helm管理</div>
+                <div class="nav-item px-2 py-1 rounded text-xs" data-section="storage">分布式存储</div>
+                <div class="nav-item px-2 py-1 rounded text-xs" data-section="metrics">Metrics Server</div>
+                <div class="nav-item px-2 py-1 rounded text-xs" data-section="summary">课程小结</div>
+            </nav>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="container mx-auto px-4 text-center">
+            <div class="flex justify-center items-center mb-4">
+                <i class="fab fa-kubernetes text-3xl mr-3"></i>
+                <h3 class="text-xl font-bold">Kubernetes进阶实践</h3>
+            </div>
+            <p class="text-gray-400 mb-4">深入掌握容器编排技术的核心概念</p>
+            <div class="flex justify-center space-x-6 text-sm">
+                <span><i class="fas fa-code mr-2"></i>实践导向</span>
+                <span><i class="fas fa-users mr-2"></i>企业级应用</span>
+                <span><i class="fas fa-rocket mr-2"></i>生产就绪</span>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const html = document.documentElement;
+        
+        // Check for saved theme preference or default to system preference
+        const savedTheme = localStorage.getItem('theme');
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        const currentTheme = savedTheme || systemTheme;
+        
+        html.setAttribute('data-theme', currentTheme);
+        if (currentTheme === 'dark') {
+            html.classList.add('dark');
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            const isDark = html.classList.contains('dark');
+            if (isDark) {
+                html.classList.remove('dark');
+                html.setAttribute('data-theme', 'light');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.classList.add('dark');
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+
+        // Navigation
+        const navItems = document.querySelectorAll('.nav-item');
+        const sections = document.querySelectorAll('.section-content');
+        
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const targetSection = item.getAttribute('data-section');
+                
+                // Remove active class from all nav items and sections
+                navItems.forEach(nav => nav.classList.remove('active'));
+                sections.forEach(section => section.classList.remove('active'));
+                
+                // Add active class to clicked nav item and corresponding section
+                item.classList.add('active');
+                document.getElementById(targetSection).classList.add('active');
+                
+                // Scroll to top of main content
+                document.querySelector('main').scrollIntoView({ behavior: 'smooth' });
+            });
+        });
+
+        // Scroll Indicator
+        window.addEventListener('scroll', () => {
+            const scrollIndicator = document.getElementById('scrollIndicator');
+            const scrollTop = window.pageYOffset;
+            const docHeight = document.body.offsetHeight;
+            const winHeight = window.innerHeight;
+            const scrollPercent = scrollTop / (docHeight - winHeight);
+            const scrollPercentRounded = Math.round(scrollPercent * 100);
+            
+            scrollIndicator.style.transform = `scaleX(${scrollPercent})`;
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add some interactive effects
+        document.querySelectorAll('.content-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-2px)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,3576 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多数据库备份脚本生成工具</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #0a0a0a;
+            --secondary: #6366f1;
+            --accent: #00d4ff;
+            --success: #00ff88;
+            --warning: #ffb800;
+            --danger: #ff4757;
+            --light: #fafbfc;
+            --dark: #000000;
+            --postgres: #336791;
+            --sqlserver: #0078d7;
+            --modifier: #a855f7;
+            --scheduler: #06b6d4;
+            --surface: #ffffff;
+            --surface-variant: #2a2a2a;
+            --surface-dark: #1a1a1a;
+            --dark-surface: #000000;
+            --surface-glass: rgba(255, 255, 255, 0.05);
+            --on-surface: #ffffff;
+            --on-surface-light: #e5e7eb;
+            --border: #e5e7eb;
+            --border-dark: rgba(255, 255, 255, 0.1);
+            --shadow: rgba(0, 0, 0, 0.1);
+            --shadow-glow: rgba(99, 102, 241, 0.3);
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-secondary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --gradient-accent: linear-gradient(135deg, #00d4ff 0%, #5b21b6 100%);
+            --glass-bg: rgba(255, 255, 255, 0.08);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            
+            /* 统一间距变量 */
+            --spacing-xs: 8px;
+            --spacing-sm: 12px;
+            --spacing-md: 16px;
+            --spacing-lg: 20px;
+            --spacing-xl: 24px;
+            --spacing-2xl: 32px;
+            
+            /* 统一圆角变量 */
+            --radius-sm: 6px;
+            --radius-md: 8px;
+            --radius-lg: 12px;
+            --radius-xl: 16px;
+            --radius-2xl: 20px;
+        }
+        
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        }
+        
+        body {
+            background: radial-gradient(ellipse at top, #000000 0%, #1a1a1a 50%, #0a0a0a 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+            font-size: 14px;
+            line-height: 1.6;
+            font-weight: 400;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(168, 85, 247, 0.05) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: none;
+            background: var(--glass-bg);
+            border-radius: 0;
+            box-shadow: none;
+            overflow: hidden;
+            backdrop-filter: blur(40px);
+            margin: 0;
+            min-height: 100vh;
+            border: 1px solid var(--glass-border);
+        }
+        
+        header {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-dark);
+            color: white;
+            padding: var(--spacing-lg) var(--spacing-2xl);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--gradient-secondary);
+            opacity: 0.1;
+            z-index: -1;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            z-index: 2;
+        }
+        
+        .logo i {
+            font-size: 3.2rem;
+            color: var(--accent);
+            text-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+            animation: glow 3s ease-in-out infinite alternate;
+            filter: drop-shadow(0 0 15px rgba(0, 212, 255, 0.4));
+        }
+        
+        @keyframes glow {
+            0% { 
+                transform: scale(1);
+                text-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+            }
+            100% { 
+                transform: scale(1.05);
+                text-shadow: 0 0 40px rgba(0, 212, 255, 0.8), 0 0 60px rgba(99, 102, 241, 0.4);
+            }
+        }
+        
+        .logo h1 {
+            font-size: 2.8rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            background: linear-gradient(135deg, #e5e7eb 0%, var(--accent) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-top: 8px;
+            font-weight: 300;
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .header-pattern {
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            opacity: 0.1;
+            font-size: 10rem;
+            transform: rotate(15deg);
+            z-index: 200;
+        }
+        
+        .main-content {
+            display: flex;
+            min-height: calc(100vh - 80px);
+            flex-wrap: wrap;
+        }
+        
+        .sidebar {
+            width: 320px;
+            min-width: 280px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            color: white;
+            padding: 0;
+            position: relative;
+            z-index: 2;
+            border-right: 1px solid var(--border-dark);
+            flex-shrink: 0;
+        }
+        
+        .sidebar::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--gradient-accent);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.5);
+        }
+        
+        .sidebar-section {
+            margin-bottom: 32px;
+        }
+        
+        .sidebar-title {
+            padding: 16px 28px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border-dark);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-size: 0.9rem;
+        }
+        
+        .sidebar-option {
+            color: rgba(255, 255, 255, 0.8);
+            padding: var(--spacing-md) var(--spacing-xl);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-md);
+            position: relative;
+            margin: 4px var(--spacing-sm);
+            border-radius: var(--spacing-md);
+            font-weight: 500;
+            border: 1px solid transparent;
+        }
+        
+        .sidebar-option:hover {
+            background: var(--glass-bg);
+            border-color: var(--border-dark);
+            transform: translateX(6px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .sidebar-option.active {
+            background: var(--gradient-secondary);
+            border-color: var(--secondary);
+            box-shadow: 0 8px 32px var(--shadow-glow);
+            transform: translateX(6px);
+        }
+        
+        .sidebar-option.active::before {
+            content: '';
+            position: absolute;
+            left: -12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 60%;
+            background: var(--accent);
+            border-radius: 2px;
+            box-shadow: 0 0 10px var(--accent);
+        }
+        
+        .sidebar-option i {
+            width: 28px;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+        
+        .sidebar-option::after {
+            display: none;
+        }
+        
+        .content-area {
+            flex: 1;
+            min-width: 0;
+            padding: var(--spacing-2xl);
+            display: flex;
+            flex-direction: column;
+            background: transparent;
+            min-height: auto;
+            overflow-y: auto;
+        }
+        
+        .tab-content {
+            display: none;
+            flex: 1;
+            min-height: auto;
+            overflow-y: auto;
+        }
+        
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 24px;
+            color: #ffffff;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--secondary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+        }
+        
+        .section-title i {
+            color: var(--secondary);
+            font-size: 1.3rem;
+        }
+        
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .config-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: var(--radius-2xl);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            padding: var(--spacing-2xl);
+            border: 1px solid var(--glass-border);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .config-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .config-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: var(--accent);
+        }
+        
+        .config-card:hover::before {
+            background: linear-gradient(135deg, rgba(0, 212, 255, 0.1) 0%, rgba(99, 102, 241, 0.05) 100%);
+        }
+        
+        .card-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.35rem;
+            margin-bottom: 22px;
+            color: #ffffff;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .card-title i {
+            color: var(--secondary);
+            font-size: 1.4rem;
+        }
+        
+        .form-group {
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: var(--spacing-sm);
+            font-weight: 600;
+            color: #e5e7eb;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .form-group label i {
+            color: var(--secondary);
+            font-size: 0.9rem;
+        }
+        
+        .form-group input, 
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border-dark);
+            border-radius: 12px;
+            font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+        }
+        
+        .form-group input:focus, 
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: var(--secondary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-1px);
+        }
+        
+        .form-group input::placeholder,
+        .form-group textarea::placeholder {
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        input::placeholder {
+            color: rgba(255, 255, 255, 0.5) !important;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 18px 0;
+        }
+        
+        .checkbox-group input {
+            width: auto;
+            transform: scale(1.2);
+        }
+        
+        .btn {
+            padding: var(--spacing-md) var(--spacing-2xl);
+            border: none;
+            border-radius: var(--radius-xl);
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            display: inline-flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid transparent;
+            backdrop-filter: blur(10px);
+        }
+        
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.6s;
+        }
+        
+        .btn:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary {
+            background: var(--gradient-secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+        
+        .btn-primary:hover {
+            background: var(--gradient-accent);
+            box-shadow: 0 12px 40px var(--shadow-glow);
+            transform: translateY(-4px) scale(1.02);
+            border-color: var(--accent);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            border-color: var(--border-dark);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-4px);
+            border-color: var(--accent);
+        }
+        
+        .btn-success {
+            background: linear-gradient(90deg, var(--success), #2f9e58);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: linear-gradient(90deg, #2f9e58, var(--success));
+            transform: translateY(-2px);
+        }
+        
+        .btn-postgres {
+            background: linear-gradient(90deg, var(--postgres), #2a5b80);
+            color: white;
+        }
+        
+        .btn-sqlserver {
+            background: linear-gradient(90deg, var(--sqlserver), #0066b4);
+            color: white;
+        }
+        
+        .btn-modifier {
+            background: linear-gradient(90deg, var(--modifier), #ef6c00);
+            color: white;
+        }
+        
+        .btn-scheduler {
+            background: linear-gradient(90deg, var(--scheduler), #0d47a1);
+            color: white;
+        }
+        
+        /* 统一的按钮样式 */
+        .btn-danger {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+            color: white;
+            border: none;
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(90deg, #dc2626, #b91c1c);
+            transform: translateY(-2px);
+        }
+        
+        .btn-add {
+            background: linear-gradient(90deg, #10b981, #059669);
+            color: white;
+            border: none;
+        }
+        
+        .btn-add:hover {
+            background: linear-gradient(90deg, #059669, #047857);
+            transform: translateY(-2px);
+        }
+        
+        .btn-cancel {
+            background: linear-gradient(90deg, #6b7280, #4b5563);
+            color: white;
+            border: none;
+        }
+        
+        .btn-cancel:hover {
+            background: linear-gradient(90deg, #4b5563, #374151);
+            transform: translateY(-2px);
+        }
+        
+        .btn-apply {
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+            color: white;
+            border: none;
+        }
+        
+        .btn-apply:hover {
+            background: linear-gradient(90deg, #2563eb, #1d4ed8);
+            transform: translateY(-2px);
+        }
+        
+        /* 统一的输入框样式 */
+        .input-field {
+            padding: var(--spacing-xs) var(--spacing-sm);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: var(--radius-sm);
+            background: rgba(255, 255, 255, 0.1);
+            color: #ffffff;
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--accent);
+            background: rgba(255, 255, 255, 0.15);
+            box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.2);
+        }
+        
+        /* 统一布局类 */
+        .section-spacing {
+            margin-bottom: var(--spacing-2xl);
+        }
+        
+        .card-spacing {
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .form-spacing {
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .button-spacing {
+            margin-top: var(--spacing-2xl);
+        }
+        
+        .content-padding {
+            padding: var(--spacing-2xl);
+        }
+        
+        .form-padding {
+            padding: var(--spacing-md) var(--spacing-lg);
+        }
+        
+        .compact-padding {
+            padding: var(--spacing-xs) var(--spacing-sm);
+        }
+        
+        /* 统一圆角类 */
+        .rounded-sm { border-radius: var(--radius-sm); }
+        .rounded-md { border-radius: var(--radius-md); }
+        .rounded-lg { border-radius: var(--radius-lg); }
+        .rounded-xl { border-radius: var(--radius-xl); }
+        .rounded-2xl { border-radius: var(--radius-2xl); }
+        
+        .action-buttons {
+            display: flex;
+            gap: var(--spacing-md);
+            margin-top: var(--spacing-2xl);
+            flex-wrap: wrap;
+        }
+        
+        .report-section {
+            margin-top: 40px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 24px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            padding: 32px;
+            border: 1px solid var(--glass-border);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            z-index: 200;
+        }
+        
+        .report-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            pointer-events: none;
+            z-index: -1;
+            border-radius: 24px;
+        }
+        
+        .report-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+        
+        .report-content {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            border: 1px solid var(--border-dark);
+            border-radius: 16px;
+            padding: 24px;
+            font-family: 'JetBrains Mono', 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Code', monospace;
+            white-space: pre-wrap;
+            flex: 1;
+            overflow-y: auto;
+            line-height: 1.7;
+            font-size: 14px;
+            color: #e2e8f0;
+            position: relative;
+            min-height: 400px;
+            box-shadow: inset 0 4px 8px 0 rgba(0, 0, 0, 0.3);
+        }
+        
+        .report-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--gradient-accent);
+            border-radius: 16px 16px 0 0;
+        }
+        
+
+        
+        .copy-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 8px 16px;
+            background: rgba(0, 0, 0, 0.8);
+            border: 1px solid var(--border-dark);
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #ffffff;
+        }
+        
+        .copy-btn:hover {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+        
+        .tables-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .table-tag {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border: 1px solid var(--border-dark);
+            transition: all 0.2s ease;
+            color: #ffffff;
+        }
+        
+        .table-tag:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            transform: scale(1.05);
+            border-color: var(--secondary);
+        }
+        
+        .table-tag i {
+            cursor: pointer;
+            color: var(--danger);
+            font-size: 0.8rem;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: var(--primary);
+            color: #a0aec0;
+            font-size: 0.95rem;
+        }
+        
+        .database-icon {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.3rem;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        
+        .oracle-icon {
+            background: #c74634;
+        }
+        
+        .mysql-icon {
+            background: #f29111;
+        }
+        
+        .postgres-icon {
+            background: var(--postgres);
+        }
+        
+        .sqlserver-icon {
+            background: var(--sqlserver);
+        }
+        
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 15px;
+            font-weight: 600;
+            padding: 12px;
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+        }
+        
+        .success {
+            color: var(--success);
+        }
+        
+        .warning {
+            color: var(--warning);
+        }
+        
+        .error {
+            color: var(--danger);
+        }
+        
+        .backup-type {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 32px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            padding: 24px;
+            border-radius: 20px;
+            border: 1px solid var(--glass-border);
+        }
+        
+        .backup-type-btn {
+            flex: 1;
+            padding: 32px 24px;
+            text-align: center;
+            border-radius: 20px;
+            background: var(--glass-bg);
+            border: 2px solid var(--border-dark);
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            font-weight: 600;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            color: rgba(255, 255, 255, 0.8);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .backup-type-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0.02) 100%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .backup-type-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+            border-color: var(--accent);
+        }
+        
+        .backup-type-btn.active {
+            box-shadow: 0 12px 40px var(--shadow-glow);
+            transform: translateY(-4px);
+        }
+        
+        .backup-type-btn i {
+            font-size: 2.5rem;
+        }
+        
+        .backup-type-btn.physical.active {
+            background: var(--gradient-secondary);
+            color: white;
+            border-color: var(--secondary);
+        }
+        
+        .backup-type-btn.logical.active {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+            border-color: var(--success);
+        }
+        
+        /* 备份选项显示控制 */
+        .backup-options {
+            display: none;
+        }
+        
+        .backup-options.active {
+            display: block;
+        }
+        
+        /* 响应式布局 */
+        @media (max-width: 1200px) {
+            .config-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                border-radius: 0;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 0;
+            }
+            
+            .container {
+                border-radius: 0;
+            }
+            
+            header {
+                padding: 12px 16px;
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .logo h1 {
+                font-size: 1.8rem;
+            }
+            
+            .logo i {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .main-content {
+                flex-direction: column;
+                min-height: calc(100vh - 120px);
+            }
+            
+            .sidebar {
+                width: 100%;
+                min-width: auto;
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .content-area {
+                padding: 12px;
+            }
+            
+            .config-grid {
+                gap: 20px;
+            }
+            
+            .config-card {
+                padding: 16px;
+            }
+            
+            .section-title {
+                font-size: 1.3rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .logo {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .logo h1 {
+                font-size: 1.5rem;
+            }
+            
+            .logo i {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .content-area {
+                padding: 8px;
+            }
+            
+            .config-card {
+                padding: 12px;
+            }
+            
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                padding: 10px 12px;
+            }
+            
+            .btn {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .sidebar-option {
+                padding: 12px 16px;
+                margin: 1px 4px;
+            }
+        }
+        
+        .tool-content {
+            padding: 32px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--glass-border);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        
+        .tool-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0.6;
+        }
+        
+        .tool-title {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .tool-description {
+            margin-bottom: 30px;
+            line-height: 1.6;
+            color: #e5e7eb;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border-left: 4px solid var(--accent);
+            backdrop-filter: blur(10px);
+        }
+        
+        .tool-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .tool-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 28px;
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        
+        .tool-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), transparent);
+            border-radius: 16px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .tool-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--glow-shadow);
+            border-color: var(--accent);
+        }
+        
+        .tool-card:hover::before {
+            opacity: 1;
+        }
+        
+        .tool-card h3 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #ffffff;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .tool-card p {
+            color: #e5e7eb;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+        
+        .tool-feature {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            box-shadow: var(--shadow);
+            padding: 28px;
+            margin-bottom: 25px;
+            border: 1px solid var(--glass-border);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+        
+        .tool-feature::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent), transparent);
+            opacity: 0.6;
+        }
+        
+        .tool-feature:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--glow-shadow);
+            border-color: var(--accent);
+        }
+        
+        .tool-feature h3 {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: #ffffff;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .modifier-feature h3 {
+            color: var(--modifier);
+        }
+        
+        .result-section {
+            margin-top: 25px;
+            border: 1px solid var(--border-dark);
+            border-radius: 12px;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+        
+        .result-header {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 16px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .result-header h4 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        
+        .result-header h4 i {
+            margin-right: 8px;
+            color: #3b82f6;
+        }
+        
+        .result-content {
+            padding: 0;
+        }
+        
+        .result-output {
+            margin: 0;
+            padding: 24px;
+            background: linear-gradient(135deg, var(--dark-surface), var(--surface-variant));
+            border: none;
+            font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.6;
+            color: #e5e7eb;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+            max-height: 400px;
+            overflow-y: auto;
+            position: relative;
+        }
+        
+        .result-output::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--secondary), var(--accent));
+            opacity: 0.8;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 4px;
+        }
+        
+        .scheduler-feature h3 {
+            color: var(--scheduler);
+        }
+        
+        .history-feature h3 {
+            color: #8b5cf6;
+        }
+        
+        .history-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border: 1px solid var(--border-dark);
+        }
+        
+        .history-count {
+            margin-left: auto;
+            color: #64748b;
+            font-weight: 500;
+        }
+        
+        .history-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+        }
+        
+        .no-history {
+            text-align: center;
+            padding: 40px 20px;
+            color: #e5e7eb;
+        }
+        
+        .no-history i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #9ca3af;
+        }
+        
+        .history-item {
+            padding: 15px 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: background-color 0.2s;
+        }
+        
+        .history-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .history-item:last-child {
+            border-bottom: none;
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .history-title {
+            font-weight: 600;
+            color: #ffffff;
+            font-size: 0.95rem;
+        }
+        
+        .history-time {
+            color: #9ca3af;
+            font-size: 0.85rem;
+        }
+        
+        .history-details {
+            color: #e5e7eb;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+        
+        .history-actions {
+            margin-top: 10px;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .history-actions .btn {
+            padding: 4px 8px;
+            font-size: 0.8rem;
+            border-radius: 4px;
+        }
+        
+        .notification {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+            box-shadow: 0 10px 15px -3px rgba(16, 185, 129, 0.3), 0 4px 6px -2px rgba(16, 185, 129, 0.1);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transform: translateX(150%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification i {
+            font-size: 1.2rem;
+        }
+        
+        .database-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .database-item {
+            display: flex;
+            align-items: center;
+            padding: 16px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            background: var(--surface);
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .database-item:hover {
+            background: var(--surface-variant);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 6px -1px var(--shadow);
+        }
+        
+        .database-item.selected {
+            background: rgba(6, 182, 212, 0.1);
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1);
+        }
+        
+        .database-item input {
+            margin-right: 12px;
+        }
+        
+        .database-item label {
+            flex: 1;
+            cursor: pointer;
+        }
+        
+        .database-item .tables-list {
+            flex: 1;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .table-item {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            color: #e5e7eb;
+        }
+        
+        .table-item.selected {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .custom-db-input {
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            border: 1px solid var(--border-dark);
+        }
+        
+        .input-hint {
+            font-size: 0.9rem;
+            color: #718096;
+            margin-top: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .input-example {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            margin-top: 8px;
+            color: #e5e7eb;
+        }
+        
+        .script-editor {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-dark);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            min-height: 300px;
+            margin-bottom: 20px;
+            color: #e5e7eb;
+        }
+        
+        .cron-output {
+            background: linear-gradient(135deg, #000000 0%, #1a1a1a 100%);
+            border: 1px solid var(--border-dark);
+            border-radius: 8px;
+            padding: 15px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            margin-top: 20px;
+            color: #e5e7eb;
+        }
+        
+        @media (max-width: 1024px) {
+            .container {
+                margin-top: 10px;
+                border-radius: 16px;
+            }
+            
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            }
+            
+            .content-area {
+                padding: 24px;
+            }
+            
+            .config-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .backup-type {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .database-icons {
+                display: none;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 16px;
+                text-align: center;
+                padding: 24px;
+            }
+            
+            .logo h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .notification {
+                bottom: 16px;
+                right: 16px;
+                left: auto;
+                max-width: calc(100vw - 32px);
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            body {
+                padding: 8px;
+            }
+            
+            .container {
+                border-radius: 12px;
+            }
+            
+            .content-area {
+                padding: 16px;
+            }
+            
+            .config-card {
+                padding: 16px;
+            }
+            
+            .sidebar-option {
+                padding: 12px 16px;
+                margin: 1px 4px;
+            }
+            
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                padding: 10px 12px;
+            }
+            
+            .btn {
+                padding: 10px 16px;
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <i class="fas fa-database"></i>
+                <div>
+                    <h1>多数据库备份脚本生成工具</h1>
+                    <div class="subtitle">支持Oracle, MySQL, PostgreSQL, SQL Server | 物理与逻辑备份 | 按库/表备份</div>
+                </div>
+            </div>
+            <div class="database-icons">
+                <div style="display: flex; gap: 15px;">
+                    <div class="database-icon oracle-icon"><i class="fab fa-oracle"></i></div>
+                    <div class="database-icon mysql-icon"><i class="fas fa-database"></i></div>
+                    <div class="database-icon postgres-icon"><i class="fas fa-server"></i></div>
+                    <div class="database-icon sqlserver-icon"><i class="fab fa-microsoft"></i></div>
+                </div>
+            </div>
+            <div class="header-pattern">
+                <i class="fas fa-code"></i>
+            </div>
+        </header>
+        
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="sidebar-section">
+                    <div class="sidebar-title">
+                        <i class="fas fa-database"></i>
+                        数据库类型
+                    </div>
+                    <div class="sidebar-option" data-tab="oracle">
+                        <i class="fas fa-oracle"></i>
+                        Oracle
+                    </div>
+                    <div class="sidebar-option" data-tab="mysql">
+                        <i class="fas fa-database"></i>
+                        MySQL
+                    </div>
+                    <div class="sidebar-option" data-tab="postgres">
+                        <i class="fas fa-server"></i>
+                        PostgreSQL
+                    </div>
+                    <div class="sidebar-option" data-tab="sqlserver">
+                        <i class="fab fa-microsoft"></i>
+                        SQL Server
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-title">
+                        <i class="fas fa-tools"></i>
+                        工具功能
+                    </div>
+                    <div class="sidebar-option" data-tab="modifier">
+                        <i class="fas fa-edit"></i>
+                        脚本修改器
+                    </div>
+                    <div class="sidebar-option" data-tab="scheduler">
+                        <i class="fas fa-calendar-alt"></i>
+                        计划任务生成
+                    </div>
+                </div>
+                
+                <div class="sidebar-section">
+                    <div class="sidebar-title">
+                        <i class="fas fa-history"></i>
+                        最近脚本
+                    </div>
+                    <div class="sidebar-option">
+                        <i class="fas fa-file-code"></i>
+                        oracle_full_backup.sh
+                    </div>
+                    <div class="sidebar-option">
+                        <i class="fas fa-file-code"></i>
+                        mysql_tables_backup.sql
+                    </div>
+                    <div class="sidebar-option">
+                        <i class="fas fa-file-code"></i>
+                        pg_daily_backup.sh
+                    </div>
+                </div>
+            </div>
+            
+            <div class="content-area">
+                <!-- Oracle 配置 -->
+                <div class="tab-content active"id="oracle">
+                    <h2 class="section-title"><i class="fab fa-oracle"></i> Oracle 备份配置</h2>
+                    
+                    <div class="backup-type">
+                        <div class="backup-type-btn physical active" data-type="physical">
+                            <i class="fas fa-hard-drive"></i>
+                            物理备份
+                        </div>
+                        <div class="backup-type-btn logical" data-type="logical">
+                            <i class="fas fa-file-code"></i>
+                            逻辑备份
+                        </div>
+                    </div>
+                    
+                    <div class="config-grid">
+                        <div class="config-card">
+                            <h3 class="card-title"><i class="fas fa-plug"></i> 连接设置</h3>
+                            <div class="form-group">
+                                <label for="oracle-host"><i class="fas fa-server"></i> 主机地址</label>
+                                <input type="text"id="oracle-host" placeholder="例如: 192.168.1.100" value="dbserver01">
+                            </div>
+                            <div class="form-group">
+                                <label for="oracle-port"><i class="fas fa-network-wired"></i> 端口</label>
+                                <input type="text"id="oracle-port" value="1521">
+                            </div>
+                            <div class="form-group">
+                                <label for="oracle-service"><i class="fas fa-cog"></i> 服务名/SID</label>
+                                <input type="text"id="oracle-service" placeholder="例如: ORCL" value="ORCL">
+                            </div>
+                            <div class="form-group">
+                                <label for="oracle-user"><i class="fas fa-user"></i> 用户名</label>
+                                <input type="text"id="oracle-user" placeholder="例如: sys" value="sys as sysdba">
+                            </div>
+                            <div class="form-group">
+                                <label for="oracle-password"><i class="fas fa-key"></i> 密码</label>
+                                <input type="password"id="oracle-password" placeholder="输入密码" value="********">
+                            </div>
+                        </div>
+                        
+                        <div class="config-card">
+                            <h3 class="card-title"><i class="fas fa-cog"></i> 备份设置</h3>
+                            <div class="form-group">
+                                <label for="oracle-backup-path"><i class="fas fa-folder-open"></i> 备份路径</label>
+                                <input type="text"id="oracle-backup-path" value="/backup/oracle/">
+                            </div>
+                            
+                            <!-- 物理备份特定设置 -->
+                            <div class="backup-options physical active">
+                                <div class="form-group">
+                                    <label for="oracle-parallel"><i class="fas fa-microchip"></i> 并行度</label>
+                                    <input type="number"id="oracle-parallel" min="1" max="16" value="4">
+                                </div>
+                                <div class="form-group">
+                                    <label for="oracle-compression"><i class="fas fa-compress"></i> 压缩级别</label>
+                                    <selectid="oracle-compression">
+                                        <option value="low">低</option>
+                                        <option value="medium" selected>中</option>
+                                        <option value="high">高</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- 逻辑备份特定设置 - 自定义输入 -->
+                            <div class="backup-options logical">
+                                <div class="form-group">
+                                    <label><i class="fas fa-database"></i> 数据库和表配置</label>
+                                    <div class="custom-db-input">
+                                        <div class="input-hint">
+                                            输入格式：数据库名:表1,表2,表3（每行一个数据库）
+                                        </div>
+                                        <textarea id="oracle-db-config" rows="4" placeholder="例如：
+APP_DB:USERS,ORDERS,PRODUCTS
+REPORT_DB:SALES,INVENTORY">APP_DB:USERS,ORDERS</textarea>
+                                        <div class="input-example">
+                                            示例：<br>
+                                            HR_DB:EMPLOYEES,DEPARTMENTS<br>
+                                            FINANCE_DB:ACCOUNTS,TRANSACTIONS
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>高级选项</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox"id="oracle-encryption">
+                                    <label for="oracle-encryption">启用加密</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox"id="oracle-validate" checked>
+                                    <label for="oracle-validate">备份后验证</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary"id="generate-oracle">
+                            <i class="fas fa-code"></i> 生成备份脚本
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-save"></i> 保存配置
+                        </button>
+                    </div>
+                    
+                    <div class="report-section">
+                        <div class="report-header">
+                            <h3 class="section-title"><i class="fas fa-file-code"></i> 生成的备份脚本</h3>
+                        </div>
+                        
+                        <div class="report-content"id="oracle-script">
+                            <!-- 生成的脚本将显示在这里 -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- MySQL 配置 -->
+                <div class="tab-content"id="mysql">
+                    <h2 class="section-title"><i class="fas fa-database"></i> MySQL 备份配置</h2>
+                    
+                    <div class="backup-type">
+                        <div class="backup-type-btn physical active" data-type="physical">
+                            <i class="fas fa-hard-drive"></i>
+                            物理备份
+                        </div>
+                        <div class="backup-type-btn logical" data-type="logical">
+                            <i class="fas fa-file-code"></i>
+                            逻辑备份
+                        </div>
+                    </div>
+                    
+                    <div class="config-grid">
+                        <div class="config-card">
+                            <h3 class="card-title"><i class="fas fa-plug"></i> 连接设置</h3>
+                            <div class="form-group">
+                                <label for="mysql-host"><i class="fas fa-server"></i> 主机地址</label>
+                                <input type="text"id="mysql-host" placeholder="例如: 192.168.1.100" value="db-mysql-01">
+                            </div>
+                            <div class="form-group">
+                                <label for="mysql-port"><i class="fas fa-network-wired"></i> 端口</label>
+                                <input type="text"id="mysql-port" value="3306">
+                            </div>
+                            <div class="form-group">
+                                <label for="mysql-db"><i class="fas fa-database"></i> 数据库名</label>
+                                <input type="text"id="mysql-db" placeholder="例如: app_db" value="app_db">
+                            </div>
+                            <div class="form-group">
+                                <label for="mysql-user"><i class="fas fa-user"></i> 用户名</label>
+                                <input type="text"id="mysql-user" placeholder="例如: root" value="admin">
+                            </div>
+                            <div class="form-group">
+                                <label for="mysql-password"><i class="fas fa-key"></i> 密码</label>
+                                <input type="password"id="mysql-password" placeholder="输入密码" value="********">
+                            </div>
+                        </div>
+                        
+                        <div class="config-card">
+                            <h3 class="card-title"><i class="fas fa-cog"></i> 备份设置</h3>
+                            <div class="form-group">
+                                <label for="mysql-backup-path"><i class="fas fa-folder-open"></i> 备份路径</label>
+                                <input type="text"id="mysql-backup-path" value="/backup/mysql/">
+                            </div>
+                            
+                            <!-- 物理备份特定设置 -->
+                            <div class="backup-options physical active">
+                                <div class="form-group">
+                                    <label for="mysql-threads"><i class="fas fa-microchip"></i> 线程数</label>
+                                    <input type="number"id="mysql-threads" min="1" max="16" value="4">
+                                </div>
+                                <div class="form-group">
+                                    <label for="mysql-compression"><i class="fas fa-compress"></i> 压缩级别</label>
+                                    <selectid="mysql-compression">
+                                        <option value="1">快速</option>
+                                        <option value="2" selected>平衡</option>
+                                        <option value="9">最佳</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- 逻辑备份特定设置 - 自定义输入 -->
+                            <div class="backup-options logical">
+                                <div class="form-group">
+                                    <label><i class="fas fa-database"></i> 数据库和表配置</label>
+                                    <div class="custom-db-input">
+                                        <div class="input-hint">
+                                            输入格式：数据库名:表1,表2,表3（每行一个数据库）
+                                        </div>
+                                        <textarea id="mysql-db-config" rows="4" placeholder="例如：
+app_db:users,orders,products
+report_db:sales,inventory">app_db:users,orders</textarea>
+                                        <div class="input-example">
+                                            示例：<br>
+                                            wordpress:wp_posts,wp_users<br>
+                                            inventory:products,categories
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>高级选项</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox"id="mysql-encryption">
+                                    <label for="mysql-encryption">启用加密</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary"id="generate-mysql">
+                            <i class="fas fa-code"></i> 生成备份脚本
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-save"></i> 保存配置
+                        </button>
+                    </div>
+                    
+                    <div class="report-section">
+                        <div class="report-header">
+                            <h3 class="section-title"><i class="fas fa-file-code"></i> 生成的备份脚本</h3>
+                        </div>
+                        
+                        <div class="report-content"id="mysql-script">
+                            <!-- 生成的脚本将显示在这里 -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PostgreSQL 配置 -->
+                <div class="tab-content"id="postgres">
+                    <h2 class="section-title"><i class="fas fa-server"></i> PostgreSQL 备份配置</h2>
+                    
+                    <div class="backup-type">
+                        <div class="backup-type-btn physical active" data-type="physical">
+                            <i class="fas fa-hard-drive"></i>
+                            物理备份
+                        </div>
+                        <div class="backup-type-btn logical" data-type="logical">
+                            <i class="fas fa-file-code"></i>
+                            逻辑备份
+                        </div>
+                    </div>
+                    
+                    <div class="config-grid">
+                        <div class="config-card">
+                            <h3 class="card-title"><i class="fas fa-plug"></i> 连接设置</h3>
+                            <div class="form-group">
+                                <label for="postgres-host"><i class="fas fa-server"></i> 主机地址</label>
+                                <input type="text"id="postgres-host" placeholder="例如: 192.168.1.100" value="pg-server">
+                            </div>
+                            <div class="form-group">
+                                <label for="postgres-port"><i class="fas fa-network-wired"></i> 端口</label>
+                                <input type="text"id="postgres-port" value="5432">
+                            </div>
+                            <div class="form-group">
+                                <label for="postgres-db"><i class="fas fa-database"></i> 数据库名</label>
+                                <input type="text"id="postgres-db" placeholder="例如: app_db" value="app_db">
+                            </div>
+                            <div class="form-group">
+                                <label for="postgres-user"><i class="fas fa-user"></i> 用户名</label>
+                                <input type="text"id="postgres-user" placeholder="例如: postgres" value="admin">
+                            </div>
+                            <div class="form-group">
+                                <label for="postgres-password"><i class="fas fa-key"></i> 密码</label>
+                                <input type="password"id="postgres-password" placeholder="输入密码" value="********">
+                            </div>
+                        </div>
+                        
+                        <div class="config-card">
+                            <h3 class="card-title"><i class="fas fa-cog"></i> 备份设置</h3>
+                            <div class="form-group">
+                                <label for="postgres-backup-path"><i class="fas fa-folder-open"></i> 备份路径</label>
+                                <input type="text"id="postgres-backup-path" value="/backup/postgres/">
+                            </div>
+                            
+                            <!-- 物理备份特定设置 -->
+                            <div class="backup-options physical active">
+                                <div class="form-group">
+                                    <label for="postgres-compress"><i class="fas fa-compress"></i> 压缩级别</label>
+                                    <selectid="postgres-compress">
+                                        <option value="0">无压缩</option>
+                                        <option value="1">快速</option>
+                                        <option value="6" selected>平衡</option>
+                                        <option value="9">最佳</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="postgres-checkpoint"><i class="fas fa-check-circle"></i> 检查点模式</label>
+                                    <selectid="postgres-checkpoint">
+                                        <option value="fast">快速</option>
+                                        <option value="spread" selected>分散</option>
+                                        <option value="full">完整</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- 逻辑备份特定设置 - 自定义输入 -->
+                            <div class="backup-options logical">
+                                <div class="form-group">
+                                    <label><i class="fas fa-database"></i> 数据库和表配置</label>
+                                    <div class="custom-db-input">
+                                        <div class="input-hint">
+                                            输入格式：数据库名:表1,表2,表3（每行一个数据库）
+                                        </div>
+                                        <textarea id="postgres-db-config" rows="4" placeholder="例如：
+app_db:users,orders,products
+report_db:sales,inventory">app_db:users,orders</textarea>
+                                        <div class="input-example">
+                                            示例：<br>
+                                            public_data:customers,transactions<br>
+                                            logs:access_logs,error_logs
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>高级选项</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox"id="postgres-verify" checked>
+                                    <label for="postgres-verify">备份后验证</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-postgres"id="generate-postgres">
+                            <i class="fas fa-code"></i> 生成备份脚本
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-save"></i> 保存配置
+                        </button>
+                    </div>
+                    
+                    <div class="report-section">
+                        <div class="report-header">
+                            <h3 class="section-title"><i class="fas fa-file-code"></i> 生成的备份脚本</h3>
+                        </div>
+                        
+                        <div class="report-content"id="postgres-script">
+                            <!-- 生成的脚本将显示在这里 -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- SQL Server 配置 -->
+                <div class="tab-content" id="sqlserver">
+                    <h2 class="section-title"><i class="fab fa-microsoft"></i> SQL Server 备份配置</h2>
+                    
+                    <div class="backup-type">
+                        <div class="backup-type-btn physical active" data-type="physical">
+                            <i class="fas fa-hard-drive"></i>
+                            物理备份
+                        </div>
+                        <div class="backup-type-btn logical" data-type="logical">
+                            <i class="fas fa-file-code"></i>
+                            逻辑备份
+                        </div>
+                    </div>
+                    
+                    <div class="config-grid">
+                        <div class="config-card">
+                            <h3 class="card-title"><i class="fas fa-plug"></i> 连接设置</h3>
+                            <div class="form-group">
+                                <label for="sqlserver-host"><i class="fas fa-server"></i> 主机地址</label>
+                                <input type="text"id="sqlserver-host" placeholder="例如: 192.168.1.100" value="sql-server">
+                            </div>
+                            <div class="form-group">
+                                <label for="sqlserver-port"><i class="fas fa-network-wired"></i> 端口</label>
+                                <input type="text"id="sqlserver-port" value="1433">
+                            </div>
+                            <div class="form-group">
+                                <label for="sqlserver-db"><i class="fas fa-database"></i> 数据库名</label>
+                                <input type="text"id="sqlserver-db" placeholder="例如: app_db" value="app_db">
+                            </div>
+                            <div class="form-group">
+                                <label for="sqlserver-user"><i class="fas fa-user"></i> 用户名</label>
+                                <input type="text"id="sqlserver-user" placeholder="例如: sa" value="admin">
+                            </div>
+                            <div class="form-group">
+                                <label for="sqlserver-password"><i class="fas fa-key"></i> 密码</label>
+                                <input type="password"id="sqlserver-password" placeholder="输入密码" value="********">
+                            </div>
+                        </div>
+                        
+                        <div class="config-card">
+                            <h3 class="card-title"><i class="fas fa-cog"></i> 备份设置</h3>
+                            <div class="form-group">
+                                <label for="sqlserver-backup-path"><i class="fas fa-folder-open"></i> 备份路径</label>
+                                <input type="text"id="sqlserver-backup-path" value="C:\\Backup\\">
+                            </div>
+                            
+                            <!-- 物理备份特定设置 -->
+                            <div class="backup-options physical active">
+                                <div class="form-group">
+                                    <label for="sqlserver-compress"><i class="fas fa-compress"></i> 压缩级别</label>
+                                    <select id="sqlserver-compress">
+                                        <option value="low">低</option>
+                                        <option value="medium" selected>中</option>
+                                        <option value="high">高</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="sqlserver-blocksize"><i class="fas fa-cube"></i> 块大小</label>
+                                    <select id="sqlserver-blocksize">
+                                        <option value="64">64 KB</option>
+                                        <option value="128" selected>128 KB</option>
+                                        <option value="256">256 KB</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <!-- 逻辑备份特定设置 - 自定义输入 -->
+                            <div class="backup-options logical">
+                                <div class="form-group">
+                                    <label><i class="fas fa-database"></i> 数据库和表配置</label>
+                                    <div class="custom-db-input">
+                                        <div class="input-hint">
+                                            输入格式：数据库名:表1,表2,表3（每行一个数据库）
+                                        </div>
+                                        <textarea id="sqlserver-db-config" rows="4" placeholder="例如：
+AppDB:Users,Orders,Products
+ReportDB:Sales,Inventory">AppDB:Users,Orders</textarea>
+                                        <div class="input-example">
+                                            示例：<br>
+                                            Northwind:Customers,Orders<br>
+                                            AdventureWorks:Product,ProductCategory
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label>高级选项</label>
+                                <div class="checkbox-group">
+                                    <input type="checkbox"id="sqlserver-verify" checked>
+                                    <label for="sqlserver-verify">备份后验证</label>
+                                </div>
+                                <div class="checkbox-group">
+                                    <input type="checkbox"id="sqlserver-checksum">
+                                    <label for="sqlserver-checksum">使用校验和</label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-sqlserver"id="generate-sqlserver">
+                            <i class="fas fa-code"></i> 生成备份脚本
+                        </button>
+                        <button class="btn btn-secondary">
+                            <i class="fas fa-save"></i> 保存配置
+                        </button>
+                    </div>
+                    
+                    <div class="report-section">
+                        <div class="report-header">
+                            <h3 class="section-title"><i class="fas fa-file-code"></i> 生成的备份脚本</h3>
+                        </div>
+                        
+                        <div class="report-content" id="sqlserver-script">
+                            <!-- 生成的脚本将显示在这里 -->
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 脚本修改器 -->
+                <div class="tab-content"id="modifier">
+                    <h2 class="section-title"><i class="fas fa-edit"></i> 脚本修改器</h2>
+                    
+                    <div class="config-card" style="margin-bottom: 30px;">
+                        <div class="card-title"><i class="fas fa-info-circle"></i> 工具说明</div>
+                        <p style="color: #e5e7eb; line-height: 1.6; margin: 0;">使用此工具修改和优化现有的备份脚本。支持语法高亮、参数替换和错误检测功能。</p>
+                    </div>
+                        
+                    <div class="config-grid">
+                        <div class="config-card">
+                            <h3 class="card-title"><i class="fas fa-bolt"></i> 快速优化</h3>
+                            <p style="color: #e5e7eb; line-height: 1.6; margin-bottom: 20px;">一键优化现有脚本，提高执行效率并减少资源占用。</p>
+                            <button class="btn btn-modifier"id="optimize-script">
+                                <i class="fas fa-magic"></i> 优化脚本
+                            </button>
+                        </div>
+                        <div class="config-card">
+                            <h3 class="card-title"><i class="fas fa-code"></i> 语法检查</h3>
+                            <p style="color: #e5e7eb; line-height: 1.6; margin-bottom: 20px;">检查脚本语法错误，确保脚本在目标环境中能正确执行。</p>
+                            <button class="btn btn-modifier"id="check-syntax">
+                                <i class="fas fa-check-circle"></i> 检查语法
+                            </button>
+                        </div>
+                        <div class="config-card">
+                            <h3 class="card-title"><i class="fas fa-exchange-alt"></i> 变量替换</h3>
+                            <p style="color: #e5e7eb; line-height: 1.6; margin-bottom: 20px;">批量替换脚本中的占位符变量为实际值。</p>
+                            <button class="btn btn-modifier"id="replace-vars">
+                                <i class="fas fa-sync-alt"></i> 替换变量
+                            </button>
+                        </div>
+                    </div>
+                        
+                    <div class="config-card">
+                        <h3 class="card-title"><i class="fas fa-file-code"></i> 脚本编辑器</h3>
+                        <div class="form-group">
+                            <label for="script-content">输入要修改的备份脚本：</label>
+                            <textarea id="script-content" rows="12" class="script-editor" placeholder="在此粘贴您的备份脚本..."></textarea>
+                        </div>
+                        <button class="btn btn-modifier"id="modify-script">
+                            <i class="fas fa-play"></i> 执行修改
+                        </button>
+                        
+                        <!-- 检查结果显示区域 -->
+                        <div class="result-section" id="modifier-results" style="display: none;">
+                            <div class="result-header">
+                                <h4><i class="fas fa-clipboard-check"></i> 检查结果</h4>
+                                <button class="btn btn-secondary btn-sm" id="clear-results">
+                                    <i class="fas fa-times"></i> 清除结果
+                                </button>
+                            </div>
+                            <div class="result-content">
+                                <pre id="modifier-output" class="result-output"></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 计划任务生成 -->
+                <div class="tab-content"id="scheduler">
+                    <div class="content-area">
+                        <h2 class="section-title"><i class="fas fa-calendar-alt"></i> 计划任务生成器</h2>
+                        
+                        <div class="config-grid">
+                            <div class="config-card">
+                                <h3 class="card-title"><i class="fas fa-history"></i> 执行历史</h3>
+                                <p>查看和管理之前生成的计划任务配置记录。</p>
+                                <button class="btn btn-scheduler" id="toggle-history">
+                                    <i class="fas fa-clock"></i> 查看历史记录
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- 执行历史模块 -->
+                        <div class="config-card" id="history-section" style="display: none;">
+                            <h3 class="card-title"><i class="fas fa-history"></i> 执行历史记录</h3>
+                            <div class="history-controls">
+                                <button class="btn btn-secondary" id="clear-history">
+                                    <i class="fas fa-trash"></i> 清空历史
+                                </button>
+                                <button class="btn btn-secondary" id="export-history">
+                                    <i class="fas fa-download"></i> 导出历史
+                                </button>
+                                <span class="history-count">共 <span id="history-count">0</span> 条记录</span>
+                            </div>
+                            <div class="history-list" id="history-list">
+                                <div class="no-history">
+                                    <i class="fas fa-info-circle"></i>
+                                    <p>暂无历史记录，生成计划任务配置后将自动保存到此处</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="config-card">
+                            <h3 class="card-title"><i class="fas fa-cogs"></i> 任务配置</h3>
+                            <div class="config-grid">
+                                <div class="config-card">
+                                    <h3 class="card-title"><i class="fas fa-clock"></i> 计划时间</h3>
+                                    <div class="form-group">
+                                        <label for="schedule-frequency">执行频率</label>
+                                        <select id="schedule-frequency">
+                                            <option value="daily">每天</option>
+                                            <option value="weekly" selected>每周</option>
+                                            <option value="monthly">每月</option>
+                                            <option value="hourly">每小时</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="schedule-time">执行时间</label>
+                                        <input type="time" id="schedule-time" value="02:00">
+                                    </div>
+                                    <div class="form-group" id="weekly-options">
+                                        <label for="schedule-days">选择星期（如果适用）</label>
+                                        <div class="checkbox-group">
+                                            <input type="checkbox" id="monday" checked>
+                                            <label for="monday">周一</label>
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <input type="checkbox" id="tuesday" checked>
+                                            <label for="tuesday">周二</label>
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <input type="checkbox" id="wednesday" checked>
+                                            <label for="wednesday">周三</label>
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <input type="checkbox" id="thursday" checked>
+                                            <label for="thursday">周四</label>
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <input type="checkbox" id="friday" checked>
+                                            <label for="friday">周五</label>
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <input type="checkbox" id="saturday">
+                                            <label for="saturday">周六</label>
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <input type="checkbox" id="sunday">
+                                            <label for="sunday">周日</label>
+                                        </div>
+                                    </div>
+                                    <div class="form-group" id="monthly-options" style="display: none;">
+                                        <label for="schedule-day">选择日期（每月）</label>
+                                        <select id="schedule-day" style="background: linear-gradient(135deg, var(--dark-surface), var(--surface-variant)); color: #e5e7eb; font-family: 'JetBrains Mono', 'Consolas', 'Monaco', 'Courier New', monospace; border: 1px solid var(--border-dark); border-radius: 8px; padding: 12px 16px;">
+                                            <option value="1" selected style="background: var(--dark-surface); color: #e5e7eb;">1号</option>
+                                            <option value="2" style="background: var(--dark-surface); color: #e5e7eb;">2号</option>
+                                            <option value="3" style="background: var(--dark-surface); color: #e5e7eb;">3号</option>
+                                            <option value="4" style="background: var(--dark-surface); color: #e5e7eb;">4号</option>
+                                            <option value="5" style="background: var(--dark-surface); color: #e5e7eb;">5号</option>
+                                            <option value="6" style="background: var(--dark-surface); color: #e5e7eb;">6号</option>
+                                            <option value="7" style="background: var(--dark-surface); color: #e5e7eb;">7号</option>
+                                            <option value="8" style="background: var(--dark-surface); color: #e5e7eb;">8号</option>
+                                            <option value="9" style="background: var(--dark-surface); color: #e5e7eb;">9号</option>
+                                            <option value="10" style="background: var(--dark-surface); color: #e5e7eb;">10号</option>
+                                            <option value="11" style="background: var(--dark-surface); color: #e5e7eb;">11号</option>
+                                            <option value="12" style="background: var(--dark-surface); color: #e5e7eb;">12号</option>
+                                            <option value="13" style="background: var(--dark-surface); color: #e5e7eb;">13号</option>
+                                            <option value="14" style="background: var(--dark-surface); color: #e5e7eb;">14号</option>
+                                            <option value="15" style="background: var(--dark-surface); color: #e5e7eb;">15号</option>
+                                            <option value="16" style="background: var(--dark-surface); color: #e5e7eb;">16号</option>
+                                            <option value="17" style="background: var(--dark-surface); color: #e5e7eb;">17号</option>
+                                            <option value="18" style="background: var(--dark-surface); color: #e5e7eb;">18号</option>
+                                            <option value="19" style="background: var(--dark-surface); color: #e5e7eb;">19号</option>
+                                            <option value="20" style="background: var(--dark-surface); color: #e5e7eb;">20号</option>
+                                            <option value="21" style="background: var(--dark-surface); color: #e5e7eb;">21号</option>
+                                            <option value="22" style="background: var(--dark-surface); color: #e5e7eb;">22号</option>
+                                            <option value="23" style="background: var(--dark-surface); color: #e5e7eb;">23号</option>
+                                            <option value="24" style="background: var(--dark-surface); color: #e5e7eb;">24号</option>
+                                            <option value="25" style="background: var(--dark-surface); color: #e5e7eb;">25号</option>
+                                            <option value="26" style="background: var(--dark-surface); color: #e5e7eb;">26号</option>
+                                            <option value="27" style="background: var(--dark-surface); color: #e5e7eb;">27号</option>
+                                            <option value="28" style="background: var(--dark-surface); color: #e5e7eb;">28号</option>
+                                            <option value="29" style="background: var(--dark-surface); color: #e5e7eb;">29号</option>
+                                            <option value="30" style="background: var(--dark-surface); color: #e5e7eb;">30号</option>
+                                            <option value="31" style="background: var(--dark-surface); color: #e5e7eb;">31号</option>
+                                        </select>
+                                        <small style="color: #9ca3af; font-size: 0.85em; margin-top: 5px; display: block;">
+                                            注意：选择29-31号时，某些月份可能不存在该日期
+                                        </small>
+                                    </div>
+                                </div>
+                                
+                                <div class="config-card">
+                                    <h3 class="card-title"><i class="fas fa-file-alt"></i> 脚本设置</h3>
+                                    <div class="form-group">
+                                        <label for="script-path">脚本路径</label>
+                                        <input type="text" id="script-path" placeholder="例如: /backup/scripts/mysql_backup.sh" value="/backup/scripts/db_backup.sh">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="output-log">输出日志路径</label>
+                                        <input type="text" id="output-log" placeholder="例如: /var/log/backup.log" value="/var/log/backup.log">
+                                    </div>
+                                    <div class="form-group">
+                                        <label>高级选项</label>
+                                        <div class="checkbox-group">
+                                            <input type="checkbox" id="email-notify" checked>
+                                            <label for="email-notify">完成后发送邮件通知</label>
+                                        </div>
+                                        <div class="checkbox-group">
+                                            <input type="checkbox" id="error-only">
+                                            <label for="error-only">仅在错误时通知</label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-scheduler"id="generate-schedule">
+                                <i class="fas fa-cogs"></i> 生成计划任务配置
+                            </button>
+                            
+                            <div id="schedule-output" class="cron-output">
+                                <!-- 生成的计划任务配置将显示在这里 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>多数据库备份脚本生成工具 v3.3 | © 2023 数据库管理解决方案 | 支持 Oracle, MySQL, PostgreSQL, SQL Server</p>
+        </footer>
+    </div>
+
+    <div class="notification" id="notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="notification-text">脚本已复制到剪贴板！</span>
+    </div>
+
+    <script>
+        // 显示通知
+        function showNotification(message) {
+            const notification = document.getElementById('notification');
+            const notificationText = document.getElementById('notification-text');
+            
+            notificationText.textContent = message;
+            notification.classList.add('show');
+            
+            // 缩短显示时间到2秒
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 2000);
+        }
+        
+        // 点击通知关闭
+        document.getElementById('notification').addEventListener('click', function() {
+            this.classList.remove('show');
+        });
+        
+        // 可靠的复制到剪贴板函数
+        function copyToClipboard(text) {
+            // 创建临时textarea元素
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.setAttribute('readonly', '');
+            textarea.style.position = 'absolute';
+            textarea.style.left = '-9999px';
+            document.body.appendChild(textarea);
+            
+            // 选择文本
+            textarea.select();
+            
+            try {
+                // 尝试使用新的Clipboard API
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(text).then(() => {
+                        showNotification('脚本已复制到剪贴板！');
+                    }).catch(err => {
+                        // 如果Clipboard API失败，使用传统方法
+                        document.execCommand('copy');
+                        showNotification('脚本已复制到剪贴板！');
+                    });
+                } else {
+                    // 使用传统方法
+                    document.execCommand('copy');
+                    showNotification('脚本已复制到剪贴板！');
+                }
+            } catch (err) {
+                showNotification('复制失败: ' + err);
+            } finally {
+                // 移除临时元素
+                document.body.removeChild(textarea);
+            }
+        }
+
+        // 复制脚本内容的专用函数
+        function copyScriptContent(button) {
+            const script = button.getAttribute('data-script');
+            if (script) {
+                copyToClipboard(script);
+            } else {
+                showNotification('未找到脚本内容！');
+            }
+        }
+
+        // 数据库切换功能
+        document.querySelectorAll('.sidebar-option[data-tab]').forEach(option => {
+            option.addEventListener('click', () => {
+                // 移除所有活动标签
+                document.querySelectorAll('.sidebar-option').forEach(el => {
+                    el.classList.remove('active');
+                });
+                
+                // 设置当前选项为活动状态
+                option.classList.add('active');
+                
+                // 隐藏所有内容区域
+                document.querySelectorAll('.tab-content').forEach(el => {
+                    el.classList.remove('active');
+                });
+                
+                // 显示选中的内容区域
+                const tabId = option.getAttribute('data-tab');
+                document.getElementById(tabId).classList.add('active');
+            });
+        });
+        
+        // 备份类型切换
+        document.querySelectorAll('.backup-type-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const parent = btn.parentElement;
+                const backupType = btn.dataset.type;
+                
+                // 更新按钮状态
+                parent.querySelectorAll('.backup-type-btn').forEach(b => {
+                    b.classList.remove('active');
+                });
+                btn.classList.add('active');
+                
+                // 更新备份选项显示
+                const container = parent.closest('.tab-content');
+                container.querySelectorAll('.backup-options').forEach(opt => {
+                    opt.classList.remove('active');
+                });
+                container.querySelectorAll(`.backup-options.${backupType}`).forEach(opt => {
+                    opt.classList.add('active');
+                });
+            });
+        });
+        
+        // 表选择功能
+        document.querySelectorAll('.table-item').forEach(item => {
+            item.addEventListener('click', function() {
+                this.classList.toggle('selected');
+            });
+        });
+        
+        // 数据库选择功能
+        document.querySelectorAll('.database-item input').forEach(input => {
+            input.addEventListener('change', function() {
+                const parent = this.closest('.database-item');
+                parent.classList.toggle('selected', this.checked);
+            });
+        });
+        
+        // 生成Oracle备份脚本
+        document.getElementById('generate-oracle').addEventListener('click', () => {
+            const host = document.getElementById('oracle-host').value || 'dbserver01';
+            const port = document.getElementById('oracle-port').value || '1521';
+            const service = document.getElementById('oracle-service').value || 'ORCL';
+            const user = document.getElementById('oracle-user').value || 'sys as sysdba';
+            const path = document.getElementById('oracle-backup-path').value || '/backup/oracle/';
+            
+            const isPhysical = document.querySelector('#oracle .backup-type-btn.physical').classList.contains('active');
+            
+            let script = '';
+            
+            if (isPhysical) {
+                // 物理备份脚本
+                const parallel = document.getElementById('oracle-parallel').value || 4;
+                const compression = document.getElementById('oracle-compression').value || 'medium';
+                const encryption = document.getElementById('oracle-encryption').checked;
+                const validate = document.getElementById('oracle-validate').checked;
+                
+                script = `#!/bin/bash
+# Oracle 物理备份脚本 (RMAN)
+# 生成时间: ${new Date().toLocaleString()}
+
+# 配置参数
+HOST="${host}"
+PORT="${port}"
+SERVICE="${service}"
+USER="${user}"
+BACKUP_DIR="${path}"
+PARALLEL=${parallel}
+COMPRESSION="${compression}"
+
+echo "开始Oracle物理备份..."
+echo "目标主机: $HOST:$PORT/$SERVICE"
+echo "备份目录: $BACKUP_DIR"
+echo "并行度: $PARALLEL"
+echo "压缩级别: $COMPRESSION"
+${encryption ? 'echo "加密: 启用"' : ''}
+${validate ? 'echo "验证: 启用"' : ''}
+
+# 创建备份目录
+mkdir -p $BACKUP_DIR
+
+# 运行RMAN备份
+rman target $USER/$SERVICE << EOF
+run {
+    allocate channel ch1 type disk;
+    allocate channel ch2 type disk;
+    ${parallel > 2 ? `allocate channel ch3 type disk;\n    allocate channel ch4 type disk;` : ''}
+    
+    set compression on for backup;
+    ${encryption ? 'set encryption on;' : ''}
+    
+    backup as compressed backupset database 
+        format '${path}full_%d_%T_%U.bkp'
+        tag 'FULL_DB_BACKUP';
+    
+    backup current controlfile 
+        format '${path}control_%d_%T_%U.bkp';
+    
+    backup archivelog all delete input;
+    
+    release channel ch1;
+    release channel ch2;
+    ${parallel > 2 ? 'release channel ch3;\n    release channel ch4;' : ''}
+}
+EOF
+
+${validate ? `
+echo "验证备份文件..."
+rman target $USER/$SERVICE << EOF
+validate backupset all;
+EOF
+` : ''}
+
+echo "备份完成! 备份文件保存在 $BACKUP_DIR";
+`;
+            } else {
+                // 逻辑备份脚本
+                const encryption = document.getElementById('oracle-encryption').checked;
+                const validate = document.getElementById('oracle-validate').checked;
+                const dbConfig = document.getElementById('oracle-db-config').value;
+                
+                // 解析自定义数据库配置
+                const dbEntries = dbConfig.split('\n').filter(line => line.trim() !== '');
+                let backupCommands = '';
+                let validateCommands = '';
+                
+                const dateStr = "$(date +%Y%m%d_%H%M%S)";
+                
+                dbEntries.forEach((entry, index) => {
+                    const [dbName, tables] = entry.split(':').map(item => item.trim());
+                    if (dbName && tables) {
+                        const tableList = tables.split(',').map(t => t.trim()).filter(t => t !== '').join(',');
+                        const dumpFile = `${path}${dbName.toLowerCase()}_tables_${dateStr}.dmp`;
+                        const logFile = `${path}${dbName.toLowerCase()}_tables_${dateStr}.log`;
+                        
+                        backupCommands += `
+echo "备份数据库 ${dbName} 中的表: ${tableList}"
+expdp $USER/$SERVICE@$HOST:$PORT/$SERVICE \\
+    tables=${tableList} \\
+    directory=DATA_PUMP_DIR \\
+    dumpfile=${dumpFile} \\
+    logfile=${logFile} \\
+    compression=all \\
+    ${encryption ? 'encryption_password=backup_pass' : ''}
+`;
+                        
+                        if (validate) {
+                            validateCommands += `
+echo "验证备份文件: ${dumpFile}"
+impdp $USER/$SERVICE@$HOST:$PORT/$SERVICE \\
+    sqlfile=${dumpFile.replace('.dmp', '.sql')} \\
+    directory=DATA_PUMP_DIR \\
+    dumpfile=${dumpFile} \\
+    validate_only=y
+`;
+                        }
+                    }
+                });
+                
+                script = `#!/bin/bash
+# Oracle 逻辑备份脚本 (expdp)
+# 生成时间: ${new Date().toLocaleString()}
+
+# 配置参数
+HOST="${host}"
+PORT="${port}"
+SERVICE="${service}"
+USER="${user}"
+BACKUP_DIR="${path}"
+
+echo "开始Oracle逻辑备份..."
+echo "目标主机: $HOST:$PORT/$SERVICE"
+echo "备份目录: $BACKUP_DIR"
+${encryption ? 'echo "加密: 启用"' : ''}
+${validate ? 'echo "验证: 启用"' : ''}
+
+# 创建备份目录
+mkdir -p $BACKUP_DIR
+
+${backupCommands}
+${validate ? validateCommands : ''}
+
+echo "备份完成! 备份文件保存在 $BACKUP_DIR";
+`;
+            }
+            
+            const reportContent = document.getElementById('oracle-script');
+            reportContent.innerHTML = `<pre class="script-content">${script}</pre>
+                <button class="copy-btn" onclick="copyScriptContent(this)"><i class="fas fa-copy"></i> 复制脚本</button>`;
+            
+            // 将脚本内容存储在按钮的data属性中
+            const copyBtn = reportContent.querySelector('.copy-btn');
+            copyBtn.setAttribute('data-script', script);
+        });
+        
+        // 生成MySQL备份脚本
+        document.getElementById('generate-mysql').addEventListener('click', () => {
+            const host = document.getElementById('mysql-host').value || 'db-mysql-01';
+            const port = document.getElementById('mysql-port').value || '3306';
+            const user = document.getElementById('mysql-user').value || 'admin';
+            const path = document.getElementById('mysql-backup-path').value || '/backup/mysql/';
+            
+            const isPhysical = document.querySelector('#mysql .backup-type-btn.physical').classList.contains('active');
+            
+            let script = '';
+            
+            if (isPhysical) {
+                // 物理备份脚本
+                const threads = document.getElementById('mysql-threads').value || 4;
+                const compression = document.getElementById('mysql-compression').value || 2;
+                const encryption = document.getElementById('mysql-encryption').checked;
+                
+                script = `#!/bin/bash
+# MySQL 物理备份脚本 (Percona XtraBackup)
+# 生成时间: ${new Date().toLocaleString()}
+
+# 配置参数
+HOST="${host}"
+PORT="${port}"
+USER="${user}"
+BACKUP_DIR="${path}"
+THREADS=${threads}
+COMPRESSION=${compression}
+
+echo "开始MySQL物理备份..."
+echo "目标主机: $HOST:$PORT"
+echo "备份目录: $BACKUP_DIR"
+echo "线程数: $THREADS"
+echo "压缩级别: $COMPRESSION"
+${encryption ? 'echo "加密: 启用"' : ''}
+
+# 创建备份目录
+mkdir -p $BACKUP_DIR
+
+# 运行XtraBackup
+xtrabackup \\
+    --host=$HOST \\
+    --port=$PORT \\
+    --user=$USER \\
+    --password=your_password_here \\
+    --backup \\
+    --target-dir=$BACKUP_DIR \\
+    --compress \\
+    --compress-threads=$THREADS \\
+    --parallel=$THREADS \\
+    ${encryption ? '--encrypt=AES256 --encrypt-key="your_encryption_key"' : ''}
+
+echo "准备备份文件..."
+xtrabackup --prepare --target-dir=$BACKUP_DIR
+
+echo "备份完成! 备份文件保存在 $BACKUP_DIR";
+`;
+            } else {
+                // 逻辑备份脚本
+                const encryption = document.getElementById('mysql-encryption').checked;
+                const dbConfig = document.getElementById('mysql-db-config').value;
+                
+                // 解析自定义数据库配置
+                const dbEntries = dbConfig.split('\n').filter(line => line.trim() !== '');
+                let backupCommands = '';
+                
+                const dateStr = "$(date +%Y%m%d_%H%M%S)";
+                
+                dbEntries.forEach((entry, index) => {
+                    const [dbName, tables] = entry.split(':').map(item => item.trim());
+                    if (dbName && tables) {
+                        const tableList = tables.split(',').map(t => t.trim()).filter(t => t !== '').join(' ');
+                        const dumpFile = `${path}${dbName}_tables_${dateStr}.sql`;
+                        
+                        backupCommands += `
+echo "备份数据库 ${dbName} 中的表: ${tableList}"
+mysqldump \\
+    -h $HOST \\
+    -P $PORT \\
+    -u $USER \\
+    -p \\
+    ${dbName} \\
+    ${tableList} \\
+    ${encryption ? '--encrypt=AES256 --encrypt-key="your_encryption_key"' : ''} \\
+    > ${dumpFile}
+`;
+                    }
+                });
+                
+                script = `#!/bin/bash
+# MySQL 逻辑备份脚本 (mysqldump)
+# 生成时间: ${new Date().toLocaleString()}
+
+# 配置参数
+HOST="${host}"
+PORT="${port}"
+USER="${user}"
+BACKUP_DIR="${path}"
+
+echo "开始MySQL逻辑备份..."
+echo "目标主机: $HOST:$PORT"
+echo "备份目录: $BACKUP_DIR"
+${encryption ? 'echo "加密: 启用"' : ''}
+
+# 创建备份目录
+mkdir -p $BACKUP_DIR
+
+${backupCommands}
+
+echo "备份完成! 备份文件保存在 $BACKUP_DIR";
+`;
+            }
+            
+            const reportContent = document.getElementById('mysql-script');
+            reportContent.innerHTML = `<pre class="script-content">${script}</pre>
+                <button class="copy-btn" onclick="copyScriptContent(this)"><i class="fas fa-copy"></i> 复制脚本</button>`;
+            
+            // 将脚本内容存储在按钮的data属性中
+            const copyBtn = reportContent.querySelector('.copy-btn');
+            copyBtn.setAttribute('data-script', script);
+        });
+        
+        // 生成PostgreSQL备份脚本
+        document.getElementById('generate-postgres').addEventListener('click', () => {
+            const host = document.getElementById('postgres-host').value || 'pg-server';
+            const port = document.getElementById('postgres-port').value || '5432';
+            const user = document.getElementById('postgres-user').value || 'admin';
+            const path = document.getElementById('postgres-backup-path').value || '/backup/postgres/';
+            
+            const isPhysical = document.querySelector('#postgres .backup-type-btn.physical').classList.contains('active');
+            
+            let script = '';
+            
+            if (isPhysical) {
+                // 物理备份脚本
+                const compress = document.getElementById('postgres-compress').value || 6;
+                const checkpoint = document.getElementById('postgres-checkpoint').value || 'spread';
+                const verify = document.getElementById('postgres-verify').checked;
+                
+                script = `#!/bin/bash
+# PostgreSQL 物理备份脚本 (pg_basebackup)
+# 生成时间: ${new Date().toLocaleString()}
+
+# 配置参数
+HOST="${host}"
+PORT="${port}"
+USER="${user}"
+BACKUP_DIR="${path}"
+COMPRESSION=${compress}
+CHECKPOINT="${checkpoint}"
+
+echo "开始PostgreSQL物理备份..."
+echo "目标主机: $HOST:$PORT"
+echo "备份目录: $BACKUP_DIR"
+echo "压缩级别: $COMPRESSION"
+echo "检查点模式: $CHECKPOINT"
+${verify ? 'echo "验证: 启用"' : ''}
+
+# 创建备份目录
+mkdir -p $BACKUP_DIR
+
+# 运行物理备份
+pg_basebackup \\
+    -h $HOST \\
+    -p $PORT \\
+    -U $USER \\
+    -D $BACKUP_DIR/postgres_basebackup_$(date +%Y%m%d) \\
+    -Ft \\
+    -z -Z $COMPRESSION \\
+    -c $CHECKPOINT \\
+    -P
+
+${verify ? `
+echo "验证备份文件..."
+pg_verifybackup $BACKUP_DIR/postgres_basebackup_$(date +%Y%m%d)
+` : ''}
+
+echo "备份完成! 备份文件保存在 $BACKUP_DIR";
+`;
+            } else {
+                // 逻辑备份脚本
+                const verify = document.getElementById('postgres-verify').checked;
+                const dbConfig = document.getElementById('postgres-db-config').value;
+                
+                // 解析自定义数据库配置
+                const dbEntries = dbConfig.split('\n').filter(line => line.trim() !== '');
+                let backupCommands = '';
+                let verifyCommands = '';
+                
+                const dateStr = "$(date +%Y%m%d_%H%M%S)";
+                
+                dbEntries.forEach((entry, index) => {
+                    const [dbName, tables] = entry.split(':').map(item => item.trim());
+                    if (dbName && tables) {
+                        const tableList = tables.split(',').map(t => t.trim()).filter(t => t !== '');
+                        let tableOptions = '';
+                        
+                        tableList.forEach(table => {
+                            tableOptions += ` -t ${table}`;
+                        });
+                        
+                        const dumpFile = `${path}${dbName}_tables_${dateStr}.dump`;
+                        
+                        backupCommands += `
+echo "备份数据库 ${dbName} 中的表: ${tableList.join(', ')}"
+pg_dump \\
+    -h $HOST \\
+    -p $PORT \\
+    -U $USER \\
+    -d ${dbName} \\
+    ${tableOptions} \\
+    -Fc \\
+    -f ${dumpFile}
+`;
+                        
+                        if (verify) {
+                            verifyCommands += `
+echo "验证备份文件: ${dumpFile}"
+pg_restore -l ${dumpFile} > /dev/null
+if [ $? -eq 0 ]; then
+    echo "备份验证成功!"
+else
+    echo "备份验证失败!"
+fi
+`;
+                        }
+                    }
+                });
+                
+                script = `#!/bin/bash
+# PostgreSQL 逻辑备份脚本 (pg_dump)
+# 生成时间: ${new Date().toLocaleString()}
+
+# 配置参数
+HOST="${host}"
+PORT="${port}"
+USER="${user}"
+BACKUP_DIR="${path}"
+
+echo "开始PostgreSQL逻辑备份..."
+echo "目标主机: $HOST:$PORT"
+echo "备份目录: $BACKUP_DIR"
+${verify ? 'echo "验证: 启用"' : ''}
+
+# 创建备份目录
+mkdir -p $BACKUP_DIR
+
+${backupCommands}
+${verify ? verifyCommands : ''}
+
+echo "备份完成! 备份文件保存在 $BACKUP_DIR";
+`;
+            }
+            
+            const reportContent = document.getElementById('postgres-script');
+            reportContent.innerHTML = `<pre class="script-content">${script}</pre>
+                <button class="copy-btn" onclick="copyScriptContent(this)"><i class="fas fa-copy"></i> 复制脚本</button>`;
+            
+            // 将脚本内容存储在按钮的data属性中
+            const copyBtn = reportContent.querySelector('.copy-btn');
+            copyBtn.setAttribute('data-script', script);
+        });
+        
+        // 生成SQL Server备份脚本
+        document.getElementById('generate-sqlserver').addEventListener('click', () => {
+            const host = document.getElementById('sqlserver-host').value || 'sql-server';
+            const port = document.getElementById('sqlserver-port').value || '1433';
+            const user = document.getElementById('sqlserver-user').value || 'admin';
+            const path = document.getElementById('sqlserver-backup-path').value || 'C:\\Backup\\';
+            
+            const isPhysical = document.querySelector('#sqlserver .backup-type-btn.physical').classList.contains('active');
+            
+            let script = '';
+            
+            if (isPhysical) {
+                // 物理备份脚本
+                const compress = document.getElementById('sqlserver-compress').value || 'medium';
+                const blocksize = document.getElementById('sqlserver-blocksize').value || 128;
+                const verify = document.getElementById('sqlserver-verify').checked;
+                const checksum = document.getElementById('sqlserver-checksum').checked;
+                
+                script = `-- SQL Server 物理备份脚本
+-- 生成时间: ${new Date().toLocaleString()}
+
+-- 配置参数
+DECLARE @backupPath NVARCHAR(255) = '${path.replace(/\\/g, '\\\\')}sqlserver_backup_${new Date().getTime()}.bak'
+DECLARE @compression NVARCHAR(20) = '${compress}'
+DECLARE @blocksize INT = ${blocksize} * 1024
+DECLARE @verify BIT = ${verify ? 1 : 0}
+DECLARE @checksum BIT = ${checksum ? 1 : 0}
+
+-- 开始备份
+BACKUP DATABASE [APP_DB]
+TO DISK = @backupPath
+WITH 
+    FORMAT,
+    COMPRESSION,
+    BLOCKSIZE = @blocksize,
+    ${checksum ? 'CHECKSUM,' : ''}
+    STATS = 5;
+
+${verify ? `
+-- 验证备份
+RESTORE VERIFYONLY 
+FROM DISK = @backupPath
+WITH CHECKSUM;
+` : ''}
+
+
+`;
+            } else {
+                // 逻辑备份脚本
+                const verify = document.getElementById('sqlserver-verify').checked;
+                const dbConfig = document.getElementById('sqlserver-db-config').value;
+                
+                // 解析自定义数据库配置
+                const dbEntries = dbConfig.split('\n').filter(line => line.trim() !== '');
+                let backupCommands = '';
+                let verifyCommands = '';
+                
+                const dateStr = "CONVERT(NVARCHAR, GETDATE(), 112) + '_' + REPLACE(CONVERT(NVARCHAR, GETDATE(), 108), ':', '')";
+                
+                dbEntries.forEach((entry, index) => {
+                    const [dbName, tables] = entry.split(':').map(item => item.trim());
+                    if (dbName && tables) {
+                        const tableList = tables.split(',').map(t => t.trim()).filter(t => t !== '');
+                        
+                        tableList.forEach(table => {
+                            const dataFile = `@backupPath + '${dbName}_${table}_' + ${dateStr} + '.dat'`;
+                            
+                            backupCommands += `
+EXEC xp_cmdshell 'bcp "${dbName}.dbo.${table}" out "' + ${dataFile} + '" -T -c -t,'
+`;
+                            
+                            if (verify) {
+                                verifyCommands += `
+DECLARE @${table.replace(/\s/g, '')}Count INT
+SELECT @${table.replace(/\s/g, '')}Count = COUNT(*) FROM [${dbName}].dbo.[${table}]
+
+DECLARE @${table.replace(/\s/g, '')}BackupCount INT
+EXEC xp_cmdshell 'find /c /v """' + ${dataFile} + '"', no_output
+SELECT @${table.replace(/\s/g, '')}BackupCount = CAST(REPLACE(@@ROWCOUNT, '行数', '') AS INT) - 1
+`;
+                            }
+                        });
+                    }
+                });
+                
+                script = `-- SQL Server 逻辑备份脚本
+-- 生成时间: ${new Date().toLocaleString()}
+
+-- 配置参数
+DECLARE @backupPath NVARCHAR(255) = '${path.replace(/\\/g, '\\\\')}'
+DECLARE @dateStr NVARCHAR(20) = ${dateStr}
+DECLARE @verify BIT = ${verify ? 1 : 0}
+
+${backupCommands}
+${verify ? verifyCommands : ''}
+`;
+            }
+            
+            const reportContent = document.getElementById('sqlserver-script');
+            reportContent.innerHTML = `<pre class="script-content">${script}</pre>
+                <button class="copy-btn" onclick="copyScriptContent(this)"><i class="fas fa-copy"></i> 复制脚本</button>`;
+            
+            // 将脚本内容存储在按钮的data属性中
+            const copyBtn = reportContent.querySelector('.copy-btn');
+            copyBtn.setAttribute('data-script', script);
+        });
+        
+        // 工具功能 - 脚本修改器
+        
+        // 结果显示函数
+        let resultHistory = [];
+        const MAX_RESULTS = 5;
+        
+        function showResultInCodeBlock(title, content) {
+            const resultsSection = document.getElementById('modifier-results');
+            const outputElement = document.getElementById('modifier-output');
+            
+            // 显示结果区域
+            resultsSection.style.display = 'block';
+            
+            // 添加时间戳和标题
+            const timestamp = new Date().toLocaleString('zh-CN');
+            const newResult = {
+                title: title,
+                content: content,
+                timestamp: timestamp
+            };
+            
+            // 添加到历史记录，保持最新5条
+            resultHistory.unshift(newResult);
+            if (resultHistory.length > MAX_RESULTS) {
+                resultHistory = resultHistory.slice(0, MAX_RESULTS);
+            }
+            
+            // 重新渲染所有结果
+            const displayContent = resultHistory.map((result, index) => {
+                const separator = index > 0 ? '\n' + '='.repeat(50) + '\n\n' : '';
+                return separator + `=== ${result.title} ===\n时间: ${result.timestamp}\n\n${result.content}\n\n`;
+            }).join('');
+            
+            outputElement.textContent = displayContent;
+            
+            // 滚动到顶部显示最新结果
+            outputElement.scrollTop = 0;
+        }
+        
+        // 清除结果功能
+        document.getElementById('clear-results').addEventListener('click', () => {
+            const resultsSection = document.getElementById('modifier-results');
+            const outputElement = document.getElementById('modifier-output');
+            
+            // 清空历史记录和显示内容
+            resultHistory = [];
+            outputElement.textContent = '';
+            resultsSection.style.display = 'none';
+            showNotification('检查结果已清除');
+        });
+        
+        // 脚本优化功能
+        document.getElementById('optimize-script').addEventListener('click', () => {
+            const script = document.getElementById('script-content').value;
+            if (!script.trim()) {
+                showNotification('请先输入要优化的脚本内容！');
+                return;
+            }
+            
+            let optimized = script;
+            let optimizations = [];
+            
+            // 添加错误处理
+            if (!optimized.includes('set -e') && !optimized.includes('set -o errexit')) {
+                optimized = '#!/bin/bash\nset -e  # 遇到错误立即退出\nset -o pipefail  # 管道命令错误处理\n\n' + optimized;
+                optimizations.push('添加了错误处理机制');
+            }
+            
+            // 优化日志记录
+            if (optimized.includes('echo ')) {
+                optimized = optimized.replace(/echo "([^"]*)"/g, 'echo "[$(date \'%Y-%m-%d %H:%M:%S\')] $1"');
+                optimizations.push('优化了日志输出格式，添加时间戳');
+            }
+            
+            // 添加备份验证
+            if (optimized.includes('mysqldump') && !optimized.includes('--single-transaction')) {
+                optimized = optimized.replace(/mysqldump/g, 'mysqldump --single-transaction --routines --triggers');
+                optimizations.push('MySQL备份添加了事务一致性和存储过程/触发器备份');
+            }
+            
+            // 添加磁盘空间检查
+            if (!optimized.includes('df -h')) {
+                const spaceCheck = `\n# 检查磁盘空间\nAVAILABLE_SPACE=$(df -BG "$BACKUP_DIR" | awk 'NR==2 {print $4}' | sed 's/G//')\nif [ "$AVAILABLE_SPACE" -lt 5 ]; then\n    echo "[$(date '%Y-%m-%d %H:%M:%S')] 警告: 备份目录可用空间不足5GB"\n    exit 1\nfi\n`;
+                optimized = optimized.replace(/(BACKUP_DIR=.*)/g, '$1' + spaceCheck);
+                optimizations.push('添加了磁盘空间检查');
+            }
+            
+            // 添加备份文件压缩
+            if (optimized.includes('.sql') && !optimized.includes('gzip')) {
+                optimized = optimized.replace(/> (\$[^\s]*\.sql)/g, '| gzip > $1.gz');
+                optimized = optimized.replace(/\.sql/g, '.sql.gz');
+                optimizations.push('添加了备份文件压缩');
+            }
+            
+            // 添加备份完成通知
+            if (!optimized.includes('备份完成')) {
+                optimized += '\n\necho "[$(date \'%Y-%m-%d %H:%M:%S\')] 备份任务完成"\necho "备份文件: $BACKUP_FILE"\necho "文件大小: $(du -h $BACKUP_FILE | cut -f1)"';
+                optimizations.push('添加了备份完成状态报告');
+            }
+            
+            document.getElementById('script-content').value = optimized;
+            
+            // 显示优化结果
+            const message = optimizations.length > 0 ? 
+                `脚本优化完成！应用了${optimizations.length}项优化：\n${optimizations.join('\n')}` : 
+                '脚本已检查，无需进一步优化。';
+            
+            showResultInCodeBlock('优化结果', message);
+            showNotification('脚本优化完成，详细结果请查看下方代码块！');
+        });
+        
+        // 语法检查功能
+        document.getElementById('check-syntax').addEventListener('click', () => {
+            const script = document.getElementById('script-content').value;
+            if (!script.trim()) {
+                showNotification('请先输入要检查的脚本内容！');
+                return;
+            }
+            
+            const issues = [];
+            const lines = script.split('\n');
+            
+            lines.forEach((line, index) => {
+                const lineNum = index + 1;
+                
+                // 检查常见语法问题
+                if (line.includes('if [') && !line.includes(']; then')) {
+                    issues.push(`第${lineNum}行: if语句语法可能有误，建议使用 'if [ condition ]; then'`);
+                }
+                
+                if (line.includes('$') && line.includes('"') && !line.match(/"[^"]*\$[^"]*"/)) {
+                    if (line.includes('$') && !line.includes('"$')) {
+                        issues.push(`第${lineNum}行: 变量引用建议使用双引号包围，如 "\$variable"`);
+                    }
+                }
+                
+                if (line.includes('rm ') && !line.includes('rm -f') && !line.includes('rm -rf')) {
+                    issues.push(`第${lineNum}行: rm命令建议添加 -f 参数避免交互提示`);
+                }
+                
+                if (line.includes('mysql ') && line.includes('-p') && line.match(/-p\w+/)) {
+                    issues.push(`第${lineNum}行: 安全警告 - 避免在命令行中直接写入密码`);
+                }
+                
+                if (line.includes('#!/bin/bash') && index !== 0) {
+                    issues.push(`第${lineNum}行: shebang应该在文件第一行`);
+                }
+            });
+            
+            // 检查必要的变量定义
+            if (script.includes('$BACKUP_DIR') && !script.includes('BACKUP_DIR=')) {
+                issues.push('缺少BACKUP_DIR变量定义');
+            }
+            
+            if (script.includes('mysqldump') && !script.includes('DB_USER=') && !script.includes('--user=')) {
+                issues.push('MySQL备份缺少用户名配置');
+            }
+            
+            const message = issues.length === 0 ? 
+                '语法检查完成，未发现明显问题！' : 
+                `发现${issues.length}个潜在问题：\n${issues.join('\n')}`;
+            
+            showResultInCodeBlock('语法检查结果', message);
+            showNotification('语法检查完成，详细结果请查看下方代码块！');
+        });
+        
+        // 变量替换功能
+        document.getElementById('replace-vars').addEventListener('click', () => {
+            const script = document.getElementById('script-content').value;
+            if (!script.trim()) {
+                showNotification('请先输入要处理的脚本内容！');
+                return;
+            }
+            
+            // 创建变量替换对话框
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.5); z-index: 1000; display: flex;
+                align-items: center; justify-content: center;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: rgba(26, 26, 26, 0.95); backdrop-filter: blur(20px); padding: 30px; border-radius: 16px; width: 500px; max-height: 80vh; overflow-y: auto; border: 1px solid rgba(255, 255, 255, 0.2);">
+                    <h3 style="margin-top: 0; color: #ffffff;"><i class="fas fa-exchange-alt"></i> 变量替换</h3>
+                    <div id="var-pairs">
+                        <div class="var-pair" style="margin-bottom: 15px; display: flex; gap: 10px; align-items: center;">
+                            <input type="text" placeholder="查找" class="input-field" style="flex: 1;">
+                            <span style="color: #ffffff;">→</span>
+                            <input type="text" placeholder="替换为" class="input-field" style="flex: 1;">
+                            <button onclick="this.parentElement.remove()" class="btn btn-danger" style="padding: var(--spacing-xs);">×</button>
+                        </div>
+                    </div>
+                    <button id="add-var-pair" class="btn btn-add" style="margin: var(--spacing-sm) 0; padding: var(--spacing-xs) var(--spacing-md);">
+                        <i class="fas fa-plus"></i> 添加替换规则
+                    </button>
+                    <div style="margin-top: var(--spacing-lg); display: flex; gap: var(--spacing-sm); justify-content: flex-end;">
+                        <button id="cancel-replace" class="btn btn-cancel" style="padding: var(--spacing-sm) var(--spacing-lg);">取消</button>
+                        <button id="apply-replace" class="btn btn-apply" style="padding: var(--spacing-sm) var(--spacing-lg);">应用替换</button>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+            
+            // 添加替换规则
+            modal.querySelector('#add-var-pair').onclick = () => {
+                const varPairs = modal.querySelector('#var-pairs');
+                const newPair = document.createElement('div');
+                newPair.className = 'var-pair';
+                newPair.style.cssText = 'margin-bottom: 15px; display: flex; gap: 10px; align-items: center;';
+                newPair.innerHTML = `
+                    <input type="text" placeholder="查找" class="input-field" style="flex: 1;">
+                    <span style="color: #ffffff;">→</span>
+                    <input type="text" placeholder="替换为" class="input-field" style="flex: 1;">
+                    <button onclick="this.parentElement.remove()" class="btn btn-danger" style="padding: var(--spacing-xs);">×</button>
+                `;
+                varPairs.appendChild(newPair);
+            };
+            
+            // 取消
+            modal.querySelector('#cancel-replace').onclick = () => {
+                document.body.removeChild(modal);
+            };
+            
+            // 应用替换
+            modal.querySelector('#apply-replace').onclick = () => {
+                const pairs = modal.querySelectorAll('.var-pair');
+                let modifiedScript = script;
+                let replacements = 0;
+                
+                pairs.forEach(pair => {
+                    const inputs = pair.querySelectorAll('input');
+                    const find = inputs[0].value.trim();
+                    const replace = inputs[1].value.trim();
+                    
+                    if (find && replace) {
+                        const regex = new RegExp(find.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+                        const matches = modifiedScript.match(regex);
+                        if (matches) {
+                            modifiedScript = modifiedScript.replace(regex, replace);
+                            replacements += matches.length;
+                        }
+                    }
+                });
+                
+                document.getElementById('script-content').value = modifiedScript;
+                document.body.removeChild(modal);
+                showNotification(`变量替换完成！共替换了${replacements}处内容。`);
+            };
+        });
+        
+        // 执行修改功能
+        document.getElementById('modify-script').addEventListener('click', () => {
+            const script = document.getElementById('script-content').value;
+            if (!script.trim()) {
+                showNotification('请先输入要修改的脚本内容！');
+                return;
+            }
+            
+            let modified = script;
+            const modifications = [];
+            
+            // 添加脚本头部信息
+            if (!modified.includes('# 修改时间:')) {
+                const header = `# 脚本修改器处理\n# 修改时间: ${new Date().toLocaleString('zh-CN')}\n# 原始脚本长度: ${script.length} 字符\n\n`;
+                modified = header + modified;
+                modifications.push('添加了脚本修改信息');
+            }
+            
+            // 标准化变量命名
+            const varPattern = /([A-Z_]+)=([^\n]*)/g;
+            let match;
+            while ((match = varPattern.exec(modified)) !== null) {
+                const varName = match[1];
+                if (!varName.startsWith('BACKUP_') && (varName.includes('DB') || varName.includes('HOST') || varName.includes('USER'))) {
+                    const newVarName = 'BACKUP_' + varName;
+                    modified = modified.replace(new RegExp('\\$' + varName, 'g'), '$' + newVarName);
+                    modified = modified.replace(varName + '=', newVarName + '=');
+                    modifications.push(`标准化变量名: ${varName} → ${newVarName}`);
+                }
+            }
+            
+            // 添加执行权限提醒
+            if (!modified.includes('chmod +x')) {
+                modified += '\n\n# 注意: 请确保脚本有执行权限\n# chmod +x ' + (script.includes('BACKUP_FILE') ? '$BACKUP_FILE' : 'backup_script.sh');
+                modifications.push('添加了执行权限提醒');
+            }
+            
+            document.getElementById('script-content').value = modified;
+            
+            const message = modifications.length > 0 ? 
+                `脚本修改完成！应用了${modifications.length}项修改：\n${modifications.join('\n')}` : 
+                '脚本已处理，无需进一步修改。';
+            
+            // 显示修改结果
+            showResultInCodeBlock('执行修改结果', message);
+            showNotification('脚本修改完成，详细结果请查看下方代码块！');
+        });
+        
+        // 工具功能 - 计划任务生成器
+        // 执行历史管理
+        let taskHistory = JSON.parse(localStorage.getItem('taskHistory') || '[]');
+        
+        function saveToHistory(config) {
+            const historyItem = {
+                id: Date.now(),
+                timestamp: new Date().toLocaleString('zh-CN'),
+                frequency: config.frequency,
+                time: config.time,
+                scriptPath: config.scriptPath,
+                logPath: config.logPath,
+                emailNotify: config.emailNotify,
+                linuxCron: config.linuxCron,
+                windowsTask: config.windowsTask,
+                cronExpression: config.cronExpression,
+                description: config.description
+            };
+            
+            taskHistory.unshift(historyItem);
+            // 限制历史记录数量为10条
+            if (taskHistory.length > 10) {
+                taskHistory = taskHistory.slice(0, 10);
+            }
+            
+            localStorage.setItem('taskHistory', JSON.stringify(taskHistory));
+            updateHistoryDisplay();
+        }
+        
+        function updateHistoryDisplay() {
+            const historyList = document.getElementById('history-list');
+            const historyCount = document.getElementById('history-count');
+            
+            historyCount.textContent = taskHistory.length;
+            
+            if (taskHistory.length === 0) {
+                historyList.innerHTML = `
+                    <div class="no-history">
+                        <i class="fas fa-info-circle"></i>
+                        <p>暂无历史记录，生成计划任务配置后将自动保存到此处</p>
+                    </div>`;
+                return;
+            }
+            
+            historyList.innerHTML = taskHistory.map(item => `
+                <div class="history-item">
+                    <div class="history-header">
+                        <div class="history-title">${item.description}</div>
+                        <div class="history-time">${item.timestamp}</div>
+                    </div>
+                    <div class="history-details">
+                        脚本: ${item.scriptPath}<br>
+                        日志: ${item.logPath}<br>
+                        邮件通知: ${item.emailNotify ? '是' : '否'}
+                    </div>
+                    <div class="history-actions">
+                        <button class="btn btn-secondary" onclick="copyToClipboard(\`${item.linuxCron}\`)">
+                            <i class="fas fa-copy"></i> Linux
+                        </button>
+                        <button class="btn btn-secondary" onclick="copyToClipboard(\`${item.windowsTask}\`)">
+                            <i class="fas fa-copy"></i> Windows
+                        </button>
+                        <button class="btn btn-secondary" onclick="copyToClipboard(\`${item.cronExpression}\`)">
+                            <i class="fas fa-copy"></i> Cron表达式
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteHistoryItem(${item.id})">
+                            <i class="fas fa-trash"></i> 删除
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function deleteHistoryItem(id) {
+            taskHistory = taskHistory.filter(item => item.id !== id);
+            localStorage.setItem('taskHistory', JSON.stringify(taskHistory));
+            updateHistoryDisplay();
+            showNotification('历史记录已删除');
+        }
+        
+        document.getElementById('toggle-history').addEventListener('click', () => {
+            const historySection = document.getElementById('history-section');
+            const toggleBtn = document.getElementById('toggle-history');
+            
+            if (historySection.style.display === 'none') {
+                historySection.style.display = 'block';
+                toggleBtn.innerHTML = '<i class="fas fa-eye-slash"></i> 隐藏历史记录';
+                updateHistoryDisplay();
+            } else {
+                historySection.style.display = 'none';
+                toggleBtn.innerHTML = '<i class="fas fa-clock"></i> 查看历史记录';
+            }
+        });
+        
+        document.getElementById('clear-history').addEventListener('click', () => {
+            if (confirm('确定要清空所有历史记录吗？此操作不可恢复。')) {
+                taskHistory = [];
+                localStorage.setItem('taskHistory', JSON.stringify(taskHistory));
+                updateHistoryDisplay();
+                showNotification('历史记录已清空');
+            }
+        });
+        
+        document.getElementById('export-history').addEventListener('click', () => {
+            if (taskHistory.length === 0) {
+                showNotification('没有历史记录可导出');
+                return;
+            }
+            
+            const exportData = taskHistory.map(item => ({
+                时间: item.timestamp,
+                描述: item.description,
+                脚本路径: item.scriptPath,
+                日志路径: item.logPath,
+                邮件通知: item.emailNotify ? '是' : '否',
+                Linux配置: item.linuxCron,
+                Windows配置: item.windowsTask,
+                Cron表达式: item.cronExpression
+            }));
+            
+            const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `计划任务历史记录_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showNotification('历史记录已导出');
+        });
+        
+        document.getElementById('generate-schedule').addEventListener('click', () => {
+            const frequency = document.getElementById('schedule-frequency').value;
+            const time = document.getElementById('schedule-time').value;
+            const scriptPath = document.getElementById('script-path').value;
+            const logPath = document.getElementById('output-log').value;
+            const emailNotify = document.getElementById('email-notify').checked;
+            
+            // 解析时间
+            const [hour, minute] = time.split(':');
+            
+            // 获取选中的星期几
+            const selectedDays = [];
+            const dayIds = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+            const dayNumbers = [1, 2, 3, 4, 5, 6, 0]; // cron格式：周日=0
+            
+            dayIds.forEach((dayId, index) => {
+                if (document.getElementById(dayId).checked) {
+                    selectedDays.push(dayNumbers[index]);
+                }
+            });
+            
+            let cronExpression = '';
+            let windowsSchedule = '';
+            let scheduleDescription = '';
+            
+            // 生成cron表达式和Windows任务计划
+            if (frequency === 'daily') {
+                cronExpression = `${minute} ${hour} * * *`;
+                windowsSchedule = `/sc DAILY /st ${time}`;
+                scheduleDescription = `每天 ${time} 执行`;
+            } else if (frequency === 'weekly') {
+                const cronDays = selectedDays.length > 0 ? selectedDays.join(',') : '1-5';
+                cronExpression = `${minute} ${hour} * * ${cronDays}`;
+                windowsSchedule = `/sc WEEKLY /d MON,TUE,WED,THU,FRI /st ${time}`;
+                scheduleDescription = `每周工作日 ${time} 执行`;
+            } else if (frequency === 'monthly') {
+                 const selectedDay = document.getElementById('schedule-day').value;
+                 cronExpression = `${minute} ${hour} ${selectedDay} * *`;
+                 windowsSchedule = `/sc MONTHLY /d ${selectedDay} /st ${time}`;
+                 scheduleDescription = `每月${selectedDay}日 ${time} 执行`;
+            } else if (frequency === 'hourly') {
+                cronExpression = `${minute} * * * *`;
+                windowsSchedule = `/sc HOURLY /st ${time}`;
+                scheduleDescription = `每小时第${minute}分钟执行`;
+            }
+            
+            const linuxCron = `${cronExpression} root ${scriptPath} >> ${logPath} 2>&1`;
+            const windowsTask = `schtasks /create /tn "数据库备份任务" /tr "${scriptPath}" ${windowsSchedule} /ru SYSTEM`;
+            
+            const output = `计划任务配置已生成：
+            
+【任务描述】
+- 执行频率: ${scheduleDescription}
+- 脚本路径: ${scriptPath}
+- 日志路径: ${logPath}
+- 邮件通知: ${emailNotify ? '是' : '否'}
+
+【Linux Cron 配置】
+${linuxCron}
+
+【Windows 任务计划配置】
+${windowsTask}
+
+【Cron 表达式】
+${cronExpression}
+(格式: 分钟 小时 日 月 星期)`;
+            
+            // 保存到历史记录
+            saveToHistory({
+                frequency: frequency,
+                time: time,
+                scriptPath: scriptPath,
+                logPath: logPath,
+                emailNotify: emailNotify,
+                linuxCron: linuxCron,
+                windowsTask: windowsTask,
+                cronExpression: cronExpression,
+                description: scheduleDescription
+            });
+            
+            document.getElementById('schedule-output').innerHTML = `<pre style="background: linear-gradient(135deg, var(--dark-surface), var(--surface-variant)); color: #e5e7eb; padding: 20px; border-radius: 8px; font-family: 'JetBrains Mono', 'Consolas', monospace; white-space: pre-wrap; word-wrap: break-word; margin: 0 0 15px 0;">${output}</pre>
+                <button class="btn btn-scheduler" onclick="copyToClipboard(\`${output}\`)">
+                    <i class="fas fa-copy"></i> 复制完整配置
+                </button>
+                <button class="btn btn-secondary" onclick="copyToClipboard(\`${linuxCron}\`)" style="margin-left: 10px;">
+                    <i class="fas fa-copy"></i> 复制Linux配置
+                </button>
+                <button class="btn btn-secondary" onclick="copyToClipboard(\`${windowsTask}\`)" style="margin-left: 10px;">
+                    <i class="fas fa-copy"></i> 复制Windows配置
+                </button>
+                <div style="margin-top: 10px; padding: 10px; background: rgba(0, 0, 0, 0.3); border: 1px solid var(--border-dark); border-radius: 6px; color: #e5e7eb;">
+                    <i class="fas fa-info-circle"></i> 配置已自动保存到执行历史记录中
+                </div>`;
+        });
+        
+        // 频率选择变化事件监听器
+        document.getElementById('schedule-frequency').addEventListener('change', function() {
+            const frequency = this.value;
+            const weeklyOptions = document.getElementById('weekly-options');
+            const monthlyOptions = document.getElementById('monthly-options');
+            
+            // 隐藏所有选项
+            weeklyOptions.style.display = 'none';
+            monthlyOptions.style.display = 'none';
+            
+            // 根据频率显示相应选项
+            if (frequency === 'weekly') {
+                weeklyOptions.style.display = 'block';
+            } else if (frequency === 'monthly') {
+                monthlyOptions.style.display = 'block';
+            }
+        });
+        
+        // 将deleteHistoryItem函数设为全局函数
+        window.deleteHistoryItem = deleteHistoryItem;
+        
+        // 初始化页面
+        document.addEventListener('DOMContentLoaded', () => {
+            // 生成初始Oracle脚本
+            document.getElementById('generate-oracle').click();
+            
+            // 初始化备份选项显示
+            document.querySelectorAll('.backup-options').forEach(opt => {
+                opt.classList.remove('active');
+            });
+            document.querySelectorAll('.backup-options.physical').forEach(opt => {
+                opt.classList.add('active');
+            });
+            
+            // 初始化频率选择显示
+            const initialFrequency = document.getElementById('schedule-frequency').value;
+            if (initialFrequency === 'weekly') {
+                document.getElementById('weekly-options').style.display = 'block';
+                document.getElementById('monthly-options').style.display = 'none';
+            } else if (initialFrequency === 'monthly') {
+                document.getElementById('weekly-options').style.display = 'none';
+                document.getElementById('monthly-options').style.display = 'block';
+            } else {
+                document.getElementById('weekly-options').style.display = 'none';
+                document.getElementById('monthly-options').style.display = 'none';
+            }
+            
+            // 初始化历史记录显示
+            updateHistoryDisplay();
+        });
+    </script>
+</body>
+</html>

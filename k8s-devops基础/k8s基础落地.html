@@ -1,0 +1,3001 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第二天 Kubernetes落地实践之旅</title>
+    
+    <!-- External CSS -->
+    <link href="https://cdn.staticfile.org/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.staticfile.org/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Code highlighting -->
+    <link href="https://cdn.staticfile.org/prism/1.29.0/themes/prism.min.css" rel="stylesheet">
+    <link href="https://cdn.staticfile.org/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --primary-dark: #1d4ed8;
+            --secondary-color: #8b5cf6;
+            --accent-color: #06b6d4;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --border-color: #e2e8f0;
+            --border-light: #f1f5f9;
+            --code-bg: #f8fafc;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+        }
+
+        [data-theme="dark"] {
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --border-color: #475569;
+            --border-light: #334155;
+            --code-bg: #1e293b;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        *,
+        *::before,
+        *::after {
+            transition: background-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                       color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                       border-color 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                       box-shadow 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                       transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans SC', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            font-size: 16px;
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
+        }
+
+        .hero-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #667eea 100%);
+            background-size: 200% 200%;
+            animation: gradientShift 8s ease-in-out infinite;
+        }
+
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .content-card {
+            background-color: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-sm);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .content-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--border-color);
+        }
+
+        .sidebar {
+            background: linear-gradient(145deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-xl);
+            backdrop-filter: blur(20px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-item {
+            color: var(--text-secondary);
+            border-radius: var(--radius-md);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: -1;
+        }
+
+        .nav-item:hover::before,
+        .nav-item.active::before {
+            width: 100%;
+        }
+
+        .nav-item:hover,
+        .nav-item.active {
+            color: white;
+            transform: translateX(4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .code-block {
+            background: linear-gradient(145deg, var(--code-bg) 0%, var(--bg-tertiary) 100%);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', Consolas, 'Liberation Mono', Menlo, monospace;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .code-block:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+            border-color: var(--primary-color);
+        }
+
+        .code-block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+            background-size: 200% 100%;
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+
+        .code-block pre {
+            margin: 0;
+            padding: 1.5rem;
+            white-space: pre;
+            overflow-x: auto;
+            font-size: 14px;
+            line-height: 1.5;
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-color) transparent;
+        }
+
+        .code-block pre::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .code-block pre::-webkit-scrollbar-track {
+            background: transparent;
+            border-radius: var(--radius-sm);
+        }
+
+        .code-block pre::-webkit-scrollbar-thumb {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: var(--radius-sm);
+        }
+
+        .copy-button {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 8px 12px;
+            font-size: 12px;
+            font-weight: 500;
+            cursor: pointer;
+            opacity: 0;
+            transform: translateY(-4px);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .copy-button:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .code-block:hover .copy-button {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .section-content {
+            display: none;
+        }
+
+        .section-content.active {
+            display: block;
+            animation: slideInUp 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .floating-toc {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 40;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: blur(20px);
+        }
+
+        @media (max-width: 1024px) {
+            .floating-toc {
+                display: none;
+            }
+        }
+
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-md);
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .theme-toggle:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.05);
+            box-shadow: var(--shadow-md);
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(139, 92, 246, 0.08) 100%);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+            border-left: 4px solid var(--primary-color);
+            border-radius: var(--radius-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .highlight-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+        }
+
+        .architecture-diagram {
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #f0f9ff 100%);
+            border: 2px dashed var(--primary-color);
+            border-radius: var(--radius-xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .architecture-diagram::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color), var(--accent-color));
+            border-radius: var(--radius-xl);
+            z-index: -1;
+            animation: borderRotate 4s linear infinite;
+        }
+
+        @keyframes borderRotate {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        [data-theme="dark"] .architecture-diagram {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(139, 92, 246, 0.1) 50%, rgba(6, 182, 212, 0.1) 100%);
+        }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid rgba(59, 130, 246, 0.2);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* 现代化滚动条样式 */
+        
+        ::-webkit-scrollbar {
+            width: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: var(--radius-md);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: var(--radius-md);
+            border: 2px solid var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+            transform: scale(1.1);
+        }
+
+        /* 增强的焦点样式 */
+        .nav-item:focus,
+        button:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 3px;
+            border-radius: var(--radius-md);
+        }
+
+        /* 按钮悬停效果 */
+        button {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        button::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        button:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        /* 响应式设计优化 */
+        @media (max-width: 1200px) {
+            .container {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero-gradient h1 {
+                font-size: 2.5rem;
+                line-height: 1.2;
+            }
+            
+            .hero-gradient p {
+                font-size: 1rem;
+                margin-bottom: 2rem;
+            }
+            
+            .content-card {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+                border-radius: var(--radius-lg);
+            }
+            
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                width: 320px;
+                z-index: 50;
+                transform: translateX(-100%);
+                transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: var(--shadow-xl);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .nav-item {
+                padding: 0.75rem 1rem;
+                margin-bottom: 0.5rem;
+            }
+
+            .code-block {
+                margin: 1rem 0;
+            }
+
+            .code-block pre {
+                padding: 1rem;
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-gradient {
+                padding: 3rem 0;
+            }
+
+            .hero-gradient h1 {
+                font-size: 2rem;
+            }
+
+            .content-card {
+                padding: 1rem;
+            }
+
+            .sidebar {
+                width: 100vw;
+            }
+        }
+
+        /* 打印样式优化 */
+        @media print {
+            .sidebar,
+            .floating-toc,
+            header,
+            footer,
+            .theme-toggle,
+            .copy-button {
+                display: none !important;
+            }
+            
+            main {
+                width: 100% !important;
+                max-width: none !important;
+            }
+            
+            .section-content {
+                display: block !important;
+                page-break-inside: avoid;
+            }
+
+            .content-card {
+                box-shadow: none;
+                border: 1px solid #ccc;
+                margin-bottom: 2rem;
+            }
+
+            .code-block {
+                border: 1px solid #ccc;
+                background: #f5f5f5 !important;
+            }
+        }
+
+        /* 性能优化和动画 */
+        .section-content {
+            will-change: transform, opacity;
+        }
+
+        .nav-item {
+            will-change: background-color, transform;
+        }
+
+        .content-card {
+            will-change: transform, box-shadow;
+        }
+
+        /* 可访问性增强 */
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* 高对比度模式支持 */
+        @media (prefers-contrast: high) {
+            :root {
+                --border-color: #000000;
+                --text-secondary: #000000;
+            }
+
+            [data-theme="dark"] {
+                --border-color: #ffffff;
+                --text-secondary: #ffffff;
+            }
+        }
+
+        /* 暗色模式过渡动画 */
+        html {
+            color-scheme: light dark;
+        }
+
+        html[data-theme="dark"] {
+            color-scheme: dark;
+        }
+        
+        /* 自定义动画 */
+        @keyframes spin-slow {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .animate-spin-slow {
+            animation: spin-slow 8s linear infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes glow {
+            0%, 100% {
+                box-shadow: 0 0 5px rgba(59, 130, 246, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 20px rgba(59, 130, 246, 0.8), 0 0 30px rgba(59, 130, 246, 0.6);
+            }
+        }
+        
+        .animate-glow {
+            animation: glow 2s ease-in-out infinite;
+        }
+        
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="sticky top-0 z-50 backdrop-blur-xl bg-white/80 dark:bg-gray-900/80 shadow-lg border-b border-gray-200/50 dark:border-gray-700/50">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <div class="relative">
+                    <i class="fas fa-dharmachakra text-3xl text-blue-600 animate-pulse"></i>
+                    <div class="absolute inset-0 bg-blue-600/20 rounded-full blur-xl animate-pulse"></div>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Kubernetes 实践教程</h1>
+                    <p class="text-sm text-gray-500 dark:text-gray-400">现代化容器编排平台</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button id="theme-toggle" class="theme-toggle p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 group">
+                    <i class="fas fa-moon dark:hidden text-lg group-hover:scale-110 transition-transform"></i>
+                    <i class="fas fa-sun hidden dark:inline text-lg group-hover:scale-110 transition-transform"></i>
+                </button>
+                <button id="mobile-menu-toggle" class="lg:hidden p-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-all duration-300 group">
+                    <i class="fas fa-bars text-lg group-hover:scale-110 transition-transform"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero-gradient text-white py-20 relative overflow-hidden">
+        <!-- 背景装饰元素 -->
+        <div class="absolute inset-0 opacity-10">
+            <div class="absolute top-10 left-10 w-20 h-20 bg-white rounded-full animate-bounce"></div>
+            <div class="absolute top-32 right-20 w-16 h-16 bg-white rounded-full animate-pulse"></div>
+            <div class="absolute bottom-20 left-1/4 w-12 h-12 bg-white rounded-full animate-ping"></div>
+            <div class="absolute bottom-32 right-1/3 w-8 h-8 bg-white rounded-full animate-bounce"></div>
+        </div>
+        
+        <div class="container mx-auto px-6 text-center relative z-10">
+            <div class="mb-8">
+                <h1 class="text-6xl font-bold mb-4 bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent animate-pulse">
+                    第二天 Kubernetes落地实践之旅
+                </h1>
+                <div class="w-32 h-1 bg-gradient-to-r from-transparent via-white to-transparent mx-auto mb-6"></div>
+            </div>
+            
+            <p class="text-xl mb-12 max-w-4xl mx-auto leading-relaxed text-blue-50">
+                深入学习Kubernetes架构与工作流程，掌握Workload管理、服务发现、负载均衡等核心技能，
+                实现从零到一的容器编排实践
+            </p>
+            
+            <div class="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
+                <div class="group">
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105">
+                        <div class="relative mb-4">
+                            <i class="fas fa-cube text-4xl group-hover:scale-110 transition-transform duration-300"></i>
+                            <div class="absolute inset-0 bg-white/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">容器编排</h3>
+                        <p class="text-blue-100 text-sm">Pod、Deployment等工作负载管理</p>
+                    </div>
+                </div>
+                
+                <div class="group">
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105">
+                        <div class="relative mb-4">
+                            <i class="fas fa-network-wired text-4xl group-hover:scale-110 transition-transform duration-300"></i>
+                            <div class="absolute inset-0 bg-white/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">服务发现</h3>
+                        <p class="text-blue-100 text-sm">Service和DNS服务发现机制</p>
+                    </div>
+                </div>
+                
+                <div class="group">
+                    <div class="bg-white/10 backdrop-blur-sm rounded-2xl p-6 border border-white/20 hover:bg-white/20 transition-all duration-300 transform hover:scale-105">
+                        <div class="relative mb-4">
+                            <i class="fas fa-balance-scale text-4xl group-hover:scale-110 transition-transform duration-300"></i>
+                            <div class="absolute inset-0 bg-white/20 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">负载均衡</h3>
+                        <p class="text-blue-100 text-sm">Ingress实现域名访问</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 滚动提示 -->
+            <div class="mt-16 animate-bounce">
+                <i class="fas fa-chevron-down text-2xl text-white/60"></i>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-6 py-12">
+        <div class="flex flex-col lg:flex-row gap-10">
+            <!-- Sidebar Navigation -->
+            <aside class="lg:w-1/4">
+                <div class="sidebar p-8 sticky top-28">
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold mb-2 bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                            <i class="fas fa-list-ul mr-3"></i>目录导航
+                        </h3>
+                        <div class="w-16 h-0.5 bg-gradient-to-r from-blue-600 to-purple-600"></div>
+                    </div>
+                    <nav id="table-of-contents" class="space-y-1">
+                        <a href="#overview" class="nav-item block py-3 px-4 rounded-xl cursor-pointer group">
+                            <i class="fas fa-eye mr-3 text-blue-500 group-hover:text-white transition-colors"></i>
+                            <span class="font-medium">课程概述</span>
+                        </a>
+                        <a href="#yaml-writing" class="nav-item block py-3 px-4 rounded-xl cursor-pointer group">
+                            <i class="fas fa-file-code mr-3 text-green-500 group-hover:text-white transition-colors"></i>
+                            <span class="font-medium">编写资源YAML</span>
+                        </a>
+                        <a href="#container-problems" class="nav-item block py-3 px-4 rounded-xl cursor-pointer group">
+                            <i class="fas fa-exclamation-triangle mr-3 text-yellow-500 group-hover:text-white transition-colors"></i>
+                            <span class="font-medium">纯容器模式问题</span>
+                        </a>
+                        <a href="#orchestration-platforms" class="nav-item block py-3 px-4 rounded-xl cursor-pointer group">
+                            <i class="fas fa-layer-group mr-3 text-purple-500 group-hover:text-white transition-colors"></i>
+                            <span class="font-medium">容器调度管理平台</span>
+                        </a>
+                        <a href="#architecture" class="nav-item block py-3 px-4 rounded-xl cursor-pointer group">
+                            <i class="fas fa-sitemap mr-3 text-indigo-500 group-hover:text-white transition-colors"></i>
+                            <span class="font-medium">架构图</span>
+                        </a>
+                        <a href="#core-components" class="nav-item block py-3 px-4 rounded-xl cursor-pointer group">
+                            <i class="fas fa-cogs mr-3 text-gray-500 group-hover:text-white transition-colors"></i>
+                            <span class="font-medium">核心组件</span>
+                        </a>
+                        <a href="#kubectl-usage" class="nav-item block py-3 px-4 rounded-xl cursor-pointer group">
+                            <i class="fas fa-terminal mr-3 text-green-600 group-hover:text-white transition-colors"></i>
+                            <span class="font-medium">kubectl使用</span>
+                        </a>
+                        <a href="#workflow" class="nav-item block py-3 px-4 rounded-xl cursor-pointer group">
+                            <i class="fas fa-project-diagram mr-3 text-blue-600 group-hover:text-white transition-colors"></i>
+                            <span class="font-medium">工作流程</span>
+                        </a>
+                        <a href="#design-thinking" class="nav-item block py-3 px-4 rounded-xl cursor-pointer group">
+                            <i class="fas fa-lightbulb mr-3 text-yellow-600 group-hover:text-white transition-colors"></i>
+                            <span class="font-medium">架构设计思考</span>
+                        </a>
+                        <a href="#cluster-installation" class="nav-item block py-3 px-4 rounded-xl cursor-pointer group">
+                            <i class="fas fa-download mr-3 text-emerald-500 group-hover:text-white transition-colors"></i>
+                            <span class="font-medium">集群安装实践</span>
+                        </a>
+                        <a href="#cluster-resources" class="nav-item block py-3 px-4 rounded-xl cursor-pointer group">
+                            <i class="fas fa-database mr-3 text-cyan-500 group-hover:text-white transition-colors"></i>
+                            <span class="font-medium">理解集群资源</span>
+                        </a>
+                        <a href="#pod-concepts" class="nav-item block py-3 px-4 rounded-xl cursor-pointer group">
+                            <i class="fas fa-cube mr-3 text-orange-500 group-hover:text-white transition-colors"></i>
+                            <span class="font-medium">Pod概念与实践</span>
+                        </a>
+                        <a href="#deployment-concepts" class="nav-item block py-3 px-4 rounded-xl cursor-pointer group">
+                            <i class="fas fa-layer-group mr-3 text-red-500 group-hover:text-white transition-colors"></i>
+                            <span class="font-medium">Deployment部署</span>
+                        </a>
+                        <a href="#service-concepts" class="nav-item block py-3 px-4 rounded-xl cursor-pointer group">
+                            <i class="fas fa-network-wired mr-3 text-teal-500 group-hover:text-white transition-colors"></i>
+                            <span class="font-medium">Service服务</span>
+                        </a>
+                        <a href="#configmap-concepts" class="nav-item block py-3 px-4 rounded-xl cursor-pointer group">
+                            <i class="fas fa-cogs mr-3 text-slate-500 group-hover:text-white transition-colors"></i>
+                            <span class="font-medium">ConfigMap配置</span>
+                        </a>
+                        <a href="#ingress-implementation" class="nav-item block py-3 px-4 rounded-xl cursor-pointer group">
+                            <i class="fas fa-globe mr-3 text-violet-500 group-hover:text-white transition-colors"></i>
+                            <span class="font-medium">Ingress实现</span>
+                        </a>
+                        <a href="#kube-proxy" class="nav-item block py-3 px-4 rounded-xl cursor-pointer group">
+                            <i class="fas fa-exchange-alt mr-3 text-pink-500 group-hover:text-white transition-colors"></i>
+                            <span class="font-medium">kube-proxy</span>
+                        </a>
+                        <a href="#secrets-config" class="nav-item block py-3 px-4 rounded-xl cursor-pointer group">
+                            <i class="fas fa-key mr-3 text-amber-500 group-hover:text-white transition-colors"></i>
+                            <span class="font-medium">Secret配置</span>
+                        </a>
+                        <a href="#ingress-https" class="nav-item block py-3 px-4 rounded-xl cursor-pointer group">
+                            <i class="fas fa-lock mr-3 text-blue-500 group-hover:text-white transition-colors"></i>
+                            <span class="font-medium">Ingress HTTPS</span>
+                        </a>
+                        <a href="#ingress-advanced" class="nav-item block py-3 px-4 rounded-xl cursor-pointer group">
+                            <i class="fas fa-route mr-3 text-indigo-500 group-hover:text-white transition-colors"></i>
+                            <span class="font-medium">多路径转发</span>
+                        </a>
+                        <a href="#summary" class="nav-item block py-3 px-4 rounded-xl cursor-pointer group">
+                            <i class="fas fa-check-circle mr-3 text-green-500 group-hover:text-white transition-colors"></i>
+                            <span class="font-medium">小结</span>
+                        </a>
+                    </nav>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="lg:w-3/4">
+                <!-- Overview Section -->
+                <section id="overview" class="section-content active">
+                    <div class="content-card rounded-lg p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                            <i class="fas fa-eye mr-3 text-blue-600"></i>课程概述
+                        </h2>
+                        <div class="highlight-box p-6 rounded-lg mb-6">
+                            <p class="text-lg leading-relaxed">
+                                本章学习kubernetes的架构及工作流程，重点介绍如何使用Workload管理业务应用的生命周期，实现服务不中断的滚动更新，通过服务发现和集群内负载均衡来实现集群内部的服务间访问，并通过ingress实现外部使用域名访问集群内部的服务。
+                            </p>
+                        </div>
+                        <p class="text-gray-700 dark:text-gray-300 mb-4">
+                            学习过程中会逐步对Django项目做k8s改造，从零开始编写所需的资源文件。通过本章的学习，学员会掌握高可用k8s集群的搭建，同时Django demo项目已经可以利用k8s的控制器、服务发现、负载均衡、配置管理等特性来实现生命周期的管理。
+                        </p>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mt-8">
+                            <div class="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-lg text-center">
+                                <i class="fas fa-cube text-3xl text-blue-600 mb-3"></i>
+                                <h3 class="font-semibold mb-2">容器编排</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">学习Pod、Deployment等工作负载管理</p>
+                            </div>
+                            <div class="bg-green-50 dark:bg-green-900/20 p-6 rounded-lg text-center">
+                                <i class="fas fa-network-wired text-3xl text-green-600 mb-3"></i>
+                                <h3 class="font-semibold mb-2">服务发现</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">掌握Service和DNS服务发现机制</p>
+                            </div>
+                            <div class="bg-purple-50 dark:bg-purple-900/20 p-6 rounded-lg text-center">
+                                <i class="fas fa-globe text-3xl text-purple-600 mb-3"></i>
+                                <h3 class="font-semibold mb-2">外部访问</h3>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">通过Ingress实现域名访问</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- YAML Writing Section -->
+                <section id="yaml-writing" class="section-content">
+                    <div class="content-card rounded-lg p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                            <i class="fas fa-file-code mr-3 text-blue-600"></i>如何编写资源YAML
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="border-l-4 border-blue-500 pl-6">
+                                <h3 class="text-xl font-semibold mb-3">1. 拿来主义，从机器中已有的资源中拿</h3>
+                                <div class="code-block">
+                                    <button class="copy-button" onclick="copyToClipboard(this)">复制</button>
+                                    <pre class="text-sm language-bash"><code>$ kubectl -n kube-system get po,deployment,ds</code></pre>
+                                </div>
+                            </div>
+
+                            <div class="border-l-4 border-green-500 pl-6">
+                                <h3 class="text-xl font-semibold mb-3">2. 学会在官网查找</h3>
+                                <p class="mb-2">官方文档：</p>
+                                <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded">
+                                    <a href="https://kubernetes.io/docs/home/" class="text-blue-600 hover:underline">
+                                        https://kubernetes.io/docs/home/
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="border-l-4 border-yellow-500 pl-6">
+                                <h3 class="text-xl font-semibold mb-3">3. 从kubernetes-api文档中查找</h3>
+                                <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded">
+                                    <a href="https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.16/#pod-v1-core" class="text-blue-600 hover:underline">
+                                        https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.16/#pod-v1-core
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div class="border-l-4 border-purple-500 pl-6">
+                                <h3 class="text-xl font-semibold mb-3">4. kubectl explain 查看具体字段含义</h3>
+                                <p class="text-gray-600 dark:text-gray-400">使用kubectl explain命令可以查看资源字段的详细说明</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Container Problems Section -->
+                <section id="container-problems" class="section-content">
+                    <div class="content-card rounded-lg p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                            <i class="fas fa-exclamation-triangle mr-3 text-red-600"></i>纯容器模式的问题
+                        </h2>
+                        
+                        <div class="grid gap-4">
+                            <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4">
+                                <h4 class="font-semibold text-red-800 dark:text-red-300 mb-2">
+                                    <i class="fas fa-server mr-2"></i>1. 容器管理复杂
+                                </h4>
+                                <p class="text-red-700 dark:text-red-400">业务容器数量庞大，哪些容器部署在哪些节点，使用了哪些端口，如何记录、管理，需要登录到每台机器去管理？</p>
+                            </div>
+
+                            <div class="bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded-lg p-4">
+                                <h4 class="font-semibold text-orange-800 dark:text-orange-300 mb-2">
+                                    <i class="fas fa-network-wired mr-2"></i>2. 跨主机通信困难
+                                </h4>
+                                <p class="text-orange-700 dark:text-orange-400">跨主机通信，多个机器中的容器之间相互调用如何做，iptables规则手动维护？</p>
+                            </div>
+
+                            <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4">
+                                <h4 class="font-semibold text-yellow-800 dark:text-yellow-300 mb-2">
+                                    <i class="fas fa-cog mr-2"></i>3. 配置管理混乱
+                                </h4>
+                                <p class="text-yellow-700 dark:text-yellow-400">跨主机容器间互相调用，配置如何写？写死固定IP+端口？</p>
+                            </div>
+
+                            <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                                <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">
+                                    <i class="fas fa-balance-scale mr-2"></i>4. 高可用实现困难
+                                </h4>
+                                <p class="text-blue-700 dark:text-blue-400">如何实现业务高可用？多个容器对外提供服务如何实现负载均衡？</p>
+                            </div>
+
+                            <div class="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-4">
+                                <h4 class="font-semibold text-purple-800 dark:text-purple-300 mb-2">
+                                    <i class="fas fa-heartbeat mr-2"></i>5. 故障恢复机制缺失
+                                </h4>
+                                <p class="text-purple-700 dark:text-purple-400">容器的业务中断了，如何可以感知到，感知到以后，如何自动启动新的容器？</p>
+                            </div>
+
+                            <div class="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg p-4">
+                                <h4 class="font-semibold text-green-800 dark:text-green-300 mb-2">
+                                    <i class="fas fa-sync-alt mr-2"></i>6. 滚动升级困难
+                                </h4>
+                                <p class="text-green-700 dark:text-green-400">如何实现滚动升级保证业务的连续性？</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Orchestration Platforms Section -->
+                <section id="orchestration-platforms" class="section-content">
+                    <div class="content-card rounded-lg p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                            <i class="fas fa-layer-group mr-3 text-blue-600"></i>容器调度管理平台
+                        </h2>
+                        
+                        <div class="grid md:grid-cols-3 gap-6 mb-8">
+                            <div class="text-center p-6 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                <i class="fab fa-docker text-4xl text-blue-500 mb-4"></i>
+                                <h3 class="text-xl font-semibold mb-2">Docker Swarm</h3>
+                                <p class="text-gray-600 dark:text-gray-400">Docker官方编排工具</p>
+                            </div>
+                            <div class="text-center p-6 border border-gray-200 dark:border-gray-700 rounded-lg">
+                                <i class="fas fa-cube text-4xl text-orange-500 mb-4"></i>
+                                <h3 class="text-xl font-semibold mb-2">Mesos</h3>
+                                <p class="text-gray-600 dark:text-gray-400">Apache分布式系统内核</p>
+                            </div>
+                            <div class="text-center p-6 border-2 border-blue-500 rounded-lg bg-blue-50 dark:bg-blue-900/20">
+                                <i class="fas fa-dharmachakra text-4xl text-blue-600 mb-4"></i>
+                                <h3 class="text-xl font-semibold mb-2 text-blue-800 dark:text-blue-300">Google Kubernetes</h3>
+                                <p class="text-blue-600 dark:text-blue-400 font-medium">市场领导者</p>
+                            </div>
+                        </div>
+
+                        <div class="highlight-box p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-3">
+                                <i class="fas fa-trophy mr-2 text-yellow-500"></i>Kubernetes的优势
+                            </h3>
+                            <p class="mb-4">2017年开始Kubernetes凭借强大的容器集群管理功能，逐步占据市场，目前在容器编排领域一枝独秀</p>
+                            <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded">
+                                <a href="https://kubernetes.io/" class="text-blue-600 hover:underline">
+                                    <i class="fas fa-external-link-alt mr-2"></i>https://kubernetes.io/
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Architecture Section -->
+                <section id="architecture" class="section-content">
+                    <div class="content-card rounded-lg p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                            <i class="fas fa-sitemap mr-3 text-blue-600"></i>架构图
+                        </h2>
+                        
+                        <div class="architecture-diagram p-8 rounded-lg mb-6">
+                            <h3 class="text-xl font-semibold mb-4 text-center">Kubernetes 集群架构</h3>
+                            <div class="grid md:grid-cols-2 gap-8">
+                                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                                    <h4 class="text-lg font-semibold mb-4 text-blue-600">
+                                        <i class="fas fa-crown mr-2"></i>管理节点 (Master Node)
+                                    </h4>
+                                    <ul class="space-y-2">
+                                        <li class="flex items-center">
+                                            <i class="fas fa-database text-green-500 mr-2"></i>
+                                            <span>ETCD - 分布式键值存储</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <i class="fas fa-server text-blue-500 mr-2"></i>
+                                            <span>API Server - 集群入口</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <i class="fas fa-calendar-alt text-purple-500 mr-2"></i>
+                                            <span>Scheduler - 调度器</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <i class="fas fa-cogs text-orange-500 mr-2"></i>
+                                            <span>Controller Manager - 控制器</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-md">
+                                    <h4 class="text-lg font-semibold mb-4 text-green-600">
+                                        <i class="fas fa-server mr-2"></i>工作节点 (Worker Node)
+                                    </h4>
+                                    <ul class="space-y-2">
+                                        <li class="flex items-center">
+                                            <i class="fas fa-cube text-blue-500 mr-2"></i>
+                                            <span>kubelet - 节点代理</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <i class="fas fa-exchange-alt text-green-500 mr-2"></i>
+                                            <span>kube-proxy - 网络代理</span>
+                                        </li>
+                                        <li class="flex items-center">
+                                            <i class="fab fa-docker text-blue-400 mr-2"></i>
+                                            <span>Container Runtime - 容器运行时</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <p class="text-gray-700 dark:text-gray-300">
+                            分布式系统，两类角色：<strong>管理节点</strong>负责集群的管理和控制，<strong>工作节点</strong>负责运行具体的业务容器。
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Core Components Section -->
+                <section id="core-components" class="section-content">
+                    <div class="content-card rounded-lg p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                            <i class="fas fa-cogs mr-3 text-blue-600"></i>核心组件
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                                <h3 class="text-xl font-semibold mb-3 text-green-600">
+                                    <i class="fas fa-database mr-2"></i>ETCD
+                                </h3>
+                                <p class="text-gray-700 dark:text-gray-300">分布式高性能键值数据库，存储整个集群的所有元数据</p>
+                            </div>
+
+                            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                                <h3 class="text-xl font-semibold mb-3 text-blue-600">
+                                    <i class="fas fa-server mr-2"></i>ApiServer
+                                </h3>
+                                <p class="text-gray-700 dark:text-gray-300">API服务器，集群资源访问控制入口，提供restAPI及安全访问控制</p>
+                            </div>
+
+                            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                                <h3 class="text-xl font-semibold mb-3 text-purple-600">
+                                    <i class="fas fa-calendar-alt mr-2"></i>Scheduler
+                                </h3>
+                                <p class="text-gray-700 dark:text-gray-300">调度器，负责把业务容器调度到最合适的Node节点</p>
+                            </div>
+
+                            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                                <h3 class="text-xl font-semibold mb-3 text-orange-600">
+                                    <i class="fas fa-cogs mr-2"></i>Controller Manager
+                                </h3>
+                                <p class="text-gray-700 dark:text-gray-300 mb-3">控制器管理，确保集群资源按照期望的方式运行</p>
+                                <div class="grid md:grid-cols-2 gap-2 text-sm">
+                                    <div class="bg-gray-50 dark:bg-gray-800 p-2 rounded">Replication Controller</div>
+                                    <div class="bg-gray-50 dark:bg-gray-800 p-2 rounded">Node Controller</div>
+                                    <div class="bg-gray-50 dark:bg-gray-800 p-2 rounded">ResourceQuota Controller</div>
+                                    <div class="bg-gray-50 dark:bg-gray-800 p-2 rounded">Namespace Controller</div>
+                                    <div class="bg-gray-50 dark:bg-gray-800 p-2 rounded">ServiceAccount Controller</div>
+                                    <div class="bg-gray-50 dark:bg-gray-800 p-2 rounded">Token Controller</div>
+                                    <div class="bg-gray-50 dark:bg-gray-800 p-2 rounded">Service Controller</div>
+                                    <div class="bg-gray-50 dark:bg-gray-800 p-2 rounded">Endpoints Controller</div>
+                                </div>
+                            </div>
+
+                            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                                <h3 class="text-xl font-semibold mb-3 text-red-600">
+                                    <i class="fas fa-cube mr-2"></i>kubelet
+                                </h3>
+                                <p class="text-gray-700 dark:text-gray-300 mb-3">运行在每个节点上的主要的"节点代理"，脏活累活</p>
+                                <ul class="list-disc list-inside space-y-1 text-gray-600 dark:text-gray-400">
+                                    <li><strong>pod 管理：</strong>kubelet 定期从所监听的数据源获取节点上 pod/container 的期望状态</li>
+                                    <li><strong>容器健康检查：</strong>kubelet 创建了容器之后还要查看容器是否正常运行</li>
+                                    <li><strong>容器监控：</strong>kubelet 会监控所在节点的资源使用情况，并定时向 master 报告</li>
+                                </ul>
+                            </div>
+
+                            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                                <h3 class="text-xl font-semibold mb-3 text-green-600">
+                                    <i class="fas fa-exchange-alt mr-2"></i>kube-proxy
+                                </h3>
+                                <p class="text-gray-700 dark:text-gray-300">维护节点中的iptables或者ipvs规则</p>
+                            </div>
+
+                            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+                                <h3 class="text-xl font-semibold mb-3 text-indigo-600">
+                                    <i class="fas fa-terminal mr-2"></i>kubectl
+                                </h3>
+                                <p class="text-gray-700 dark:text-gray-300">命令行接口，用于对 Kubernetes 集群运行命令</p>
+                                <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded mt-2">
+                                    <a href="https://kubernetes.io/zh/docs/reference/kubectl/" class="text-blue-600 hover:underline">
+                                        https://kubernetes.io/zh/docs/reference/kubectl/
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- kubectl Usage Section -->
+                <section id="kubectl-usage" class="section-content">
+                    <div class="content-card rounded-lg p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                            <i class="fas fa-terminal mr-3 text-blue-600"></i>kubectl的使用
+                        </h2>
+                        
+                        <div class="highlight-box p-6 rounded-lg mb-6">
+                            <p class="text-lg">
+                                类似于docker，kubectl是命令行工具，用于与APIServer交互，内置了丰富的子命令，功能极其强大。
+                            </p>
+                            <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded mt-4">
+                                <a href="https://kubernetes.io/docs/reference/kubectl/overview/" class="text-blue-600 hover:underline">
+                                    <i class="fas fa-external-link-alt mr-2"></i>kubectl 官方文档
+                                </a>
+                            </div>
+                        </div>
+
+                        <h3 class="text-xl font-semibold mb-4">常用命令示例</h3>
+                        <div class="space-y-4">
+                            <div class="code-block p-4">
+                                <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">查看帮助信息</div>
+                                <pre class="text-sm"><code>$ kubectl -h
+$ kubectl get -h
+$ kubectl create -h
+$ kubectl create namespace -h</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Workflow Section -->
+                <section id="workflow" class="section-content">
+                    <div class="content-card rounded-lg p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                            <i class="fas fa-project-diagram mr-3 text-blue-600"></i>工作流程
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="flex items-start space-x-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                <div class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">1</div>
+                                <div>
+                                    <h4 class="font-semibold mb-2">用户创建Pod请求</h4>
+                                    <p class="text-gray-700 dark:text-gray-300">用户准备一个资源文件（记录了业务应用的名称、镜像地址等信息），通过调用APIServer执行创建Pod</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                                <div class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">2</div>
+                                <div>
+                                    <h4 class="font-semibold mb-2">APIServer处理请求</h4>
+                                    <p class="text-gray-700 dark:text-gray-300">APIServer收到用户的Pod创建请求，将Pod信息写入到etcd中</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                                <div class="bg-yellow-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">3</div>
+                                <div>
+                                    <h4 class="font-semibold mb-2">调度器发现新Pod</h4>
+                                    <p class="text-gray-700 dark:text-gray-300">调度器通过list-watch的方式，发现有新的pod数据，但是这个pod还没有绑定到某一个节点中</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-4 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                                <div class="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">4</div>
+                                <div>
+                                    <h4 class="font-semibold mb-2">调度算法选择节点</h4>
+                                    <p class="text-gray-700 dark:text-gray-300">调度器通过调度算法，计算出最适合该pod运行的节点，并调用APIServer，把信息更新到etcd中</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-4 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                                <div class="bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">5</div>
+                                <div>
+                                    <h4 class="font-semibold mb-2">kubelet启动容器</h4>
+                                    <p class="text-gray-700 dark:text-gray-300">kubelet同样通过list-watch方式，发现有新的pod调度到本机的节点了，因此调用容器运行时，去根据pod的描述信息，拉取镜像，启动容器，同时生成事件信息</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-4 p-4 bg-indigo-50 dark:bg-indigo-900/20 rounded-lg">
+                                <div class="bg-indigo-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">6</div>
+                                <div>
+                                    <h4 class="font-semibold mb-2">状态同步</h4>
+                                    <p class="text-gray-700 dark:text-gray-300">同时，把容器的信息、事件及状态也通过APIServer写入到etcd中</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Design Thinking Section -->
+                <section id="design-thinking" class="section-content">
+                    <div class="content-card rounded-lg p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                            <i class="fas fa-lightbulb mr-3 text-yellow-600"></i>架构设计的几点思考
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="border-l-4 border-blue-500 pl-6 py-4">
+                                <h3 class="text-lg font-semibold mb-2">1. 分工明确，配合流畅</h3>
+                                <p class="text-gray-700 dark:text-gray-300">系统各个组件分工明确(APIServer是所有请求入口，CM是控制中枢，Scheduler主管调度，而Kubelet负责运行)，配合流畅，整个运行机制一气呵成。</p>
+                            </div>
+
+                            <div class="border-l-4 border-green-500 pl-6 py-4">
+                                <h3 class="text-lg font-semibold mb-2">2. 无状态设计</h3>
+                                <p class="text-gray-700 dark:text-gray-300">除了配置管理和持久化组件ETCD，其他组件并不保存数据。意味<code class="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">除ETCD外</code>其他组件都是无状态的。因此从架构设计上对kubernetes系统高可用部署提供了支撑。</p>
+                            </div>
+
+                            <div class="border-l-4 border-yellow-500 pl-6 py-4">
+                                <h3 class="text-lg font-semibold mb-2">3. 故障恢复能力</h3>
+                                <p class="text-gray-700 dark:text-gray-300">同时因为组件无状态，组件的升级，重启，故障等并不影响集群最终状态，只要组件恢复后就可以从中断处继续运行。</p>
+                            </div>
+
+                            <div class="border-l-4 border-purple-500 pl-6 py-4">
+                                <h3 class="text-lg font-semibold mb-2">4. List-Watch机制</h3>
+                                <p class="text-gray-700 dark:text-gray-300">各个组件和kube-apiserver之间的数据推送都是通过list-watch机制来实现。</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Cluster Installation Section -->
+                <section id="cluster-installation" class="section-content">
+                    <div class="content-card rounded-lg p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                            <i class="fas fa-download mr-3 text-blue-600"></i>实践--集群安装
+                        </h2>
+                        
+                        <h3 class="text-xl font-semibold mb-4">k8s集群主流安装方式对比分析</h3>
+                        <div class="grid md:grid-cols-3 gap-6 mb-8">
+                            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6 text-center">
+                                <i class="fas fa-laptop text-3xl text-blue-500 mb-3"></i>
+                                <h4 class="font-semibold mb-2">minikube</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">单节点开发环境</p>
+                            </div>
+                            <div class="border border-gray-200 dark:border-gray-700 rounded-lg p-6 text-center">
+                                <i class="fas fa-code text-3xl text-green-500 mb-3"></i>
+                                <h4 class="font-semibold mb-2">二进制安装</h4>
+                                <p class="text-sm text-gray-600 dark:text-gray-400">手动配置所有组件</p>
+                            </div>
+                            <div class="border-2 border-blue-500 rounded-lg p-6 text-center bg-blue-50 dark:bg-blue-900/20">
+                                <i class="fas fa-tools text-3xl text-blue-600 mb-3"></i>
+                                <h4 class="font-semibold mb-2 text-blue-800 dark:text-blue-300">kubeadm等安装工具</h4>
+                                <p class="text-sm text-blue-600 dark:text-blue-400">推荐方式</p>
+                            </div>
+                        </div>
+
+                        <div class="highlight-box p-6 rounded-lg mb-6">
+                            <h4 class="text-lg font-semibold mb-3">kubeadm 推荐</h4>
+                            <div class="bg-gray-100 dark:bg-gray-800 p-3 rounded">
+                                <a href="https://kubernetes.io/zh/docs/reference/setup-tools/kubeadm/kubeadm/" class="text-blue-600 hover:underline">
+                                    https://kubernetes.io/zh/docs/reference/setup-tools/kubeadm/kubeadm/
+                                </a>
+                            </div>
+                            <p class="mt-3 text-gray-700 dark:text-gray-300">《Kubernetes安装手册（非高可用版）》</p>
+                        </div>
+
+                        <h3 class="text-xl font-semibold mb-4">核心组件部署方式</h3>
+                        <div class="space-y-4">
+                            <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                                <h4 class="font-semibold mb-2">静态Pod的方式：</h4>
+                                <div class="code-block p-4">
+                                    <pre class="text-sm"><code># etcd、apiserver、controller-manager、kube-scheduler
+$ kubectl -n kube-system get po</code></pre>
+                                </div>
+                            </div>
+
+                            <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                                <h4 class="font-semibold mb-2">systemd服务方式：</h4>
+                                <div class="code-block p-4">
+                                    <pre class="text-sm"><code>$ systemctl status kubelet</code></pre>
+                                </div>
+                            </div>
+
+                            <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                                <h4 class="font-semibold mb-2">kubectl：</h4>
+                                <p class="text-gray-700 dark:text-gray-300">二进制命令行工具</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Cluster Resources Section -->
+                <section id="cluster-resources" class="section-content">
+                    <div class="content-card rounded-lg p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                            <i class="fas fa-database mr-3 text-blue-600"></i>理解集群资源
+                        </h2>
+                        
+                        <div class="highlight-box p-6 rounded-lg mb-6">
+                            <h3 class="text-lg font-semibold mb-3">组件 vs 资源</h3>
+                            <ul class="space-y-2">
+                                <li><strong>组件</strong>是为了支撑k8s平台的运行，安装好的软件。</li>
+                                <li><strong>资源</strong>是如何去使用k8s的能力的定义。比如，k8s可以使用Pod来管理业务应用，那么Pod就是k8s集群中的一类资源。</li>
+                            </ul>
+                        </div>
+
+                        <div class="code-block p-4 mb-6">
+                            <div class="text-sm text-gray-600 dark:text-gray-400 mb-2">查看集群中的所有资源</div>
+                            <pre class="text-sm"><code>$ kubectl api-resources</code></pre>
+                        </div>
+
+                        <h3 class="text-xl font-semibold mb-4">如何理解namespace：</h3>
+                        <p class="text-gray-700 dark:text-gray-300 mb-4">
+                            命名空间，集群内一个虚拟的概念，类似于资源池的概念，一个池子里可以有各种资源类型，绝大多数的资源都必须属于某一个namespace。集群初始化安装好之后，会默认有如下几个namespace：
+                        </p>
+
+                        <div class="code-block p-4 mb-6">
+                            <pre class="text-sm"><code>$ kubectl get namespaces
+NAME                   STATUS   AGE
+default                Active   84m
+kube-node-lease        Active   84m
+kube-public            Active   84m
+kube-system            Active   84m
+kubernetes-dashboard   Active   71m</code></pre>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                                <h4 class="font-semibold mb-2 text-blue-800 dark:text-blue-300">命名空间规则</h4>
+                                <ul class="text-sm space-y-1">
+                                    <li>• 所有NAMESPACED的资源，在创建的时候都需要指定namespace，若不指定，默认会在default命名空间下</li>
+                                    <li>• 相同namespace下的同类资源不可以重名，不同类型的资源可以重名</li>
+                                    <li>• 不同namespace下的同类资源可以重名</li>
+                                </ul>
+                            </div>
+                            <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                                <h4 class="font-semibold mb-2 text-green-800 dark:text-green-300">最佳实践</h4>
+                                <p class="text-sm">通常在项目使用的时候，我们会创建带有业务含义的namespace来做逻辑上的整合</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Ingress Implementation Section -->
+                <section id="ingress-implementation" class="section-content">
+                    <div class="content-card rounded-lg p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                            <i class="fas fa-globe mr-3 text-blue-600"></i>Ingress实现逻辑
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="flex items-start space-x-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg">
+                                <div class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">1</div>
+                                <div>
+                                    <p class="text-gray-700 dark:text-gray-300">ingress controller通过和kubernetes api交互，动态的去感知集群中ingress规则变化</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-4 p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
+                                <div class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">2</div>
+                                <div>
+                                    <p class="text-gray-700 dark:text-gray-300">然后读取ingress规则(规则就是写明了哪个域名对应哪个service)，按照自定义的规则，生成一段nginx配置</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg">
+                                <div class="bg-yellow-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">3</div>
+                                <div>
+                                    <p class="text-gray-700 dark:text-gray-300">再写到nginx-ingress-controller的pod里，这个Ingress controller的pod里运行着一个Nginx服务，控制器把生成的nginx配置写入/etc/nginx/nginx.conf文件中</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start space-x-4 p-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg">
+                                <div class="bg-purple-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold">4</div>
+                                <div>
+                                    <p class="text-gray-700 dark:text-gray-300">然后reload一下使配置生效。以此达到域名分别配置和动态更新的问题。</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="text-xl font-semibold mb-4 mt-8">Ingress概念</h3>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-6">
+                            <p class="text-gray-700 dark:text-gray-300 mb-3">对于Kubernetes的Service，无论是Cluster-Ip和NodePort均是四层的负载，集群内的服务如何实现七层的负载均衡，这就需要借助于Ingress。</p>
+                            <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">Ingress-nginx组成</h4>
+                            <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
+                                <li><strong>ingress-nginx-controller</strong>: 根据用户编写的ingress规则，动态的去更改nginx服务的配置文件</li>
+                                <li><strong>Ingress资源对象</strong>: 将Nginx的配置抽象成一个Ingress对象</li>
+                            </ul>
+                        </div>
+
+                        <h3 class="text-xl font-semibold mb-4">安装Ingress</h3>
+                        <div class="code-block p-4 mb-6">
+                            <pre class="text-sm"><code># 下载安装文件
+$ wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.30.0/deploy/static/mandatory.yaml
+
+# 修改部署节点
+$ grep -n5 nodeSelector mandatory.yaml
+216-      serviceAccountName: nginx-ingress-serviceaccount
+217:      nodeSelector:
+218-        ingress: "true"    # 决定将ingress部署在哪些机器
+
+# 为节点添加标签
+$ kubectl label node k8s-master ingress=true
+
+# 创建ingress
+$ kubectl create -f mandatory.yaml</code></pre>
+                        </div>
+
+                        <h3 class="text-xl font-semibold mb-4">Ingress使用示例</h3>
+                        <div class="code-block p-4 mb-6">
+                            <pre class="text-sm"><code>apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: myblog
+  namespace: luffy
+spec:
+  rules:
+  - host: myblog.luffy.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: myblog
+          servicePort: 80</code></pre>
+                        </div>
+
+                        <h3 class="text-xl font-semibold mb-4">HTTPS配置</h3>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-6">
+                            <div class="code-block p-3">
+                                <pre class="text-xs"><code># 生成自签名证书
+$ openssl req -x509 -nodes -days 2920 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=*.luffy.com/O=ingress-nginx"
+
+# 创建secret保存证书
+$ kubectl -n luffy create secret tls https-secret --key tls.key --cert tls.crt</code></pre>
+                            </div>
+                            <div class="mt-3">
+                                <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">HTTPS Ingress配置</h4>
+                                <div class="code-block p-3">
+                                    <pre class="text-xs"><code>apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: myblog-tls
+  namespace: luffy
+spec:
+  rules:
+  - host: myblog.luffy.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: myblog
+          servicePort: 80
+  tls:
+  - hosts:
+    - myblog.luffy.com
+    secretName: https-secret</code></pre>
+                                </div>
+                            </div>
+                        </div>
+
+                        <h3 class="text-xl font-semibold mb-4">多路径转发</h3>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-6">
+                            <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">多path转发示例</h4>
+                            <div class="code-block p-3">
+                                <pre class="text-xs"><code>apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: simple-fanout-example
+  namespace: luffy
+spec:
+  rules:
+  - host: myblog.luffy.com
+    http:
+      paths:
+      - path: /foo
+        backend:
+          serviceName: service1
+          servicePort: 4200
+      - path: /bar
+        backend:
+          serviceName: service2
+          servicePort: 8080
+      - path: /
+        backend:
+          serviceName: myblog
+          servicePort: 80</code></pre>
+                            </div>
+                        </div>
+
+                        <h3 class="text-xl font-semibold mb-4">URL重写</h3>
+                        <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-6">
+                            <p class="text-gray-700 dark:text-gray-300 mb-3">通过nginx的URL重写功能，可以将请求路径重写到后端服务的不同路径。</p>
+                            <div class="code-block p-3">
+                                <pre class="text-xs"><code>apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: rewrite-path
+  namespace: luffy
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /admin/$1
+spec:
+  rules:
+  - host: myblog.luffy.com
+    http:
+      paths:
+      - path: /foo/(.*)
+        backend:
+          serviceName: myblog
+          servicePort: 80</code></pre>
+                            </div>
+                            <p class="text-gray-700 dark:text-gray-300 mt-2">访问 myblog.luffy.com/foo/test 会被重写为 myblog:80/admin/test</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- kube-proxy Section -->
+                <section id="kube-proxy" class="section-content">
+                    <div class="content-card rounded-lg p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                            <i class="fas fa-exchange-alt mr-3 text-blue-600"></i>kube-proxy
+                        </h2>
+                        
+                        <p class="text-gray-700 dark:text-gray-300 mb-6">
+                            运行在每个节点上，监听 API Server 中服务对象的变化，再通过创建流量路由规则来实现网络的转发。
+                        </p>
+
+                        <h3 class="text-xl font-semibold mb-4">三种模式：</h3>
+                        <div class="space-y-4">
+                            <div class="border border-red-200 dark:border-red-800 rounded-lg p-4 bg-red-50 dark:bg-red-900/20">
+                                <h4 class="font-semibold text-red-800 dark:text-red-300 mb-2">
+                                    <i class="fas fa-user mr-2"></i>User space (已废弃)
+                                </h4>
+                                <p class="text-red-700 dark:text-red-400 text-sm">让 Kube-Proxy 在用户空间监听一个端口，所有的 Service 都转发到这个端口，然后 Kube-Proxy 在内部应用层对其进行转发，所有报文都走一遍用户态，性能不高，k8s v1.2版本后废弃。</p>
+                            </div>
+
+                            <div class="border border-blue-200 dark:border-blue-800 rounded-lg p-4 bg-blue-50 dark:bg-blue-900/20">
+                                <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">
+                                    <i class="fas fa-table mr-2"></i>Iptables (当前默认)
+                                </h4>
+                                <p class="text-blue-700 dark:text-blue-400 text-sm">当前默认模式，完全由 IPtables 来实现，通过各个node节点上的iptables规则来实现service的负载均衡，但是随着service数量的增大，iptables模式由于线性查找匹配、全量更新等特点，其性能会显著下降。</p>
+                            </div>
+
+                            <div class="border border-green-200 dark:border-green-800 rounded-lg p-4 bg-green-50 dark:bg-green-900/20">
+                                <h4 class="font-semibold text-green-800 dark:text-green-300 mb-2">
+                                    <i class="fas fa-tachometer-alt mr-2"></i>IPVS (高性能)
+                                </h4>
+                                <p class="text-green-700 dark:text-green-400 text-sm">与iptables同样基于Netfilter，但是采用的hash表，因此当service数量达到一定规模时，hash查表的速度优势就会显现出来，从而提高service的服务性能。k8s 1.8版本开始引入，1.11版本开始稳定，需要开启宿主机的ipvs模块。</p>
+                            </div>
+                        </div>
+
+                        <h3 class="text-xl font-semibold mb-4 mt-8">IPtables模式示例</h3>
+                        <div class="code-block p-4">
+                            <pre class="text-sm"><code>$ iptables-save |grep -v myblog-np|grep  "luffy/myblog"
+-A KUBE-SERVICES ! -s 10.244.0.0/16 -d 10.99.174.93/32 -p tcp -m comment --comment "demo/myblog: cluster IP" -m tcp --dport 80 -j KUBE-MARK-MASQ
+-A KUBE-SERVICES -d 10.99.174.93/32 -p tcp -m comment --comment "demo/myblog: cluster IP" -m tcp --dport 80 -j KUBE-SVC-WQNGJ7YFZKCTKPZK
+
+$ iptables-save |grep KUBE-SVC-WQNGJ7YFZKCTKPZK</code></pre>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Pod Concepts Section -->
+                <section id="pod-concepts" class="section-content">
+                    <div class="content-card rounded-lg p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                            <i class="fas fa-cube mr-3 text-blue-600"></i>Pod 概念与实践
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="highlight-box p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3">为什么需要Pod？</h3>
+                                <ul class="space-y-2">
+                                    <li><strong>容器间协作：</strong>多个容器需要共享网络、存储等资源</li>
+                                    <li><strong>原子性部署：</strong>一组容器作为一个整体进行调度和管理</li>
+                                    <li><strong>资源共享：</strong>Pod内容器共享网络命名空间和存储卷</li>
+                                    <li><strong>生命周期管理：</strong>统一管理容器的启动、停止和重启</li>
+                                </ul>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">Pod特性</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">共享网络</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Pod内所有容器共享同一个IP地址和端口空间</p>
+                                </div>
+                                <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-green-800 dark:text-green-300 mb-2">共享存储</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">可以定义共享的Volume供Pod内容器使用</p>
+                                </div>
+                                <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-purple-800 dark:text-purple-300 mb-2">原子调度</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Pod是Kubernetes调度的最小单位</p>
+                                </div>
+                                <div class="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-orange-800 dark:text-orange-300 mb-2">短暂性</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Pod是临时的，可以被创建、销毁和重新创建</p>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">Pod YAML定义</h3>
+                            <div class="code-block p-4 mb-4">
+                                <pre class="text-sm"><code>apiVersion: v1
+kind: Pod
+metadata:
+  name: myblog
+  namespace: luffy
+  labels:
+    component: myblog
+spec:
+  containers:
+  - name: myblog
+    image: 172.21.51.143:5000/myblog:v1
+    env:
+    - name: MYSQL_HOST
+      value: "127.0.0.1"
+    - name: MYSQL_USER
+      value: "root"
+    - name: MYSQL_PASSWD
+      value: "123456"
+    ports:
+    - containerPort: 8002
+    resources:
+      requests:
+        memory: "100Mi"
+        cpu: "50m"
+      limits:
+        memory: "500Mi"
+        cpu: "100m"
+    livenessProbe:
+      httpGet:
+        path: /blog/index/
+        port: 8002
+        scheme: HTTP
+      initialDelaySeconds: 10
+      periodSeconds: 15
+      timeoutSeconds: 2
+    readinessProbe:
+      httpGet:
+        path: /blog/index/
+        port: 8002
+        scheme: HTTP
+      initialDelaySeconds: 10
+      periodSeconds: 15
+      timeoutSeconds: 2</code></pre>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">资源限制 (Resource Limits)</h3>
+                            <div class="space-y-6 mb-8">
+                                <p class="text-gray-700 dark:text-gray-300">Kubernetes提供了requests和limits两种类型参数对资源进行预分配和使用限制，主要针对CPU和内存两个基础指标。</p>
+                                
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div class="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-lg">
+                                        <h4 class="text-lg font-semibold mb-3 text-blue-800 dark:text-blue-300">Requests (资源请求)</h4>
+                                        <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                                            <li>• 容器使用的最小资源需求</li>
+                                            <li>• 作用于调度阶段，作为容器调度时资源分配的判断依据</li>
+                                            <li>• 只有当前节点可分配资源 >= request 时才允许调度</li>
+                                            <li>• requests.cpu转成docker的--cpu-shares参数</li>
+                                            <li>• requests.memory仅作为k8s调度依据</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="bg-green-50 dark:bg-green-900/20 p-6 rounded-lg">
+                                        <h4 class="text-lg font-semibold mb-3 text-green-800 dark:text-green-300">Limits (资源限制)</h4>
+                                        <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                                            <li>• 容器能使用资源的最大值</li>
+                                            <li>• 设置为0表示不做限制</li>
+                                            <li>• 内存超过limit时会被OOM</li>
+                                            <li>• CPU超过limit时会被限制但不会被kill</li>
+                                            <li>• limits.cpu转成docker的--cpu-quota参数</li>
+                                            <li>• limits.memory转成docker的--memory参数</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                
+                                <div class="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+                                    <h4 class="text-lg font-semibold mb-2 text-yellow-800 dark:text-yellow-300">CPU资源单位</h4>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300">1 CPU = 1000 millicpu (1 Core = 1000m)</p>
+                                </div>
+                                
+                                <div class="code-block p-4">
+                                    <pre class="text-sm"><code>resources:
+  requests:
+    memory: "100Mi"  # 请求100MB内存
+    cpu: "50m"       # 请求0.05个CPU核心
+  limits:
+    memory: "500Mi"  # 限制最大500MB内存
+    cpu: "100m"      # 限制最大0.1个CPU核心</code></pre>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">Pod管理命令</h3>
+                            <div class="code-block p-4 mb-4">
+                                <pre class="text-sm"><code># 创建Pod
+$ kubectl create -f pod.yaml
+
+# 查看Pod
+$ kubectl get pods
+$ kubectl get pods -o wide
+$ kubectl -n luffy get pods
+
+# 查看Pod详情
+$ kubectl describe pod myblog
+
+# 查看Pod日志
+$ kubectl logs myblog
+$ kubectl logs -f myblog
+
+# 进入Pod
+$ kubectl exec -it myblog -- /bin/bash
+
+# 删除Pod
+$ kubectl delete pod myblog
+$ kubectl delete -f pod.yaml</code></pre>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">健康检查机制</h3>
+                            <div class="space-y-6 mb-8">
+                                <div class="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-lg">
+                                    <h4 class="text-lg font-semibold mb-3 text-blue-800 dark:text-blue-300">LivenessProbe 存活性探测</h4>
+                                    <p class="text-gray-700 dark:text-gray-300 mb-4">用于判断容器是否存活，即Pod是否为running状态。如果探测失败，kubelet将kill掉容器，并根据重启策略决定是否重启。</p>
+                                    <div class="code-block p-4">
+                                        <pre class="text-sm"><code>livenessProbe:
+  httpGet:
+    path: /blog/index/
+    port: 8002
+    scheme: HTTP
+  initialDelaySeconds: 10  # 容器启动后第一次执行探测等待时间
+  periodSeconds: 10        # 执行探测的频率
+  timeoutSeconds: 2        # 探测超时时间</code></pre>
+                                    </div>
+                                </div>
+
+                                <div class="bg-green-50 dark:bg-green-900/20 p-6 rounded-lg">
+                                    <h4 class="text-lg font-semibold mb-3 text-green-800 dark:text-green-300">ReadinessProbe 可用性探测</h4>
+                                    <p class="text-gray-700 dark:text-gray-300 mb-4">用于判断容器是否正常提供服务。如果探测失败，Endpoint Controller将从Service的Endpoint列表中移除此Pod，不再转发流量。</p>
+                                    <div class="code-block p-4">
+                                        <pre class="text-sm"><code>readinessProbe:
+  httpGet:
+    path: /blog/index/
+    port: 8002
+    scheme: HTTP
+  initialDelaySeconds: 10
+  timeoutSeconds: 2
+  periodSeconds: 10</code></pre>
+                                    </div>
+                                </div>
+
+                                <div class="bg-purple-50 dark:bg-purple-900/20 p-6 rounded-lg">
+                                    <h4 class="text-lg font-semibold mb-3 text-purple-800 dark:text-purple-300">探测方式</h4>
+                                    <ul class="space-y-2 text-gray-700 dark:text-gray-300">
+                                        <li><strong>exec：</strong>通过执行命令检查服务，返回值为0表示健康</li>
+                                        <li><strong>httpGet：</strong>通过HTTP请求检查，返回200-399状态码表示健康</li>
+                                        <li><strong>tcpSocket：</strong>通过TCP连接检查，能建立连接表示健康</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">初始化容器 (initContainers)</h3>
+                            <div class="space-y-4 mb-8">
+                                <p class="text-gray-700 dark:text-gray-300">初始化容器在应用容器启动之前运行，用于执行初始化任务，如调整系统参数、修复权限等。</p>
+                                <div class="code-block p-4">
+                                    <pre class="text-sm"><code>spec:
+  initContainers:
+  - name: elasticsearch-logging-init
+    image: alpine:3.6
+    command:
+    - /sbin/sysctl
+    - -w
+    - vm.max_map_count=262144
+    securityContext:
+      privileged: true
+  - name: fix-permissions
+    image: alpine:3.6
+    command: ["sh", "-c", "chown -R 1000:1000 /usr/share/elasticsearch/data"]
+    securityContext:
+      privileged: true
+    volumeMounts:
+    - name: elasticsearch-logging
+      mountPath: /usr/share/elasticsearch/data</code></pre>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">生命周期钩子 (Lifecycle Hooks)</h3>
+                            <div class="space-y-4 mb-8">
+                                <p class="text-gray-700 dark:text-gray-300">生命周期钩子允许在容器启动后和停止前执行特定操作。</p>
+                                <div class="code-block p-4">
+                                    <pre class="text-sm"><code>lifecycle:
+  postStart:
+    exec:
+      command: ['sh', '-c', 'echo $(date +%s): POST-START >> /loap/timing']
+  preStop:
+    exec:
+      command: ['sh', '-c', 'echo $(date +%s): PRE-STOP >> /loap/timing']</code></pre>
+                                </div>
+                                <div class="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+                                    <p class="text-sm text-yellow-800 dark:text-yellow-300"><strong>注意：</strong>只有主动杀掉Pod才会触发preStop钩子，如果Pod自己Down掉，则不会执行preStop钩子。</p>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">Pod生命周期状态</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center space-x-4">
+                                    <div class="bg-gray-300 text-gray-800 px-3 py-1 rounded-full text-sm font-medium">Pending</div>
+                                    <p class="text-gray-700 dark:text-gray-300">Pod已被创建，但还未调度到节点或正在下载镜像</p>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <div class="bg-blue-300 text-gray-800 px-3 py-1 rounded-full text-sm font-medium">ContainerCreating</div>
+                                    <p class="text-gray-700 dark:text-gray-300">Pod已调度到节点，正在创建容器</p>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <div class="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-medium">Running</div>
+                                    <p class="text-gray-700 dark:text-gray-300">Pod已绑定到节点，所有容器都已创建，至少一个容器正在运行</p>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <div class="bg-blue-500 text-white px-3 py-1 rounded-full text-sm font-medium">Succeeded</div>
+                                    <p class="text-gray-700 dark:text-gray-300">Pod中所有容器都已成功终止，且不会重启</p>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <div class="bg-red-500 text-white px-3 py-1 rounded-full text-sm font-medium">Failed</div>
+                                    <p class="text-gray-700 dark:text-gray-300">Pod中所有容器都已终止，至少一个容器以失败状态终止</p>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <div class="bg-purple-500 text-white px-3 py-1 rounded-full text-sm font-medium">CrashLoopBackOff</div>
+                                    <p class="text-gray-700 dark:text-gray-300">容器退出，kubelet正在将它重启</p>
+                                </div>
+                                <div class="flex items-center space-x-4">
+                                    <div class="bg-yellow-500 text-white px-3 py-1 rounded-full text-sm font-medium">Unknown</div>
+                                    <p class="text-gray-700 dark:text-gray-300">无法获取Pod状态，通常是与Pod通信失败</p>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">Pod 小结</h3>
+                            <div class="bg-green-50 dark:bg-green-900/20 p-6 rounded-lg">
+                                <h4 class="text-lg font-semibold mb-4 text-green-800 dark:text-green-300">Pod核心要点</h4>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                                        <li>• 实现k8s平台与特定容器运行时解耦，提供灵活的业务部署方式</li>
+                                        <li>• 使用YAML格式定义资源文件，掌握Map与List语法</li>
+                                        <li>• 通过kubectl create/get/exec/logs/delete等操作k8s资源</li>
+                                        <li>• 每启动一个Pod，先创建Infra容器实现网络空间共享</li>
+                                    </ul>
+                                    <ul class="space-y-2 text-sm text-gray-700 dark:text-gray-300">
+                                        <li>• 通过livenessProbe和readinessProbe实现健康检查</li>
+                                        <li>• 通过requests和limits限定容器资源申请与上限</li>
+                                        <li>• 通过initContainer和lifecycle执行初始化和生命周期操作</li>
+                                        <li>• 编写YAML要善用官方网站和kubectl explain命令</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Deployment Section -->
+                <section id="deployment-concepts" class="section-content">
+                    <div class="content-card rounded-lg p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                            <i class="fas fa-layer-group mr-3 text-green-600"></i>Deployment 部署管理
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="highlight-box p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3">为什么需要Deployment？</h3>
+                                <ul class="space-y-2">
+                                    <li><strong>副本管理：</strong>确保指定数量的Pod副本始终运行</li>
+                                    <li><strong>滚动更新：</strong>支持应用的无缝更新和回滚</li>
+                                    <li><strong>自愈能力：</strong>自动替换失败的Pod实例</li>
+                                    <li><strong>扩缩容：</strong>根据需求动态调整Pod数量</li>
+                                </ul>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">Deployment特性</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                                <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">声明式管理</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">描述期望状态，系统自动维护</p>
+                                </div>
+                                <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-green-800 dark:text-green-300 mb-2">滚动更新</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">零停机时间的应用更新</p>
+                                </div>
+                                <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-purple-800 dark:text-purple-300 mb-2">版本管理</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">支持版本回滚和历史记录</p>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">Deployment YAML配置</h3>
+                            <div class="code-block p-4 mb-4">
+                                <pre class="text-sm"><code>apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myblog
+  namespace: luffy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: myblog
+  template:
+    metadata:
+      labels:
+        app: myblog
+    spec:
+      containers:
+      - name: myblog
+        image: 172.21.51.143:5000/myblog:v1
+        ports:
+        - containerPort: 8002
+        env:
+        - name: MYSQL_HOST
+          value: mysql
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: myblog
+              key: MYSQL_USER
+        - name: MYSQL_PASSWD
+          valueFrom:
+            secretKeyRef:
+              name: myblog
+              key: MYSQL_PASSWD
+        resources:
+          requests:
+            memory: "100Mi"
+            cpu: "50m"
+          limits:
+            memory: "500Mi"
+            cpu: "100m"
+        livenessProbe:
+          httpGet:
+            path: /blog/index/
+            port: 8002
+          initialDelaySeconds: 10
+          periodSeconds: 15
+        readinessProbe:
+          httpGet:
+            path: /blog/index/
+            port: 8002
+          initialDelaySeconds: 10
+          periodSeconds: 15</code></pre>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">Deployment管理命令</h3>
+                            <div class="code-block p-4 mb-4">
+                                <pre class="text-sm"><code># 创建Deployment
+$ kubectl create -f deployment.yaml
+
+# 查看Deployment
+$ kubectl get deployments
+$ kubectl get deploy -o wide
+
+# 查看ReplicaSet
+$ kubectl get replicasets
+$ kubectl get rs
+
+# 扩缩容
+$ kubectl scale deployment myblog --replicas=3
+
+# 更新镜像
+$ kubectl set image deployment/myblog myblog=172.21.51.143:5000/myblog:v2
+
+# 查看更新状态
+$ kubectl rollout status deployment/myblog
+
+# 查看更新历史
+$ kubectl rollout history deployment/myblog
+
+# 回滚到上一版本
+$ kubectl rollout undo deployment/myblog
+
+# 回滚到指定版本
+$ kubectl rollout undo deployment/myblog --to-revision=2</code></pre>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">副本保障机制</h3>
+                            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-6">
+                                <p class="text-gray-700 dark:text-gray-300 mb-3">controller实时检测pod状态，并保障副本数一直处于期望的值。</p>
+                                <div class="code-block p-3">
+                                    <pre class="text-xs"><code>## 删除pod，观察pod状态变化
+$ kubectl -n luffy delete pod myblog-7c96c9f76b-qbbg7
+
+# 观察pod
+$ kubectl get pods -o wide
+
+## 设置两个副本
+$ kubectl -n luffy scale deploy myblog --replicas=2
+deployment.extensions/myblog scaled</code></pre>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">Pod驱逐策略</h3>
+                            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-6">
+                                <p class="text-gray-700 dark:text-gray-300 mb-3">K8S 有个特色功能叫 pod eviction，它在某些场景下如节点 NotReady，或者资源不足时，把 pod 驱逐至其它节点。</p>
+                                <div class="space-y-3">
+                                    <div>
+                                        <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">驱逐机制</h4>
+                                        <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
+                                            <li><strong>Kube-controller-manager</strong>: 周期性检查所有节点状态，当节点处于 NotReady 状态超过一段时间后，驱逐该节点上所有 pod</li>
+                                            <li><strong>Kubelet</strong>: 周期性检查本节点资源，当资源不足时，按照优先级驱逐部分 pod</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h5 class="font-semibold text-gray-800 dark:text-gray-300 mb-2">资源监控指标：</h5>
+                                        <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1 ml-4">
+                                            <li>memory.available：节点可用内存</li>
+                                            <li>nodefs.available：节点根盘可用存储空间</li>
+                                            <li>imagefs.available：镜像存储盘的可用空间</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">服务更新</h3>
+                            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-6">
+                                <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">更新方式</h4>
+                                <ol class="list-decimal list-inside text-gray-700 dark:text-gray-300 space-y-1">
+                                    <li>修改yaml文件，使用<code class="bg-gray-200 dark:bg-gray-600 px-1 rounded">kubectl apply -f deploy-myblog.yaml</code></li>
+                                    <li><code class="bg-gray-200 dark:bg-gray-600 px-1 rounded">kubectl -n luffy edit deploy myblog</code>在线更新</li>
+                                    <li><code class="bg-gray-200 dark:bg-gray-600 px-1 rounded">kubectl -n luffy set image deploy myblog myblog=172.21.51.67:5000/myblog:v2 --record</code></li>
+                                </ol>
+                                <div class="code-block p-3 mt-3">
+                                    <pre class="text-xs"><code># 构建新版本镜像
+$ docker build . -t 172.21.51.67:5000/myblog:v2 -f Dockerfile
+$ docker push 172.21.51.67:5000/myblog:v2
+
+# 更新部署
+$ kubectl -n luffy set image deploy myblog myblog=172.21.51.67:5000/myblog:v2 --record</code></pre>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">更新策略</h3>
+                            <div class="space-y-4">
+                                <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">RollingUpdate（默认）</h4>
+                                    <ul class="space-y-1 text-sm">
+                                        <li><strong>maxSurge：</strong>更新过程中可以创建的额外Pod数量</li>
+                                        <li><strong>maxUnavailable：</strong>更新过程中可以不可用的Pod数量</li>
+                                    </ul>
+                                    <div class="code-block p-3 mt-3">
+                                        <pre class="text-xs"><code>strategy:
+  type: RollingUpdate
+  rollingUpdate:
+    maxSurge: 1
+    maxUnavailable: 0</code></pre>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">Recreate</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">先删除所有旧Pod，再创建新Pod（会有停机时间）</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Service Section -->
+                <section id="service-concepts" class="section-content">
+                    <div class="content-card rounded-lg p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                            <i class="fas fa-network-wired mr-3 text-purple-600"></i>Service 服务发现
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="highlight-box p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3">Service解决的问题</h3>
+                                <ul class="space-y-2">
+                                    <li><strong>Pod IP不固定：</strong>Pod重启后IP会变化</li>
+                                    <li><strong>负载均衡：</strong>多个Pod副本需要统一入口</li>
+                                    <li><strong>服务发现：</strong>应用间需要稳定的访问方式</li>
+                                    <li><strong>端口管理：</strong>统一管理服务端口</li>
+                                </ul>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">ClusterIP Service</h3>
+                            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-6">
+                                <p class="text-gray-700 dark:text-gray-300 mb-3">service是一组pod的服务抽象，相当于一组pod的LB，负责将请求分发给对应的pod。service会为这个LB提供一个IP，一般称为cluster IP。</p>
+                                <div class="code-block p-3">
+                                    <pre class="text-xs"><code>apiVersion: v1
+kind: Service
+metadata:
+  name: myblog
+  namespace: luffy
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8002
+  selector:
+    app: myblog
+  type: ClusterIP</code></pre>
+                                </div>
+                                <div class="mt-3">
+                                    <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">Service与Pod关联</h4>
+                                    <p class="text-gray-700 dark:text-gray-300">service对象创建的同时，会创建同名的endpoints对象，若服务设置了readinessProbe，当readinessProbe检测失败时，endpoints列表中会剔除掉对应的pod_ip。</p>
+                                    <div class="code-block p-3 mt-2">
+                                        <pre class="text-xs"><code>$ kubectl -n luffy get endpoints myblog
+NAME     ENDPOINTS                            AGE
+myblog   10.244.0.68:8002,10.244.1.158:8002   7m</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">服务发现</h3>
+                            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-6">
+                                <p class="text-gray-700 dark:text-gray-300 mb-3">在k8s集群中，组件之间可以通过定义的Service名称实现通信。</p>
+                                <div class="code-block p-3">
+                                    <pre class="text-xs"><code># 进入myblog容器
+$ kubectl -n luffy exec -ti myblog-5c97d79cdb-j485f bash
+[root@myblog-5c97d79cdb-j485f myblog]# curl mysql:3306
+[root@myblog-5c97d79cdb-j485f myblog]# curl myblog/blog/index/</code></pre>
+                                </div>
+                                <div class="mt-3">
+                                    <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">CoreDNS实现</h4>
+                                    <p class="text-gray-700 dark:text-gray-300">CoreDNS是一个Go语言实现的链式插件DNS服务端，启动pod的时候，会把kube-dns服务的cluster-ip地址注入到pod的resolve解析配置中。</p>
+                                    <div class="code-block p-3 mt-2">
+                                        <pre class="text-xs"><code># 查看pod解析配置
+$ cat /etc/resolv.conf
+nameserver 10.96.0.10
+search luffy.svc.cluster.local svc.cluster.local cluster.local</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">NodePort Service</h3>
+                            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-6">
+                                <p class="text-gray-700 dark:text-gray-300 mb-3">cluster-ip为虚拟地址，只能在k8s集群内部进行访问，集群外部如果访问内部服务，实现方式之一为使用NodePort方式。NodePort会默认在 30000-32767 范围内分配端口。</p>
+                                <div class="code-block p-3">
+                                    <pre class="text-xs"><code>apiVersion: v1
+kind: Service
+metadata:
+  name: myblog-np
+  namespace: luffy
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8002
+  selector:
+    app: myblog
+  type: NodePort</code></pre>
+                                </div>
+                                <div class="mt-3">
+                                    <p class="text-gray-700 dark:text-gray-300">集群内每个节点的NodePort端口都会进行监听，可以通过任意节点IP+端口访问服务。</p>
+                                    <div class="code-block p-3 mt-2">
+                                        <pre class="text-xs"><code>$ kubectl -n luffy get svc
+NAME        TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)        AGE
+myblog-np   NodePort    10.105.228.101   <none>        80:30647/TCP   4s
+
+# 通过任意节点访问
+$ curl 172.21.51.67:30647/blog/index/
+$ curl 172.21.51.68:30647/blog/index/</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">kube-proxy工作原理</h3>
+                            <div class="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg mb-6">
+                                <p class="text-gray-700 dark:text-gray-300 mb-3">运行在每个节点上，监听 API Server 中服务对象的变化，再通过创建流量路由规则来实现网络的转发。</p>
+                                <div class="space-y-3">
+                                    <div>
+                                        <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">三种模式</h4>
+                                        <ul class="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
+                                            <li><strong>User space</strong>: 所有报文都走用户态，性能不高，已废弃</li>
+                                            <li><strong>Iptables</strong>: 当前默认模式，完全由 IPtables 实现，但随着service数量增大性能下降</li>
+                                            <li><strong>IPVS</strong>: 基于hash表，性能更好，k8s 1.11版本开始稳定</li>
+                                        </ul>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">Iptables规则示例</h4>
+                                        <div class="code-block p-3">
+                                            <pre class="text-xs"><code># 查看service相关的iptables规则
+$ iptables-save | grep "luffy/myblog"
+-A KUBE-SERVICES -d 10.99.174.93/32 -p tcp --dport 80 -j KUBE-SVC-WQNGJ7YFZKCTKPZK
+
+# 查看负载均衡规则
+$ iptables-save | grep KUBE-SVC-WQNGJ7YFZKCTKPZK
+-A KUBE-SVC-WQNGJ7YFZKCTKPZK -m statistic --mode random --probability 0.50000000000 -j KUBE-SEP-GB5GNOM5CZH7ICXZ</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">Service类型对比</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">ClusterIP</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">集群内部访问，分配虚拟IP</p>
+                                </div>
+                                <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-green-800 dark:text-green-300 mb-2">NodePort</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">通过节点端口对外暴露服务</p>
+                                </div>
+                                <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-purple-800 dark:text-purple-300 mb-2">LoadBalancer</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">云平台负载均衡器</p>
+                                </div>
+                                <div class="bg-orange-50 dark:bg-orange-900/20 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-orange-800 dark:text-orange-300 mb-2">ExternalName</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">映射到外部服务的DNS名称</p>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">ClusterIP Service配置</h3>
+                            <div class="code-block p-4 mb-4">
+                                <pre class="text-sm"><code>apiVersion: v1
+kind: Service
+metadata:
+  name: myblog
+  namespace: luffy
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8002
+  selector:
+    app: myblog
+  type: ClusterIP</code></pre>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">NodePort Service配置</h3>
+                            <div class="code-block p-4 mb-4">
+                                <pre class="text-sm"><code>apiVersion: v1
+kind: Service
+metadata:
+  name: myblog
+  namespace: luffy
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8002
+    nodePort: 30008
+  selector:
+    app: myblog
+  type: NodePort</code></pre>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">Service管理命令</h3>
+                            <div class="code-block p-4 mb-4">
+                                <pre class="text-sm"><code># 创建Service
+$ kubectl create -f service.yaml
+
+# 查看Service
+$ kubectl get services
+$ kubectl get svc -o wide
+
+# 查看Service详情
+$ kubectl describe service myblog
+
+# 查看Endpoints
+$ kubectl get endpoints
+$ kubectl get ep
+
+# 删除Service
+$ kubectl delete service myblog</code></pre>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">服务发现机制</h3>
+                            <div class="space-y-4">
+                                <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">DNS解析</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">通过CoreDNS实现服务名到ClusterIP的解析</p>
+                                    <div class="code-block p-3">
+                                        <pre class="text-xs"><code># 服务名访问格式
+<service-name>.<namespace>.svc.cluster.local
+
+# 同命名空间可简化为
+<service-name></code></pre>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">环境变量</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400">Kubernetes自动注入Service相关环境变量到Pod中</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- ConfigMap Section -->
+                <section id="configmap-concepts" class="section-content">
+                    <div class="content-card rounded-lg p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                            <i class="fas fa-cogs mr-3 text-orange-600"></i>ConfigMap 配置管理
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="highlight-box p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3">ConfigMap的作用</h3>
+                                <ul class="space-y-2">
+                                    <li><strong>配置分离：</strong>将配置信息从应用代码中分离</li>
+                                    <li><strong>环境适配：</strong>不同环境使用不同配置</li>
+                                    <li><strong>动态更新：</strong>支持配置的热更新</li>
+                                    <li><strong>版本管理：</strong>配置变更可追踪</li>
+                                </ul>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">ConfigMap YAML配置</h3>
+                            <div class="code-block p-4 mb-4">
+                                <pre class="text-sm"><code>apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: myblog
+  namespace: luffy
+data:
+  MYSQL_HOST: mysql
+  MYSQL_PORT: "3306"
+  MYSQL_DB: myblog</code></pre>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">使用ConfigMap</h3>
+                            <div class="space-y-4">
+                                <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">环境变量方式</h4>
+                                    <div class="code-block p-3">
+                                        <pre class="text-xs"><code>env:
+- name: MYSQL_HOST
+  valueFrom:
+    configMapKeyRef:
+      name: myblog
+      key: MYSQL_HOST</code></pre>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 dark:bg-gray-800 p-4 rounded-lg">
+                                    <h4 class="font-semibold mb-2">Volume挂载方式</h4>
+                                    <div class="code-block p-3">
+                                        <pre class="text-xs"><code>volumes:
+- name: config
+  configMap:
+    name: myblog
+volumeMounts:
+- name: config
+  mountPath: /etc/config</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">ConfigMap管理命令</h3>
+                            <div class="code-block p-4 mb-4">
+                                <pre class="text-sm"><code># 创建ConfigMap
+$ kubectl create configmap myblog --from-literal=MYSQL_HOST=mysql
+$ kubectl create -f configmap.yaml
+
+# 从文件创建
+$ kubectl create configmap myblog --from-file=config.properties
+
+# 查看ConfigMap
+$ kubectl get configmaps
+$ kubectl get cm
+
+# 查看ConfigMap详情
+$ kubectl describe configmap myblog
+
+# 编辑ConfigMap
+$ kubectl edit configmap myblog</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Secrets Config Section -->
+                <section id="secrets-config" class="section-content">
+                    <div class="content-card rounded-lg p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                            <i class="fas fa-key mr-3 text-blue-600"></i>配置管理 - Secret
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="highlight-box p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3">Secret类型</h3>
+                                <ul class="space-y-2">
+                                    <li><strong>Service Account：</strong>用来访问Kubernetes API，由Kubernetes自动创建，并且会自动挂载到Pod的/run/secrets/kubernetes.io/serviceaccount目录中</li>
+                                    <li><strong>Opaque：</strong>base64编码格式的Secret，用来存储密码、密钥等</li>
+                                    <li><strong>kubernetes.io/dockerconfigjson：</strong>用来存储私有docker registry的认证信息</li>
+                                </ul>
+                            </div>
+
+                            <h3 class="text-xl font-semibold mb-4">Secret配置示例</h3>
+                            <p class="text-gray-700 dark:text-gray-300 mb-4">
+                                <code class="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">myblog/two-pod/secret.yaml</code>
+                            </p>
+                            
+                            <div class="code-block p-4 mb-4">
+                                <pre class="text-sm"><code>apiVersion: v1
+kind: Secret
+metadata:
+  name: myblog
+  namespace: luffy
+type: Opaque
+data:
+  MYSQL_USER: cm9vdA==		#注意加-n参数， echo -n root|base64
+  MYSQL_PASSWD: MTIzNDU2</code></pre>
+                            </div>
+
+                            <h4 class="text-lg font-semibold mb-3">创建并查看：</h4>
+                            <div class="code-block p-4 mb-4">
+                                <pre class="text-sm"><code>$ kubectl create -f secret.yaml
+$ kubectl -n luffy get secret</code></pre>
+                            </div>
+
+                            <h4 class="text-lg font-semibold mb-3">另一种创建方式：</h4>
+                            <div class="code-block p-4 mb-4">
+                                <pre class="text-sm"><code>$ cat secret.txt
+MYSQL_USER=root
+MYSQL_PASSWD=123456
+$ kubectl -n luffy create secret generic myblog --from-env-file=secret.txt</code></pre>
+                            </div>
+
+                            <h4 class="text-lg font-semibold mb-3">修改后的mysql配置</h4>
+                            <p class="text-gray-700 dark:text-gray-300 mb-4">
+                                资源路径：<code class="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">myblog/two-pod/mysql-with-config.yaml</code>
+                            </p>
+                            
+                            <div class="code-block p-4">
+                                <pre class="text-sm"><code>...
+spec:
+  containers:
+  - name: mysql</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Ingress HTTPS Section -->
+                <section id="ingress-https" class="section-content">
+                    <div class="content-card rounded-lg p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                            <i class="fas fa-lock mr-3 text-blue-600"></i>Ingress HTTPS配置
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="highlight-box p-6 rounded-lg mb-6">
+                                <h3 class="text-lg font-semibold mb-3">访问配置</h3>
+                                <p class="text-lg">域名解析服务，将 <code class="bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded">myblog.luffy.com</code> 解析到ingress的地址上。</p>
+                                <p class="text-gray-700 dark:text-gray-300 mt-2">ingress是支持多副本的，高可用的情况下，生产的配置是使用lb服务（内网F5设备，公网elb、slb、clb，解析到各ingress的机器，如何域名指向lb地址）</p>
+                            </div>
+
+                            <div class="border-l-4 border-blue-500 pl-6">
+                                <h3 class="text-xl font-semibold mb-3">本机hosts配置</h3>
+                                <p class="text-gray-700 dark:text-gray-300 mb-3">本机，添加如下hosts记录来演示效果：</p>
+                                <div class="code-block">
+                                    <button class="copy-button" onclick="copyToClipboard(this)">复制</button>
+                                    <pre class="text-sm language-bash"><code>172.21.51.67 myblog.luffy.com</code></pre>
+                                </div>
+                                <p class="text-gray-700 dark:text-gray-300 mt-3">然后，访问 <a href="http://myblog.luffy.com/blog/index/" class="text-blue-600 hover:underline">http://myblog.luffy.com/blog/index/</a></p>
+                            </div>
+
+                            <div class="border-l-4 border-green-500 pl-6">
+                                <h3 class="text-xl font-semibold mb-3">HTTPS访问配置</h3>
+                                
+                                <h4 class="text-lg font-semibold mb-3">1. 生成自签名证书</h4>
+                                <div class="code-block">
+                                    <button class="copy-button" onclick="copyToClipboard(this)">复制</button>
+                                    <pre class="text-sm language-bash"><code># 自签名证书
+$ openssl req -x509 -nodes -days 2920 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=*.luffy.com/O=ingress-nginx"</code></pre>
+                                </div>
+
+                                <h4 class="text-lg font-semibold mb-3 mt-4">2. 创建Secret对象</h4>
+                                <div class="code-block">
+                                    <button class="copy-button" onclick="copyToClipboard(this)">复制</button>
+                                    <pre class="text-sm language-bash"><code># 证书信息保存到secret对象中，ingress-nginx会读取secret对象解析出证书加载到nginx配置中
+$ kubectl -n luffy create secret tls https-secret --key tls.key --cert tls.crt</code></pre>
+                                </div>
+
+                                <h4 class="text-lg font-semibold mb-3 mt-4">3. 修改Ingress YAML</h4>
+                                <div class="code-block">
+                                    <button class="copy-button" onclick="copyToClipboard(this)">复制</button>
+                                    <pre class="text-sm language-yaml"><code>apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: myblog-tls
+  namespace: luffy
+spec:
+  rules:
+  - host: myblog.luffy.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: myblog
+          servicePort: 80
+  tls:
+  - hosts:
+    - myblog.luffy.com
+    secretName: https-secret</code></pre>
+                                </div>
+
+                                <p class="text-gray-700 dark:text-gray-300 mt-3">然后，访问 <a href="https://myblog.luffy.com/blog/index/" class="text-blue-600 hover:underline">https://myblog.luffy.com/blog/index/</a></p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Ingress Advanced Section -->
+                <section id="ingress-advanced" class="section-content">
+                    <div class="content-card rounded-lg p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                            <i class="fas fa-route mr-3 text-indigo-600"></i>多路径转发及重写实现
+                        </h2>
+                        
+                        <div class="space-y-6">
+                            <div class="border-l-4 border-blue-500 pl-6">
+                                <h3 class="text-xl font-semibold mb-3">1. 多path转发示例</h3>
+                                
+                                <h4 class="text-lg font-semibold mb-3">目标：</h4>
+                                <div class="code-block">
+                                    <button class="copy-button" onclick="copyToClipboard(this)">复制</button>
+                                    <pre class="text-sm"><code>myblog.luffy.com -> 172.21.51.67 -> /foo   service1:4200
+                                      /bar   service2:8080
+                                      /      myblog:80</code></pre>
+                                </div>
+
+                                <h4 class="text-lg font-semibold mb-3 mt-4">实现：</h4>
+                                <div class="code-block">
+                                    <button class="copy-button" onclick="copyToClipboard(this)">复制</button>
+                                    <pre class="text-sm language-yaml"><code>apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: simple-fanout-example
+  namespace: luffy
+spec:
+  rules:
+  - host: myblog.luffy.com
+    http:
+      paths:
+      - path: /foo
+        backend:
+          serviceName: service1
+          servicePort: 4200
+      - path: /bar
+        backend:
+          serviceName: service2
+          servicePort: 8080
+      - path: /
+        backend:
+          serviceName: myblog
+          servicePort: 80</code></pre>
+                                </div>
+                            </div>
+
+                            <div class="border-l-4 border-green-500 pl-6">
+                                <h3 class="text-xl font-semibold mb-3">2. nginx的URL重写</h3>
+                                
+                                <h4 class="text-lg font-semibold mb-3">目标：</h4>
+                                <div class="code-block">
+                                    <button class="copy-button" onclick="copyToClipboard(this)">复制</button>
+                                    <pre class="text-sm"><code>myblog.luffy.com -> 172.21.51.67 -> /foo/    myblog:80/admin/</code></pre>
+                                </div>
+
+                                <h4 class="text-lg font-semibold mb-3 mt-4">实现：</h4>
+                                <div class="code-block">
+                                    <button class="copy-button" onclick="copyToClipboard(this)">复制</button>
+                                    <pre class="text-sm language-yaml"><code>apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: rewrite-path
+  namespace: luffy
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /admin/$1
+spec:
+  rules:
+  - host: myblog.luffy.com
+    http:
+      paths:
+      - path: /foo/(.*)
+        backend:
+          serviceName: myblog
+          servicePort: 80</code></pre>
+                                </div>
+                            </div>
+
+                            <div class="bg-blue-50 dark:bg-blue-900/20 p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-3 text-blue-800 dark:text-blue-300">
+                                    <i class="fas fa-info-circle mr-2"></i>重要说明
+                                </h3>
+                                <ul class="space-y-2 text-blue-700 dark:text-blue-400">
+                                    <li>• 多路径转发可以实现基于URL路径的服务路由</li>
+                                    <li>• URL重写功能通过annotations实现nginx配置的灵活控制</li>
+                                    <li>• 正则表达式捕获组可以用于动态路径重写</li>
+                                    <li>• 这些功能为微服务架构提供了强大的流量管理能力</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Summary Section -->
+                <section id="summary" class="section-content">
+                    <div class="content-card rounded-lg p-8 mb-8">
+                        <h2 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">
+                            <i class="fas fa-check-circle mr-3 text-green-600"></i>小结
+                        </h2>
+                        
+                        <div class="highlight-box p-6 rounded-lg mb-6">
+                            <h3 class="text-lg font-semibold mb-3">本章核心内容</h3>
+                            <p class="text-lg">核心讲如何通过k8s管理业务应用</p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mt-1">1</div>
+                                <p class="text-gray-700 dark:text-gray-300">介绍k8s的架构、核心组件和工作流程，使用kubeadm快速安装k8s集群</p>
+                            </div>
+
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mt-1">2</div>
+                                <p class="text-gray-700 dark:text-gray-300">定义Pod.yaml，将myblog和mysql打包在同一个Pod中，myblog使用localhost访问mysql</p>
+                            </div>
+
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mt-1">3</div>
+                                <p class="text-gray-700 dark:text-gray-300">mysql数据持久化，为myblog业务应用添加了健康检查和资源限制</p>
+                            </div>
+
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mt-1">4</div>
+                                <p class="text-gray-700 dark:text-gray-300">将myblog与mysql拆分，使用独立的Pod管理</p>
+                            </div>
+
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mt-1">5</div>
+                                <p class="text-gray-700 dark:text-gray-300">yaml文件中的环境变量存在账号密码明文等敏感信息，使用configMap和Secret来统一配置，优化部署</p>
+                            </div>
+
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mt-1">6</div>
+                                <p class="text-gray-700 dark:text-gray-300">只用Pod去直接管理业务应用，对于多副本的需求，很难实现，因此使用Deployment Workload</p>
+                            </div>
+
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mt-1">7</div>
+                                <p class="text-gray-700 dark:text-gray-300">有了多副本，多个Pod如何去实现LB入口，因此引入了Service的资源类型，有CLusterIp和NodePort</p>
+                            </div>
+
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mt-1">8</div>
+                                <p class="text-gray-700 dark:text-gray-300">ClusterIP是四层的IP地址，不固定，不具备跨环境迁移，因此利用coredns实现集群内服务发现，组件之间直接通过Service名称通信，实现配置的去IP化</p>
+                            </div>
+
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mt-1">9</div>
+                                <p class="text-gray-700 dark:text-gray-300">对Django应用做改造，django直接使用mysql:3306实现数据库访问</p>
+                            </div>
+
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mt-1">10</div>
+                                <p class="text-gray-700 dark:text-gray-300">为了实现在集群外部对集群内服务的访问，因此创建NodePort类型的Service</p>
+                            </div>
+
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mt-1">11</div>
+                                <p class="text-gray-700 dark:text-gray-300">介绍了Service的实现原理，通过kube-proxy利用iptables或者ipvs维护服务访问规则，实现虚拟IP转发到具体Pod的需求</p>
+                            </div>
+
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mt-1">12</div>
+                                <p class="text-gray-700 dark:text-gray-300">为了实现集群外使用域名访问myblog，因此引入Ingress资源，通过定义访问规则，实现七层代理</p>
+                            </div>
+
+                            <div class="flex items-start space-x-3">
+                                <div class="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-sm font-bold mt-1">13</div>
+                                <p class="text-gray-700 dark:text-gray-300">考虑真实的场景，对Ingress的使用做了拓展，介绍多path转发及nginx URL重写的实现</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Floating TOC for Desktop -->
+    <div class="floating-toc">
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-4 max-w-xs">
+            <h4 class="font-semibold mb-3 text-gray-900 dark:text-white">快速导航</h4>
+            <div class="space-y-1 text-sm">
+                <a href="#overview" class="block py-1 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400">概述</a>
+                <a href="#yaml-writing" class="block py-1 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400">YAML编写</a>
+                <a href="#container-problems" class="block py-1 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400">容器问题</a>
+                <a href="#architecture" class="block py-1 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400">架构</a>
+                <a href="#core-components" class="block py-1 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400">核心组件</a>
+                <a href="#pod-concepts" class="block py-1 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400">Pod概念</a>
+                <a href="#deployment-concepts" class="block py-1 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400">Deployment</a>
+                <a href="#service-concepts" class="block py-1 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400">Service</a>
+                <a href="#configmap-concepts" class="block py-1 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400">ConfigMap</a>
+                <a href="#secrets-config" class="block py-1 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400">Secret</a>
+                <a href="#ingress-https" class="block py-1 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400">Ingress HTTPS</a>
+                <a href="#ingress-advanced" class="block py-1 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400">多路径转发</a>
+                <a href="#summary" class="block py-1 px-2 rounded hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-600 dark:text-gray-400">小结</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-800 text-white py-8 mt-16">
+        <div class="container mx-auto px-4">
+            <div class="text-center space-y-4">
+                <!-- 标题 -->
+                <div class="flex justify-center items-center space-x-3">
+                    <i class="fas fa-dharmachakra text-2xl text-blue-400"></i>
+                    <h3 class="text-2xl font-bold text-blue-400">Kubernetes 实践教程</h3>
+                </div>
+                
+                <!-- 描述 -->
+                <p class="text-gray-300 max-w-md mx-auto">
+                    掌握容器编排的核心技能，开启云原生应用开发之旅
+                </p>
+                
+                <!-- 社交链接 -->
+                <div class="flex justify-center space-x-6 py-4">
+                    <a href="#" class="text-gray-400 hover:text-blue-400 transition-colors">
+                        <i class="fab fa-github text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-green-400 transition-colors">
+                        <i class="fas fa-book text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-400 hover:text-purple-400 transition-colors">
+                        <i class="fas fa-graduation-cap text-xl"></i>
+                    </a>
+                </div>
+                
+                <!-- 版权信息 -->
+                <div class="border-t border-gray-700 pt-4">
+                    <p class="text-gray-400 text-sm">
+                        &copy; 2025 Kubernetes 基础落地实践课程
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        
+        // Check for saved theme preference or default to system preference
+        const savedTheme = localStorage.getItem('theme');
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        const currentTheme = savedTheme || systemTheme;
+        
+        html.setAttribute('data-theme', currentTheme);
+        
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+
+        // Navigation
+        const navItems = document.querySelectorAll('.nav-item');
+        const sections = document.querySelectorAll('.section-content');
+        
+        function showSection(targetId) {
+            // Hide all sections
+            sections.forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show target section
+            const targetSection = document.getElementById(targetId);
+            if (targetSection) {
+                targetSection.classList.add('active');
+            }
+            
+            // Update nav items
+            navItems.forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            // Add active class to clicked nav item
+            const activeNavItem = document.querySelector(`[href="#${targetId}"]`);
+            if (activeNavItem) {
+                activeNavItem.classList.add('active');
+            }
+        }
+        
+        // Add click event listeners to nav items
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = item.getAttribute('href').substring(1);
+                showSection(targetId);
+                
+                // Smooth scroll to top on mobile
+                if (window.innerWidth < 1024) {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Floating TOC navigation
+        const floatingTocLinks = document.querySelectorAll('.floating-toc a');
+        floatingTocLinks.forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = link.getAttribute('href').substring(1);
+                showSection(targetId);
+            });
+        });
+
+        // Mobile menu toggle
+        const mobileMenuToggle = document.getElementById('mobile-menu-toggle');
+        const sidebar = document.querySelector('aside');
+        
+        mobileMenuToggle.addEventListener('click', () => {
+            if (window.innerWidth < 768) {
+                sidebar.classList.toggle('show');
+            } else {
+                sidebar.classList.toggle('hidden');
+            }
+        });
+
+        // Close mobile menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (window.innerWidth < 768 && !sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+                sidebar.classList.remove('show');
+            } else if (window.innerWidth < 1024 && !sidebar.contains(e.target) && !mobileMenuToggle.contains(e.target)) {
+                sidebar.classList.add('hidden');
+            }
+        });
+
+        // Copy to clipboard function
+        function copyToClipboard(button) {
+            const codeBlock = button.nextElementSibling.querySelector('code');
+            const text = codeBlock.textContent;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = button.textContent;
+                button.textContent = '已复制!';
+                button.style.background = '#10b981';
+                button.style.color = 'white';
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.style.background = '';
+                    button.style.color = '';
+                }, 2000);
+            }).catch(err => {
+                console.error('复制失败:', err);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                const originalText = button.textContent;
+                button.textContent = '已复制!';
+                setTimeout(() => {
+                    button.textContent = originalText;
+                }, 2000);
+            });
+        }
+
+        // Make copy function globally available
+        window.copyToClipboard = copyToClipboard;
+
+        // Responsive sidebar handling
+        function handleResize() {
+            if (window.innerWidth >= 1024) {
+                sidebar.classList.remove('hidden');
+            } else {
+                sidebar.classList.add('hidden');
+            }
+        }
+
+        window.addEventListener('resize', handleResize);
+        handleResize(); // Initial call
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Add loading animation
+        window.addEventListener('load', () => {
+            document.body.classList.add('loaded');
+            // Initialize Prism.js for code highlighting
+            if (typeof Prism !== 'undefined') {
+                Prism.highlightAll();
+            }
+        });
+
+        // Smooth scroll to section with offset for fixed header
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                const headerHeight = document.querySelector('header').offsetHeight;
+                const sectionTop = section.offsetTop - headerHeight - 20;
+                window.scrollTo({
+                    top: sectionTop,
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        // Enhanced keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            // ESC key to close mobile menu
+            if (e.key === 'Escape' && window.innerWidth < 768) {
+                sidebar.classList.remove('show');
+            }
+            
+            // Ctrl/Cmd + K to focus search (if implemented)
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                // Focus search input if available
+            }
+        });
+
+        // Performance optimization: Lazy load images
+        const observerOptions = {
+            root: null,
+            rootMargin: '50px',
+            threshold: 0.1
+        };
+
+        const imageObserver = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    if (img.dataset.src) {
+                        img.src = img.dataset.src;
+                        img.removeAttribute('data-src');
+                        imageObserver.unobserve(img);
+                    }
+                }
+            });
+        }, observerOptions);
+
+        // Observe all images with data-src attribute
+        document.querySelectorAll('img[data-src]').forEach(img => {
+            imageObserver.observe(img);
+        });
+        
+        // Back to Top Button
+        const backToTopBtn = document.getElementById('back-to-top');
+        
+        // Show/hide button based on scroll position
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('show');
+            } else {
+                backToTopBtn.classList.remove('show');
+            }
+        });
+        
+        // Smooth scroll to top
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+    </script>
+    
+    <!-- Back to Top Button -->
+    <button id="back-to-top" class="fixed bottom-8 right-8 w-12 h-12 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg transition-all duration-300 opacity-0 invisible transform translate-y-4 z-50 flex items-center justify-center">
+        <i class="fas fa-chevron-up text-lg"></i>
+    </button>
+    
+    <style>
+        #back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        #back-to-top:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+        }
+    </style>
+    
+    <!-- Prism.js for code highlighting -->
+    <script src="https://cdn.staticfile.org/prism/1.29.0/components/prism-core.min.js"></script>
+    <script src="https://cdn.staticfile.org/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
+    <script src="https://cdn.staticfile.org/prism/1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script>
+</body>
+</html>

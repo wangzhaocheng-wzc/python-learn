@@ -1,0 +1,3163 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker学习教程 - 走进Docker的世界</title>
+    
+    <!-- External CSS -->
+    <link href="https://unpkg.com/tailwindcss@^2/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Prism.js for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Docker学习教程 - 从入门到实践，全面掌握Docker容器技术，包含安装配置、Dockerfile编写、网络原理等完整知识体系">
+    <meta name="keywords" content="Docker,容器,教程,DevOps,云原生,Kubernetes,容器化,微服务">
+    <meta name="author" content="Docker学习教程">
+    <meta property="og:title" content="Docker学习教程 - 第一天：走进Docker的世界">
+    <meta property="og:description" content="全面的Docker学习教程，从基础概念到实际应用">
+    <meta property="og:type" content="article">
+    
+    <style>
+        :root {
+            --primary-color: #3b82f6;
+            --secondary-color: #1e40af;
+            --accent-color: #6366f1;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --error-color: #ef4444;
+            --text-primary: #111827;
+            --text-secondary: #6b7280;
+            --text-muted: #9ca3af;
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --border-color: #e2e8f0;
+            --border-light: #f1f5f9;
+            --code-bg: #f8fafc;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+        }
+
+        [data-theme="dark"] {
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --border-color: #475569;
+            --border-light: #334155;
+            --code-bg: #1e293b;
+            --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
+            --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
+            --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+            --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.3), 0 8px 10px -6px rgb(0 0 0 / 0.3);
+        }
+
+        * {
+            transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        }
+
+        body {
+            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--text-primary);
+            line-height: 1.75;
+            font-size: 16px;
+            letter-spacing: 0.01em;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .hero-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-gradient::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23ffffff" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
+            opacity: 0.3;
+        }
+
+        .hero-gradient .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .content-section {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            box-shadow: var(--shadow-sm);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .content-section:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .sidebar {
+            background: linear-gradient(180deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+            border-right: 1px solid var(--border-light);
+            box-shadow: var(--shadow-lg);
+            backdrop-filter: blur(20px);
+        }
+
+        .nav-item {
+            color: var(--text-secondary);
+            border-left: 3px solid transparent;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0.1;
+        }
+
+        .nav-item:hover::before, .nav-item.active::before {
+            width: 100%;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            color: var(--primary-color);
+            background: linear-gradient(90deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.05));
+            border-left-color: var(--primary-color);
+            transform: translateX(6px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-item i {
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-item:hover i {
+            transform: scale(1.1);
+        }
+
+        .code-block {
+            background: var(--code-bg);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-lg);
+            font-family: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .code-block::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--primary-color), transparent);
+        }
+
+        .section-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .section-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            transform: scaleX(0);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .section-card:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: var(--shadow-xl);
+            border-color: var(--primary-color);
+        }
+
+        .section-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .theme-toggle {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-light);
+            color: var(--text-primary);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .theme-toggle::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: radial-gradient(circle, var(--primary-color), var(--accent-color));
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transform: translate(-50%, -50%);
+            border-radius: 50%;
+        }
+
+        .theme-toggle:hover::before {
+            width: 100px;
+            height: 100px;
+        }
+
+        .theme-toggle:hover {
+            color: white;
+            border-color: var(--primary-color);
+            box-shadow: var(--shadow-md);
+        }
+
+        .theme-toggle i {
+            position: relative;
+            z-index: 1;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .theme-toggle:hover i {
+            transform: rotate(180deg);
+        }
+
+        .highlight-box {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(147, 51, 234, 0.08) 100%);
+            border-left: 4px solid var(--primary-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .highlight-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(45deg, transparent 30%, rgba(255, 255, 255, 0.1) 50%, transparent 70%);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
+
+        .highlight-box:hover::before {
+            transform: translateX(100%);
+        }
+
+        .mobile-menu {
+            transition: transform 0.3s ease;
+        }
+
+        /* Enhanced Responsive Design */
+        @media (max-width: 768px) {
+            .mobile-menu {
+                transform: translateX(-100%);
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+            
+            .mobile-menu.open {
+                transform: translateX(0);
+            }
+            
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                width: 280px;
+                z-index: 50;
+                backdrop-filter: blur(20px);
+            }
+
+            .feature-card {
+                padding: 1.5rem;
+            }
+
+            .btn-primary, .btn-secondary {
+                padding: 10px 20px;
+                font-size: 0.875rem;
+            }
+
+            .section-title {
+                font-size: 1.5rem;
+            }
+
+            .hero-gradient {
+                padding: 3rem 1rem;
+            }
+
+            .hero-gradient h1 {
+                font-size: 2.5rem;
+            }
+
+            .hero-gradient p {
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .feature-card {
+                padding: 1rem;
+            }
+
+            .section-title {
+                font-size: 1.25rem;
+                padding-left: 20px;
+            }
+
+            .btn-primary, .btn-secondary {
+                padding: 8px 16px;
+                font-size: 0.8rem;
+            }
+
+            .hero-gradient h1 {
+                font-size: 2rem;
+            }
+
+            .hero-gradient .text-xl {
+                font-size: 0.875rem;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .mobile-menu {
+                transform: translateX(0);
+            }
+        }
+
+        /* Enhanced Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInLeft {
+            from {
+                opacity: 0;
+                transform: translateX(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .animate-fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        .animate-fade-in-left {
+            animation: fadeInLeft 0.6s ease-out;
+        }
+
+        .animate-slide-in-right {
+            animation: slideInRight 0.6s ease-out;
+        }
+
+        .animate-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        /* Enhanced Typography */
+        .text-gradient {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 700;
+        }
+
+        .text-large {
+            font-size: 1.125rem;
+            line-height: 1.75;
+        }
+
+        .text-small {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        /* Enhanced Buttons */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            text-decoration: none;
+            color: white;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 2px solid var(--border-color);
+            padding: 10px 22px;
+            border-radius: var(--radius-lg);
+            font-weight: 600;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .btn-secondary:hover {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            text-decoration: none;
+        }
+
+        /* Enhanced Cards */
+        .feature-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-light);
+            border-radius: var(--radius-xl);
+            padding: 2rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+            transform: scaleX(0);
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        /* Enhanced Spacing */
+        .space-y-4 > * + * {
+            margin-top: 1rem;
+        }
+
+        .space-y-6 > * + * {
+            margin-top: 1.5rem;
+        }
+
+        .space-y-8 > * + * {
+            margin-top: 2rem;
+        }
+
+        .section-title {
+            position: relative;
+            padding-left: 24px;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+
+        .section-title::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 5px;
+            height: 32px;
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            border-radius: 3px;
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 2px;
+            height: 16px;
+            background: linear-gradient(135deg, var(--accent-color), var(--primary-color));
+            border-radius: 1px;
+            opacity: 0.6;
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: rgba(0, 0, 0, 0.05);
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-color), var(--primary-color));
+            background-size: 200% 100%;
+            animation: shimmer 2s infinite;
+            transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            width: 0%;
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.5);
+        }
+
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+
+        /* Search Box */
+        .search-box {
+            position: relative;
+        }
+
+        .search-results {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 100;
+            display: none;
+        }
+
+        .search-result-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        .search-result-item:hover {
+            background-color: var(--bg-secondary);
+        }
+
+        .search-result-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Enhanced Code Blocks */
+        .code-container {
+            position: relative;
+            margin: 1rem 0;
+        }
+
+        .code-header {
+            background: var(--code-bg);
+            border: 1px solid var(--border-color);
+            border-bottom: none;
+            border-radius: 8px 8px 0 0;
+            padding: 8px 16px;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copy-button {
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: var(--radius-md);
+            font-size: 0.75rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .copy-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .copy-button:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .copy-button:hover::before {
+            left: 100%;
+        }
+
+        .copy-button.copied {
+            background: linear-gradient(135deg, var(--success-color), #059669);
+            transform: scale(0.95);
+        }
+
+        .copy-button:active {
+            transform: scale(0.95);
+        }
+
+        /* Improved focus styles for accessibility */
+        .nav-item:focus,
+        button:focus,
+        input:focus {
+            outline: 2px solid var(--primary-color);
+            outline-offset: 2px;
+        }
+
+        /* Smooth scrolling */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Loading animation */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(59, 130, 246, 0.3);
+            border-radius: 50%;
+            border-top-color: var(--primary-color);
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+        <div id="progressFill" class="progress-fill"></div>
+    </div>
+
+    <!-- Mobile Menu Overlay -->
+    <div id="mobileOverlay" class="fixed inset-0 bg-black bg-opacity-50 z-40 hidden md:hidden"></div>
+
+    <!-- Header -->
+    <header class="fixed top-0 left-0 right-0 z-30 bg-white dark:bg-gray-900 shadow-lg">
+        <div class="flex items-center justify-between px-4 py-3">
+            <div class="flex items-center space-x-4">
+                <button id="mobileMenuBtn" class="md:hidden p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
+                        <i class="fab fa-docker text-white text-xl"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-600 dark:text-gray-400">Docker学习教程</h1>
+                        <p class="text-sm text-gray-600 dark:text-gray-400">走进Docker的世界</p>
+                    </div>
+                </div>
+            </div>
+            <button id="themeToggle" class="theme-toggle p-2 rounded-lg">
+                <i class="fas fa-moon" id="themeIcon"></i>
+            </button>
+        </div>
+    </header>
+
+    <div class="flex pt-16">
+        <!-- Sidebar -->
+        <aside id="sidebar" class="sidebar mobile-menu w-80 h-screen overflow-y-auto sticky top-16">
+            <div class="p-6">
+                <h2 class="text-lg font-semibold mb-4 flex items-center">
+                    <i class="fas fa-list-ul mr-2 text-blue-500"></i>
+                    目录导航
+                </h2>
+                
+                <!-- Search Box -->
+                <div class="search-box mb-4">
+                    <div class="relative">
+                        <input type="text" id="searchBox" placeholder="搜索内容... (Ctrl+K)" 
+                               class="w-full px-3 py-2 pl-10 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100">
+                        <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                    <div id="searchResults" class="search-results"></div>
+                </div>
+                <nav class="space-y-2">
+                    <a href="#intro" class="nav-item block px-4 py-3 rounded-lg cursor-pointer">
+                        <i class="fas fa-play-circle mr-2"></i>
+                        课程介绍
+                    </a>
+                    <a href="#why-docker" class="nav-item block px-4 py-3 rounded-lg cursor-pointer">
+                        <i class="fas fa-question-circle mr-2"></i>
+                        为什么出现Docker
+                    </a>
+                    <a href="#what-docker" class="nav-item block px-4 py-3 rounded-lg cursor-pointer">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        什么是Docker
+                    </a>
+                    <a href="#docker-capabilities" class="nav-item block px-4 py-3 rounded-lg cursor-pointer">
+                        <i class="fas fa-cogs mr-2"></i>
+                        Docker能做什么
+                    </a>
+                    <a href="#version-management" class="nav-item block px-4 py-3 rounded-lg cursor-pointer">
+                        <i class="fas fa-code-branch mr-2"></i>
+                        版本管理
+                    </a>
+                    <a href="#installation" class="nav-item block px-4 py-3 rounded-lg cursor-pointer">
+                        <i class="fas fa-download mr-2"></i>
+                        安装配置
+                    </a>
+                    <a href="#core-elements" class="nav-item block px-4 py-3 rounded-lg cursor-pointer">
+                        <i class="fas fa-cubes mr-2"></i>
+                        Docker核心要素
+                    </a>
+                    <a href="#dockerfile" class="nav-item block px-4 py-3 rounded-lg cursor-pointer">
+                        <i class="fas fa-file-code mr-2"></i>
+                        Dockerfile使用
+                    </a>
+                    <a href="#dockerfile-detail" class="nav-item block px-4 py-3 rounded-lg cursor-pointer">
+                        <i class="fas fa-file-code mr-2"></i>
+                        Dockerfile详解
+                    </a>
+                    <a href="#docker-principle" class="nav-item block px-4 py-3 rounded-lg cursor-pointer">
+                        <i class="fas fa-cogs mr-2"></i>
+                        Docker实现原理
+                    </a>
+                    <a href="#docker-network" class="nav-item block px-4 py-3 rounded-lg cursor-pointer">
+                        <i class="fas fa-network-wired mr-2"></i>
+                        Docker网络
+                    </a>
+                    <a href="#docker-network-detail" class="nav-item block px-4 py-3 rounded-lg cursor-pointer">
+                        <i class="fas fa-network-wired mr-2"></i>
+                        Docker网络详解
+                    </a>
+                    <a href="#django-practice" class="nav-item block px-4 py-3 rounded-lg cursor-pointer">
+                        <i class="fas fa-rocket mr-2"></i>
+                        Django应用容器化实践
+                    </a>
+                    <a href="#summary" class="nav-item block px-4 py-3 rounded-lg cursor-pointer">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        本章小结
+                    </a>
+                </nav>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="flex-1 min-h-screen">
+            <!-- Hero Section -->
+            <section class="hero-gradient text-white py-20 px-6">
+                <div class="hero-content max-w-6xl mx-auto text-center">
+                    <div class="animate-fade-in-up">
+                        <div class="mb-8 animate-float">
+                            <div class="inline-block p-6 bg-white/10 rounded-full backdrop-blur-sm">
+                                <i class="fab fa-docker text-8xl opacity-90"></i>
+                            </div>
+                        </div>
+                        <h1 class="text-6xl md:text-7xl font-bold mb-8 leading-tight">
+                            <span class="block">第一天：走进Docker的世界</span>
+    
+                        </h1>
+                        <p class="text-xl md:text-xl opacity-90 max-w-5xl mx-auto leading-relaxed mb-12">
+                            介绍Docker的前世今生，了解Docker的实现原理，以Django项目为例，带大家如何编写最佳的Dockerfile构建镜像。
+                            <br class="hidden md:block">
+                            通过本章的学习，大家会知道Docker的概念及基本操作，并学会构建自己的业务镜像。
+                        </p>
+                        <div class="flex flex-col md:flex-row gap-6 justify-center items-center mb-12">
+                            <a href="#intro" class="btn-primary animate-pulse">
+                                <i class="fas fa-rocket"></i>
+                                开始学习之旅
+                            </a>
+                            <a href="#django-practice" class="btn-secondary bg-white/10 border-white/30 text-white hover:bg-white hover:text-blue-600">
+                                <i class="fas fa-code"></i>
+                                查看实战示例
+                            </a>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl px-6 py-4 animate-fade-in-up" style="animation-delay: 0.2s">
+                                <i class="fas fa-clock text-2xl mb-2 text-blue-200"></i>
+                                <div class="text-sm opacity-80">预计学习时间</div>
+                                <div class="font-semibold">2-3小时</div>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl px-6 py-4 animate-fade-in-up" style="animation-delay: 0.4s">
+                                <i class="fas fa-signal text-2xl mb-2 text-green-200"></i>
+                                <div class="text-sm opacity-80">难度等级</div>
+                                <div class="font-semibold">入门级</div>
+                            </div>
+                            <div class="bg-white/10 backdrop-blur-sm rounded-xl px-6 py-4 animate-fade-in-up" style="animation-delay: 0.6s">
+                                <i class="fas fa-users text-2xl mb-2 text-purple-200"></i>
+                                <div class="text-sm opacity-80">适合人群</div>
+                                <div class="font-semibold">开发者</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <div class="max-w-6xl mx-auto px-6 py-12">
+                <!-- 课程介绍 -->
+                <section id="intro" class="content-section rounded-xl p-8 mb-12 fade-in">
+                    <h2 class="section-title text-3xl font-bold mb-6">
+                        <i class="fas fa-play-circle mr-3 text-blue-500"></i>
+                        课程介绍
+                    </h2>
+                    <div class="highlight-box p-6 rounded-lg mb-6">
+                        <p class="text-lg leading-relaxed">
+                            本章将带你全面了解Docker技术，从基础概念到实际应用，通过理论学习和实践操作相结合的方式，
+                            让你快速掌握Docker的核心知识和操作技能。
+                        </p>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-3 gap-8">
+                        <div class="feature-card text-center animate-fade-in-up" style="animation-delay: 0.1s">
+                            <div class="text-yellow-500 text-4xl mb-6 animate-float">
+                                <i class="fas fa-lightbulb"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-4 text-gradient">理论基础</h3>
+                            <p class="text-secondary leading-relaxed mb-6">深入了解Docker的核心概念、技术原理和发展历程，建立扎实的理论基础</p>
+                            <div class="space-y-2 text-sm text-left">
+                                <div class="flex items-center text-gray-600 dark:text-gray-400">
+                                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                    容器化技术演进
+                                </div>
+                                <div class="flex items-center text-gray-600 dark:text-gray-400">
+                                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                    Docker架构原理
+                                </div>
+                                <div class="flex items-center text-gray-600 dark:text-gray-400">
+                                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                    核心概念解析
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feature-card text-center animate-fade-in-up" style="animation-delay: 0.2s">
+                            <div class="text-green-500 text-4xl mb-6 animate-float" style="animation-delay: 1s">
+                                <i class="fas fa-tools"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-4 text-gradient">实践操作</h3>
+                            <p class="text-secondary leading-relaxed mb-6">掌握Docker的安装配置、基本命令和日常操作，培养实际动手能力</p>
+                            <div class="space-y-2 text-sm text-left">
+                                <div class="flex items-center text-gray-600 dark:text-gray-400">
+                                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                    环境安装配置
+                                </div>
+                                <div class="flex items-center text-gray-600 dark:text-gray-400">
+                                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                    常用命令操作
+                                </div>
+                                <div class="flex items-center text-gray-600 dark:text-gray-400">
+                                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                    镜像容器管理
+                                </div>
+                            </div>
+                        </div>
+                        <div class="feature-card text-center animate-fade-in-up" style="animation-delay: 0.3s">
+                            <div class="text-purple-500 text-4xl mb-6 animate-float" style="animation-delay: 2s">
+                                <i class="fas fa-project-diagram"></i>
+                            </div>
+                            <h3 class="text-xl font-bold mb-4 text-gradient">项目实战</h3>
+                            <p class="text-secondary leading-relaxed mb-6">通过Django项目实战，学习Dockerfile编写和容器化部署的最佳实践</p>
+                            <div class="space-y-2 text-sm text-left">
+                                <div class="flex items-center text-gray-600 dark:text-gray-400">
+                                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                    Dockerfile编写
+                                </div>
+                                <div class="flex items-center text-gray-600 dark:text-gray-400">
+                                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                    镜像构建优化
+                                </div>
+                                <div class="flex items-center text-gray-600 dark:text-gray-400">
+                                    <i class="fas fa-check-circle text-green-500 mr-2"></i>
+                                    应用容器化部署
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 认识Docker -->
+                <section class="content-section rounded-xl p-8 mb-12">
+                    <h2 class="section-title text-3xl font-bold mb-8">
+                        <i class="fab fa-docker mr-3 text-blue-500"></i>
+                        认识Docker
+                    </h2>
+                    
+                    <div class="grid md:grid-cols-3 gap-8 mb-12">
+                        <div class="text-center animate-fade-in-up" style="animation-delay: 0.1s">
+                            <div class="w-20 h-20 bg-gradient-to-br from-red-400 to-red-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse shadow-lg">
+                                <i class="fas fa-question text-3xl text-white"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gradient mb-3">Why</h3>
+                            <p class="text-lg text-gray-600 dark:text-gray-400 font-medium">为什么需要Docker</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">解决环境依赖问题</p>
+                        </div>
+                        <div class="text-center animate-fade-in-up" style="animation-delay: 0.2s">
+                            <div class="w-20 h-20 bg-gradient-to-br from-blue-400 to-blue-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse shadow-lg" style="animation-delay: 0.5s">
+                                <i class="fas fa-info text-3xl text-white"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gradient mb-3">What</h3>
+                            <p class="text-lg text-gray-600 dark:text-gray-400 font-medium">Docker是什么</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">轻量级虚拟化技术</p>
+                        </div>
+                        <div class="text-center animate-fade-in-up" style="animation-delay: 0.3s">
+                            <div class="w-20 h-20 bg-gradient-to-br from-green-400 to-green-600 rounded-full flex items-center justify-center mx-auto mb-6 animate-pulse shadow-lg" style="animation-delay: 1s">
+                                <i class="fas fa-cogs text-3xl text-white"></i>
+                            </div>
+                            <h3 class="text-2xl font-bold text-gradient mb-3">How</h3>
+                            <p class="text-lg text-gray-600 dark:text-gray-400 font-medium">如何使用Docker</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-500 mt-2">实践操作与应用</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 为什么出现Docker -->
+                <section id="why-docker" class="content-section rounded-xl p-8 mb-12">
+                    <h2 class="section-title text-3xl font-bold mb-6">
+                        <i class="fas fa-question-circle mr-3 text-red-500"></i>
+                        为什么出现Docker
+                    </h2>
+                    
+                    <div class="highlight-box p-6 rounded-lg mb-6">
+                        <h3 class="text-xl font-semibold mb-4">核心需求</h3>
+                        <p class="text-lg">需要一种轻量、高效的虚拟化能力</p>
+                    </div>
+
+                    <div class="prose max-w-none">
+                        <p class="text-lg leading-relaxed mb-6">
+                            Docker 公司位于旧金山，原名dotCloud，底层利用了Linux容器技术（LXC）（在操作系统中实现资源隔离与限制）。
+                            为了方便创建和管理这些容器，dotCloud 开发了一套内部工具，之后被命名为"Docker"。Docker就是这样诞生的。
+                        </p>
+
+                        <div class="grid md:grid-cols-2 gap-8 mb-8">
+                            <div class="section-card p-6 rounded-lg">
+                                <h4 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-server mr-2 text-orange-500"></i>
+                                    Hypervisor
+                                </h4>
+                                <p class="mb-4">一种运行在基础物理服务器和操作系统之间的中间软件层，可允许多个操作系统和应用共享硬件。</p>
+                                <div class="text-sm text-gray-600 dark:text-gray-400">
+                                    <p><strong>常见产品：</strong></p>
+                                    <ul class="list-disc list-inside mt-2 space-y-1">
+                                        <li>VMware Workstation、ESXi</li>
+                                        <li>微软的Hyper-V</li>
+                                        <li>思杰的XenServer</li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="section-card p-6 rounded-lg">
+                                <h4 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-cube mr-2 text-blue-500"></i>
+                                    Container Runtime
+                                </h4>
+                                <p class="mb-4">通过Linux内核虚拟化能力管理多个容器，多个容器共享一套操作系统内核。</p>
+                                <div class="text-sm text-gray-600 dark:text-gray-400">
+                                    <p><strong>优势：</strong></p>
+                                    <ul class="list-disc list-inside mt-2 space-y-1">
+                                        <li>摘掉了内核占用的空间</li>
+                                        <li>减少运行所需要的耗时</li>
+                                        <li>使得容器极其轻量与快速</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 什么是Docker -->
+                <section id="what-docker" class="content-section rounded-xl p-8 mb-12">
+                    <h2 class="section-title text-3xl font-bold mb-6">
+                        <i class="fas fa-info-circle mr-3 text-blue-500"></i>
+                        什么是Docker
+                    </h2>
+                    
+                    <div class="highlight-box p-6 rounded-lg mb-6">
+                        <h3 class="text-xl font-semibold mb-4">定义</h3>
+                        <p class="text-lg">基于操作系统内核，提供轻量级虚拟化功能的CS架构的软件产品。</p>
+                    </div>
+
+                    <div class="section-card p-6 rounded-lg mb-6">
+                        <h3 class="text-xl font-semibold mb-4 flex items-center">
+                            <i class="fas fa-shipping-fast mr-2 text-green-500"></i>
+                            核心价值
+                        </h3>
+                        <p class="text-lg">基于轻量的特性，解决软件交付过程中的环境依赖</p>
+                    </div>
+                </section>
+
+                <!-- Docker能做什么 -->
+                <section id="docker-capabilities" class="content-section rounded-xl p-8 mb-12">
+                    <h2 class="section-title text-3xl font-bold mb-6">
+                        <i class="fas fa-cogs mr-3 text-green-500"></i>
+                        Docker能做什么
+                    </h2>
+                    
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="section-card p-6 rounded-lg">
+                            <div class="flex items-start space-x-4">
+                                <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-box text-blue-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold mb-2">应用打包</h3>
+                                    <p class="text-gray-600 dark:text-gray-400">
+                                        可以把应用程序代码及运行依赖环境打包成镜像，作为交付介质，在各环境部署
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-card p-6 rounded-lg">
+                            <div class="flex items-start space-x-4">
+                                <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-play text-green-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold mb-2">容器管理</h3>
+                                    <p class="text-gray-600 dark:text-gray-400">
+                                        可以将镜像（image）启动成为容器(container)，并且提供多容器的生命周期进行管理（启、停、删）
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-card p-6 rounded-lg">
+                            <div class="flex items-start space-x-4">
+                                <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-shield-alt text-purple-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold mb-2">资源隔离</h3>
+                                    <p class="text-gray-600 dark:text-gray-400">
+                                        container容器之间相互隔离，且每个容器可以设置资源限额
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-card p-6 rounded-lg">
+                            <div class="flex items-start space-x-4">
+                                <div class="w-12 h-12 bg-orange-100 dark:bg-orange-900 rounded-lg flex items-center justify-center flex-shrink-0">
+                                    <i class="fas fa-cloud text-orange-600"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-lg font-semibold mb-2">轻量虚拟化</h3>
+                                    <p class="text-gray-600 dark:text-gray-400">
+                                        提供轻量级虚拟化功能，容器就是在宿主机中的一个个的虚拟的空间，彼此相互隔离，完全独立
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 版本管理 -->
+                <section id="version-management" class="content-section rounded-xl p-8 mb-12">
+                    <h2 class="section-title text-3xl font-bold mb-6">
+                        <i class="fas fa-code-branch mr-3 text-purple-500"></i>
+                        版本管理
+                    </h2>
+                    
+                    <div class="highlight-box p-6 rounded-lg mb-6">
+                        <p class="text-lg">Docker 引擎主要有两个版本：企业版（EE）和社区版（CE）</p>
+                        <p class="mt-2">从17.03月开始，使用时间日期管理版本，稳定版以每季度为准。</p>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-tags mr-2 text-blue-500"></i>
+                                版本类型
+                            </h3>
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-blue-700 dark:text-blue-300 mb-2">企业版（EE）</h4>
+                                    <p class="text-sm text-blue-600 dark:text-blue-400">提供12个月的支持</p>
+                                </div>
+                                <div class="bg-green-50 dark:bg-green-900 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-green-700 dark:text-green-300 mb-2">社区版（CE）</h4>
+                                    <p class="text-sm text-green-600 dark:text-green-400">提供4个月的支持</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-calendar mr-2 text-green-500"></i>
+                                发布周期
+                            </h3>
+                            <ul class="space-y-3">
+                                <li class="flex items-center space-x-3">
+                                    <i class="fas fa-check-circle text-green-500"></i>
+                                    <span>每个季度(1-3,4-6,7-9,10-12)，企业版和社区版都会发布一个稳定版本(Stable)</span>
+                                </li>
+                                <li class="flex items-center space-x-3">
+                                    <i class="fas fa-check-circle text-green-500"></i>
+                                    <span>每个月社区版还会通过 Edge 方式发布月度版</span>
+                                </li>
+                                <li class="flex items-center space-x-3">
+                                    <i class="fas fa-check-circle text-green-500"></i>
+                                    <span>从 2017 年第一季度开始，Docker 版本号遵循 YY.MM-xx 格式</span>
+                                </li>
+                            </ul>
+                            <div class="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                <p class="text-sm text-gray-600 dark:text-gray-400 bg-gray-50 dark:bg-gray-800"><strong>示例：</strong>2018 年 6 月第一次发布的社区版本为 18.06.0-ce</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 发展史 -->
+                <section id="development-history" class="content-section rounded-xl p-8 mb-12">
+                    <h2 class="section-title text-3xl font-bold mb-6">
+                        <i class="fas fa-history mr-3 text-indigo-500"></i>
+                        发展史
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        <div class="section-card p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                <i class="fas fa-calendar-alt mr-2 text-blue-500"></i>
+                                早期阶段（Docker 1.8之前）
+                            </h4>
+                            <p class="mb-4">Docker 1.8之前，使用<a href="https://linuxcontainers.org/fr/lxc/introduction/" class="text-blue-600 hover:underline" target="_blank">LXC</a>，Docker在上层做了封装，把LXC复杂的容器创建与使用方式简化为自己的一套命令体系。</p>
+                        </div>
+
+                        <div class="section-card p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                <i class="fas fa-code-branch mr-2 text-green-500"></i>
+                                libcontainer项目
+                            </h4>
+                            <p class="mb-4">之后，为了实现跨平台等复杂的场景，Docker抽出了libcontainer项目，把对namespace、cgroup的操作封装在libcontainer项目里，支持不同的平台类型。</p>
+                        </div>
+
+                        <div class="section-card p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                <i class="fas fa-handshake mr-2 text-purple-500"></i>
+                                OCI组织成立（2015年6月）
+                            </h4>
+                            <p class="mb-4">2015年6月，Docker牵头成立了 OCI（Open Container Initiative开放容器计划）组织，这个组织的目的是建立起一个围绕容器的通用标准。容器格式标准是一种不受上层结构绑定的协议，即不限于某种特定操作系统、硬件、CPU架构、公有云等，允许任何人在遵循该标准的情况下开发应用容器技术，这使得容器技术有了一个更广阔的发展空间。</p>
+                        </div>
+
+                        <div class="section-card p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                <i class="fas fa-tools mr-2 text-orange-500"></i>
+                                runC项目
+                            </h4>
+                            <p class="mb-4">OCI成立后，libcontainer 交给OCI组织来维护，但是libcontainer中只包含了与kernel交互的库，因此基于libcontainer项目，后面又加入了一个CLI工具，并且项目改名为runC (<a href="https://github.com/opencontainers/runc" class="text-blue-600 hover:underline" target="_blank">https://github.com/opencontainers/runc</a>)，目前runC已经成为一个功能强大的runtime工具。</p>
+                        </div>
+
+                        <div class="section-card p-6 rounded-lg">
+                            <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                <i class="fas fa-sitemap mr-2 text-red-500"></i>
+                                架构调整 - containerd
+                            </h4>
+                            <p class="mb-4">Docker也做了架构调整。将容器运行时相关的程序从docker daemon剥离出来，形成了<strong>containerd</strong>。containerd向上为Docker Daemon提供了<code>gRPC接口</code>，使得Docker Daemon屏蔽下面的结构变化，确保原有接口向下兼容。向下通过<code>containerd-shim</code>结合<code>runC</code>，使得引擎可以独立升级，避免之前Docker Daemon升级会导致所有容器不可用的问题。</p>
+                            
+                            <div class="mt-4 p-4 bg-gray-50 dark:bg-gray-800 rounded-lg">
+                                <h5 class="font-semibold mb-2">架构层次：</h5>
+                                <ul class="list-disc list-inside space-y-1 text-sm">
+                                    <li><strong>runC（libcontainer）</strong>：符合OCI标准的一个实现，与底层系统交互</li>
+                                    <li><strong>containerd</strong>：实现了OCI之上的容器的高级功能，比如镜像管理、容器执行的调用等</li>
+                                    <li><strong>Dockerd</strong>：目前是最上层与CLI交互的进程，接收cli的请求并与containerd协作</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 安装配置 -->
+                <section id="installation" class="content-section rounded-xl p-8 mb-12">
+                    <h2 class="section-title text-3xl font-bold mb-6">
+                        <i class="fas fa-download mr-3 text-orange-500"></i>
+                        安装配置
+                    </h2>
+                    
+                    <div class="space-y-8">
+                        <!-- 配置网卡转发 -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-network-wired mr-2 text-purple-500"></i>
+                                配置网卡转发
+                            </h3>
+                            <p class="mb-4 text-gray-600 dark:text-gray-400">在安装Docker之前，需要先配置网卡转发功能，确保容器网络正常工作。</p>
+                            <div class="code-block p-4 overflow-x-auto">
+                                <pre class="text-sm"><code># 若未配置，需要执行如下
+$ cat &lt;&lt;EOF &gt;  /etc/sysctl.d/docker.conf
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+net.ipv4.ip_forward=1
+EOF
+$ sysctl -p /etc/sysctl.d/docker.conf</code></pre>
+                            </div>
+                        </div>
+                        
+                        <!-- Yum安装配置Docker -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-terminal mr-2 text-green-500"></i>
+                                Yum安装配置Docker
+                            </h3>
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="font-semibold mb-2">1. 下载阿里源repo文件</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code>## 下载阿里源repo文件
+$ curl -o /etc/yum.repos.d/Centos-7.repo http://mirrors.aliyun.com/repo/Centos-7.repo
+$ curl -o /etc/yum.repos.d/docker-ce.repo http://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+
+$ yum clean all && yum makecache</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">2. 安装Docker</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code>## yum安装
+$ yum install docker-ce-20.10.6 -y
+## 查看源中可用版本
+$ yum list docker-ce --showduplicates | sort -r
+## 安装旧版本
+##yum install -y docker-ce-18.09.9</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">3. 配置源加速</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code>## 配置源加速
+## https://cr.console.aliyun.com/cn-hangzhou/instances/mirrors
+mkdir -p /etc/docker
+vi /etc/docker/daemon.json
+{
+  "registry-mirrors" : [
+    "https://8xpk5wnt.mirror.aliyuncs.com"
+  ]
+}</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">4. 启动Docker</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code>## 设置开机自启
+systemctl enable docker  
+systemctl daemon-reload
+
+## 启动docker
+systemctl start docker 
+
+## 查看docker信息
+docker info</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Docker核心要素 -->
+                <section id="core-elements" class="content-section rounded-xl p-8 mb-12">
+                    <h2 class="section-title text-3xl font-bold mb-6">
+                        <i class="fas fa-cubes mr-3 text-blue-500"></i>
+                        Docker核心要素
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        <!-- 镜像 -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-layer-group mr-2 text-blue-500"></i>
+                                镜像（Image）
+                            </h3>
+                            <p class="mb-4">Docker镜像是一个只读的模板，用来创建Docker容器。镜像是分层存储的，每一层都是只读的。</p>
+                            
+                            <h4 class="font-semibold mb-2">镜像常用操作</h4>
+                            <div class="code-block p-4 overflow-x-auto mb-4">
+                                <pre class="text-sm"><code># 查看镜像列表
+$ docker images
+$ docker image ls
+
+# 搜索镜像
+$ docker search nginx
+
+# 拉取镜像
+$ docker pull nginx:1.18
+
+# 删除镜像
+$ docker rmi nginx:1.18
+$ docker image rm nginx:1.18
+
+# 构建镜像
+$ docker build -t myapp:v1 .
+
+# 给镜像打标签
+$ docker tag myapp:v1 myapp:latest
+
+# 推送镜像到仓库
+$ docker push myapp:v1</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- 容器 -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-box mr-2 text-green-500"></i>
+                                容器（Container）
+                            </h3>
+                            <p class="mb-4">容器是镜像的运行实例，是一个可读写的层。容器可以被启动、停止、删除。</p>
+                            
+                            <h4 class="font-semibold mb-2">容器常用操作</h4>
+                            <div class="code-block p-4 overflow-x-auto mb-4">
+                                <pre class="text-sm"><code># 运行容器
+$ docker run -d --name mynginx -p 80:80 nginx
+
+# 查看容器列表
+$ docker ps
+$ docker ps -a  # 包括已停止的容器
+
+# 启动/停止/重启容器
+$ docker start mynginx
+$ docker stop mynginx
+$ docker restart mynginx
+
+# 进入容器
+$ docker exec -it mynginx /bin/bash
+
+# 查看容器日志
+$ docker logs -f mynginx
+
+# 复制文件
+$ docker cp file.txt mynginx:/tmp/
+$ docker cp mynginx:/tmp/file.txt ./
+
+# 删除容器
+$ docker rm mynginx
+$ docker rm -f mynginx  # 强制删除运行中的容器</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- 仓库 -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-warehouse mr-2 text-purple-500"></i>
+                                仓库（Repository）
+                            </h3>
+                            <p class="mb-4">Docker仓库是集中存放镜像的地方，分为公共仓库和私有仓库。</p>
+                            
+                            <h4 class="font-semibold mb-2">仓库操作</h4>
+                            <div class="code-block p-4 overflow-x-auto mb-4">
+                                <pre class="text-sm"><code># 登录仓库
+$ docker login
+$ docker login registry.example.com
+
+# 推送镜像
+$ docker push myapp:v1
+
+# 拉取镜像
+$ docker pull myapp:v1
+
+# 登出
+$ docker logout</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Dockerfile使用 -->
+                <section id="dockerfile" class="content-section rounded-xl p-8 mb-12">
+                    <h2 class="section-title text-3xl font-bold mb-6">
+                        <i class="fas fa-file-code mr-3 text-indigo-500"></i>
+                        Dockerfile使用
+                    </h2>
+                    
+                    <div class="space-y-8">
+                        <!-- 基本语法 -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-code mr-2 text-blue-500"></i>
+                                基本语法
+                            </h3>
+                            <div class="code-block p-4 overflow-x-auto mb-4">
+                                <pre class="text-sm"><code>$ docker build . -t ImageName:ImageTag -f Dockerfile</code></pre>
+                            </div>
+                            <p class="text-gray-600 dark:text-gray-400">
+                                Dockerfile是一堆指令，在docker build的时候，按照该指令进行操作，最终生成我们期望的镜像
+                            </p>
+                        </div>
+
+                        <!-- 常用指令 -->
+                        <div class="space-y-6">
+                            <!-- FROM -->
+                            <div class="section-card p-6 rounded-lg">
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-layer-group mr-2 text-green-500"></i>
+                                    FROM - 指定基础镜像
+                                </h4>
+                                <p class="mb-3 text-gray-600 dark:text-gray-400">必须为第一个命令</p>
+                                <div class="code-block p-4 overflow-x-auto">
+                                    <pre class="text-sm"><code>格式：
+    FROM &lt;image&gt;
+    FROM &lt;image&gt;:&lt;tag&gt;
+示例：
+    FROM mysql:5.7
+注意：
+    tag是可选的，如果不使用tag时，会使用latest版本的基础镜像</code></pre>
+                                </div>
+                            </div>
+
+                            <!-- MAINTAINER -->
+                            <div class="section-card p-6 rounded-lg">
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-user mr-2 text-blue-500"></i>
+                                    MAINTAINER - 镜像维护者信息
+                                </h4>
+                                <div class="code-block p-4 overflow-x-auto">
+                                    <pre class="text-sm"><code>格式：
+    MAINTAINER &lt;name&gt;
+示例：
+    MAINTAINER Yongxin Li
+    MAINTAINER inspur_lyx@hotmail.com
+    MAINTAINER Yongxin Li &lt;inspur_lyx@hotmail.com&gt;</code></pre>
+                                </div>
+                            </div>
+
+                            <!-- COPY/ADD -->
+                            <div class="section-card p-6 rounded-lg">
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-copy mr-2 text-purple-500"></i>
+                                    COPY|ADD - 添加本地文件到镜像中
+                                </h4>
+                                <div class="code-block p-4 overflow-x-auto">
+                                    <pre class="text-sm"><code>格式：
+    COPY &lt;src&gt;... &lt;dest&gt;
+示例：
+    ADD hom* /mydir/          # 添加所有以"hom"开头的文件
+    ADD test relativeDir/     # 添加 "test" 到 `WORKDIR`/relativeDir/
+    ADD test /absoluteDir/    # 添加 "test" 到 /absoluteDir/</code></pre>
+                                </div>
+                            </div>
+
+                            <!-- WORKDIR -->
+                            <div class="section-card p-6 rounded-lg">
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-folder mr-2 text-orange-500"></i>
+                                    WORKDIR - 工作目录
+                                </h4>
+                                <div class="code-block p-4 overflow-x-auto">
+                                    <pre class="text-sm"><code>格式：
+    WORKDIR /path/to/workdir
+示例：
+    WORKDIR /a  (这时工作目录为/a)
+注意：
+    通过WORKDIR设置工作目录后，Dockerfile中其后的命令RUN、CMD、ENTRYPOINT、ADD、COPY等命令都会在该目录下执行</code></pre>
+                                </div>
+                            </div>
+
+                            <!-- RUN -->
+                            <div class="section-card p-6 rounded-lg">
+                                <h4 class="text-lg font-semibold mb-3 flex items-center">
+                                    <i class="fas fa-terminal mr-2 text-red-500"></i>
+                                    RUN - 构建镜像过程中执行命令
+                                </h4>
+                                <p class="text-gray-600 dark:text-gray-400 mb-3">在构建镜像时执行的命令，每个RUN指令都会创建一个新的镜像层</p>
+                            </div>
+                        </div>
+
+                        <!-- 构建示例 -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-hammer mr-2 text-green-500"></i>
+                                构建示例
+                            </h3>
+                            <div class="code-block p-4 overflow-x-auto">
+                                <pre class="text-sm"><code>$ docker build . -t myblog:v1 -f Dockerfile</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Dockerfile详解 -->
+                <section id="dockerfile-detail" class="content-section rounded-xl p-8 mb-12">
+                    <h2 class="section-title text-3xl font-bold mb-6">
+                        <i class="fas fa-file-code mr-3 text-orange-500"></i>
+                        Dockerfile详解
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        <!-- 基本指令 -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4">常用指令详解</h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="font-semibold mb-2">FROM - 基础镜像</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 指定基础镜像
+FROM ubuntu:20.04
+FROM python:3.9-slim
+FROM node:16-alpine</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">COPY vs ADD</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># COPY - 复制文件或目录
+COPY app.py /app/
+COPY requirements.txt /app/
+COPY . /app/
+
+# ADD - 复制文件，支持URL和自动解压
+ADD app.tar.gz /app/
+ADD https://example.com/file.txt /app/</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">RUN - 执行命令</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 执行shell命令
+RUN apt-get update && apt-get install -y python3
+RUN pip install -r requirements.txt
+
+# 使用exec形式
+RUN ["pip", "install", "-r", "requirements.txt"]</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">WORKDIR - 工作目录</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 设置工作目录
+WORKDIR /app
+COPY . .
+RUN pip install -r requirements.txt</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">ENV - 环境变量</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 设置环境变量
+ENV PYTHON_VERSION=3.9
+ENV PATH=/app:$PATH
+ENV DEBUG=True</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">EXPOSE - 暴露端口</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 声明容器监听的端口
+EXPOSE 80
+EXPOSE 8000 8080</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">CMD vs ENTRYPOINT</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># CMD - 容器启动时的默认命令
+CMD ["python", "app.py"]
+CMD python app.py
+
+# ENTRYPOINT - 容器启动时的入口点
+ENTRYPOINT ["python", "app.py"]
+
+# 组合使用
+ENTRYPOINT ["python"]
+CMD ["app.py"]</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">基础环境镜像</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code>#基础环境镜像
+FROM java:8-alpine
+
+RUN apk add --update ca-certificates && rm -rf /var/cache/apk/* && \
+  find /usr/share/ca-certificates/mozilla/ -name "*.crt" -exec keytool -import -trustcacerts \
+  -keystore /usr/lib/jvm/java-1.8-openjdk/jre/lib/security/cacerts -storepass changeit -noprompt \
+  -file {} -alias {} \; && \
+  keytool -list -keystore /usr/lib/jvm/java-1.8-openjdk/jre/lib/security/cacerts --storepass changeit
+
+ENV MAVEN_VERSION 3.5.4
+ENV MAVEN_HOME /usr/lib/mvn
+ENV PATH $MAVEN_HOME/bin:$PATH
+
+RUN wget http://archive.apache.org/dist/maven/maven-3/$MAVEN_VERSION/binaries/apache-maven-$MAVEN_VERSION-bin.tar.gz && \
+  tar -zxvf apache-maven-$MAVEN_VERSION-bin.tar.gz && \
+  rm apache-maven-$MAVEN_VERSION-bin.tar.gz && \
+  mv apache-maven-$MAVEN_VERSION /usr/lib/mvn
+
+RUN mkdir -p /usr/src/app
+WORKDIR /usr/src/app</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">前端镜像</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code>#前端镜像
+FROM nginx:1.19.0-alpine
+
+LABEL maintainer="mritd <mritd@linux.com>"
+
+ARG TZ='Asia/Shanghai'
+ENV TZ ${TZ}
+
+RUN apk upgrade --update \
+    && apk add bash tzdata curl wget ca-certificates \
+    && ln -sf /usr/share/zoneinfo/${TZ} /etc/localtime \
+    && echo ${TZ} > /etc/timezone \
+    && rm -rf /usr/share/nginx/html /var/cache/apk/*
+
+COPY landscape-animation-experiment /usr/share/nginx/html
+
+EXPOSE 80 443
+
+CMD ["nginx", "-g", "daemon off;"]</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">java镜像</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code>#java镜像
+FROM java:8u111
+
+ENV JAVA_OPTS "\
+-Xmx4096m \
+-XX:MetaspaceSize=256m \
+-XX:MaxMetaspaceSize=256m"
+ENV JAVA_HOME /usr/java/jdk
+ENV PATH ${PATH}:${JAVA_HOME}/bin
+
+COPY target/myapp.jar myapp.jar
+
+RUN ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+RUN echo 'Asia/Shanghai' >/etc/timezone
+
+EXPOSE 9000
+CMD java ${JAVA_OPTS} -jar myapp.jar</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 多阶段构建 -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4">多阶段构建示例</h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="font-semibold mb-2">Go应用多阶段构建</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 原始构建
+FROM golang:1.13
+
+WORKDIR /go/src/github.com/alexellis/href-counter/
+
+COPY vendor vendor
+COPY app.go .
+ENV GOPROXY https://goproxy.cn
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .</code></pre>
+            
+                                    </div>
+                                    <div class="code-block p-4 overflow-x-auto mb-4">
+                                        <pre class="text-sm"><code>docker build . -t href-counter:v1 -f Dockerfile</code></pre>
+                                    </div>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 多阶构建
+FROM golang:1.13 AS builder
+
+WORKDIR /go/src/github.com/alexellis/href-counter/
+
+COPY vendor vendor
+COPY app.go	.
+ENV GOPROXY https://goproxy.cn
+
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o app .
+
+FROM alpine:3.10
+RUN apk --no-cache add ca-certificates
+
+WORKDIR /root/
+
+COPY --from=builder  /go/src/github.com/alexellis/href-counter/app    .
+
+CMD ["./app"]</code></pre>
+                                    </div>
+                                    <div class="code-block p-4 overflow-x-auto mb-4">
+                                        <pre class="text-sm"><code>docker build . -t href-counter:v2 -f Dockerfile.multi</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Docker最佳实践原则 -->
+                            <div class="section-card p-6 rounded-lg mt-6">
+                                <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                    <i class="fas fa-lightbulb mr-2 text-yellow-500"></i>
+                                    Docker最佳实践原则
+                                </h3>
+                                
+                                <div class="space-y-4">
+                                    <div class="bg-yellow-50 dark:bg-yellow-900 p-4 rounded-lg">
+                                        <h4 class="font-semibold text-yellow-700 dark:text-yellow-300 mb-3">构建镜像的基本原则</h4>
+                                        <ul class="text-yellow-600 dark:text-yellow-400 text-sm space-y-2">
+                                            <li>• <strong>不必要的内容不要放在镜像中</strong> - 保持镜像轻量化</li>
+                                            <li>• <strong>减少不必要的层文件</strong> - 合并RUN指令，减少镜像层数</li>
+                                            <li>• <strong>减少网络传输操作</strong> - 使用本地缓存，合理安排COPY指令</li>
+                                            <li>• <strong>可以适当的包含一些调试命令</strong> - 便于问题排查</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
+                                        <h4 class="font-semibold text-blue-700 dark:text-blue-300 mb-3">通过1号进程理解容器的本质</h4>
+                                        <p class="text-blue-600 dark:text-blue-400 text-sm mb-3">
+                                            容器启动时，CMD或ENTRYPOINT指定的命令会成为容器的1号进程。理解这一点对于容器管理至关重要。
+                                        </p>
+                                        <div class="code-block p-3">
+                                            <pre class="text-sm"><code># 查看容器内的进程
+$ docker exec -ti my-nginx-alpine /bin/sh
+#/ ps aux</code></pre>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-green-50 dark:bg-green-900 p-4 rounded-lg">
+                                        <h4 class="font-semibold text-green-700 dark:text-green-300 mb-3">容器启动时命令覆盖</h4>
+                                        <p class="text-green-600 dark:text-green-400 text-sm mb-3">
+                                            容器启动的时候可以通过命令去覆盖默认的CMD，自定义命令会覆盖镜像中指定的CMD指令，作为容器的1号进程启动。
+                                        </p>
+                                        <div class="code-block p-3 mb-3">
+                                            <pre class="text-sm"><code># 基本语法
+$ docker run -d --name xxx nginx:alpine &lt;自定义命令&gt;
+
+# 示例1：覆盖CMD执行echo命令
+$ docker run -d --name test-3 nginx:alpine echo 123
+
+# 示例2：覆盖CMD执行ping命令
+$ docker run -d --name test-4 nginx:alpine ping www.luffycity.com</code></pre>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="bg-purple-50 dark:bg-purple-900 p-4 rounded-lg">
+                                        <h4 class="font-semibold text-purple-700 dark:text-purple-300 mb-3">容器的本质理解</h4>
+                                        <p class="text-purple-600 dark:text-purple-400 text-sm mb-3">
+                                            本质上讲容器是利用namespace和cgroup等技术在宿主机中创建的独立的虚拟空间，这个空间内的网络、进程、挂载等资源都是隔离的。
+                                        </p>
+                                        <div class="code-block p-3">
+                                            <pre class="text-sm"><code># 进入容器查看隔离环境
+$ docker exec -ti my-nginx /bin/sh
+#/ ip addr        # 查看网络配置
+#/ ls -l /        # 查看文件系统
+#/ apt install xxx # 安装软件对宿主机和其他容器没有任何影响
+
+# 注意：和虚拟机不同的是，容器间共享一个内核，所以容器内没法升级内核</code></pre>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Docker实现原理 -->
+                <section id="docker-principle" class="content-section rounded-xl p-8 mb-12">
+                    <h2 class="section-title text-3xl font-bold mb-6">
+                        <i class="fas fa-cogs mr-3 text-red-500"></i>
+                        Docker实现原理
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        <!-- Namespace -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-layer-group mr-2 text-blue-500"></i>
+                                Namespace - 资源隔离
+                            </h3>
+                            <p class="mb-4">Namespace是Linux内核提供的一种资源隔离机制，Docker利用它来实现容器间的隔离。</p>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="font-semibold mb-2">主要的Namespace类型</h4>
+                                    <div class="grid md:grid-cols-2 gap-4">
+                                        <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
+                                            <h5 class="font-semibold text-blue-700 dark:text-blue-300">PID Namespace</h5>
+                                            <p class="text-sm text-blue-600 dark:text-blue-400">进程ID隔离，容器内的进程看不到宿主机的进程</p>
+                                        </div>
+                                        <div class="bg-green-50 dark:bg-green-900 p-4 rounded-lg">
+                                            <h5 class="font-semibold text-green-700 dark:text-green-300">Network Namespace</h5>
+                                            <p class="text-sm text-green-600 dark:text-green-400">网络隔离，每个容器有独立的网络栈</p>
+                                        </div>
+                                        <div class="bg-purple-50 dark:bg-purple-900 p-4 rounded-lg">
+                                            <h5 class="font-semibold text-purple-700 dark:text-purple-300">Mount Namespace</h5>
+                                            <p class="text-sm text-purple-600 dark:text-purple-400">文件系统挂载点隔离</p>
+                                        </div>
+                                        <div class="bg-orange-50 dark:bg-orange-900 p-4 rounded-lg">
+                                            <h5 class="font-semibold text-orange-700 dark:text-orange-300">UTS Namespace</h5>
+                                            <p class="text-sm text-orange-600 dark:text-orange-400">主机名和域名隔离</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">验证Namespace隔离</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 查看容器的PID namespace
+$ docker run -d --name test nginx
+$ docker exec test ps aux
+
+# 在宿主机查看容器进程
+$ ps aux | grep nginx
+
+# 查看网络namespace
+$ docker exec test ip addr
+$ ip addr  # 宿主机网络</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- CGroup -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-tachometer-alt mr-2 text-green-500"></i>
+                                CGroup - 资源限制
+                            </h3>
+                            <p class="mb-4">Control Groups用于限制和监控进程组的资源使用，包括CPU、内存、磁盘I/O等。</p>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="font-semibold mb-2">资源限制示例</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 限制内存使用
+$ docker run -d --name test --memory=512m nginx
+
+# 限制CPU使用
+$ docker run -d --name test --cpus=0.5 nginx
+
+# 限制CPU核心
+$ docker run -d --name test --cpuset-cpus=0,1 nginx
+
+# 查看容器资源使用情况
+$ docker stats test</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">查看CGroup信息</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 查看容器的cgroup信息
+$ docker exec test cat /proc/1/cgroup
+
+# 在宿主机查看cgroup限制
+$ cat /sys/fs/cgroup/memory/docker/容器ID/memory.limit_in_bytes</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- UnionFS -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-layer-group mr-2 text-purple-500"></i>
+                                UnionFS - 联合文件系统
+                            </h3>
+                            <p class="mb-4">UnionFS允许将多个目录挂载到同一个目录下，实现分层存储和写时复制。</p>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="font-semibold mb-2">查看镜像层</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 查看镜像的层信息
+$ docker history nginx:latest
+
+# 查看镜像详细信息
+$ docker inspect nginx:latest
+
+# 查看容器的文件系统层
+$ docker diff container_name</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">存储驱动</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 查看Docker存储驱动
+$ docker info | grep "Storage Driver"
+
+# 常见的存储驱动
+# - overlay2 (推荐)
+# - aufs
+# - devicemapper
+# - btrfs
+# - zfs</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Docker网络 -->
+                <section id="docker-network" class="content-section rounded-xl p-8 mb-12">
+                    <h2 class="section-title text-3xl font-bold mb-6">
+                        <i class="fas fa-network-wired mr-3 text-cyan-500"></i>
+                        Docker网络
+                    </h2>
+                    
+                    <div class="space-y-8">
+                        <!-- 网络概述 -->
+                        <div class="highlight-box p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4">网络通信问题</h3>
+                            <p class="mb-4">Docker容器是一块具有隔离性的虚拟系统，容器内可以有自己独立的网络空间，那么：</p>
+                            <ul class="space-y-2">
+                                <li class="flex items-center space-x-2">
+                                    <i class="fas fa-question-circle text-blue-500"></i>
+                                    <span>多个容器之间是如何实现通信的呢？</span>
+                                </li>
+                                <li class="flex items-center space-x-2">
+                                    <i class="fas fa-question-circle text-blue-500"></i>
+                                    <span>容器和宿主机之间又是如何实现的通信呢？</span>
+                                </li>
+                                <li class="flex items-center space-x-2">
+                                    <i class="fas fa-question-circle text-blue-500"></i>
+                                    <span>使用-p参数是怎么实现的端口映射?</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <!-- 网络模式 -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-6 flex items-center">
+                                <i class="fas fa-sitemap mr-2 text-blue-500"></i>
+                                网络模式
+                            </h3>
+                            <p class="mb-6 text-gray-600 dark:text-gray-400">
+                                我们在使用docker run创建Docker容器时，可以用--net选项指定容器的网络模式，Docker有以下4种网络模式：
+                            </p>
+                            
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div class="bg-blue-50 dark:bg-blue-900 p-6 rounded-lg">
+                                    <h4 class="text-lg font-semibold text-blue-700 dark:text-blue-300 mb-3 flex items-center">
+                                        <i class="fas fa-bridge-water mr-2"></i>
+                                        Bridge模式
+                                    </h4>
+                                    <p class="text-sm text-blue-600 dark:text-blue-400 mb-2">
+                                        <code class="bg-blue-100 dark:bg-blue-800 px-2 py-1 rounded">--net=bridge</code>
+                                    </p>
+                                    <p class="text-blue-600 dark:text-blue-400">默认设置，使用Docker网桥进行通信</p>
+                                </div>
+
+                                <div class="bg-green-50 dark:bg-green-900 p-6 rounded-lg">
+                                    <h4 class="text-lg font-semibold text-green-700 dark:text-green-300 mb-3 flex items-center">
+                                        <i class="fas fa-server mr-2"></i>
+                                        Host模式
+                                    </h4>
+                                    <p class="text-sm text-green-600 dark:text-green-400 mb-2">
+                                        <code class="bg-green-100 dark:bg-green-800 px-2 py-1 rounded">--net=host</code>
+                                    </p>
+                                    <p class="text-green-600 dark:text-green-400">容器内部网络空间共享宿主机的空间，效果类似直接在宿主机上启动一个进程</p>
+                                </div>
+
+                                <div class="bg-purple-50 dark:bg-purple-900 p-6 rounded-lg">
+                                    <h4 class="text-lg font-semibold text-purple-700 dark:text-purple-300 mb-3 flex items-center">
+                                        <i class="fas fa-link mr-2"></i>
+                                        Container模式
+                                    </h4>
+                                    <p class="text-sm text-purple-600 dark:text-purple-400 mb-2">
+                                        <code class="bg-purple-100 dark:bg-purple-800 px-2 py-1 rounded">--net=container:NAME_or_ID</code>
+                                    </p>
+                                    <p class="text-purple-600 dark:text-purple-400">指定容器与特定容器共享网络命名空间</p>
+                                </div>
+
+                                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
+                                    <h4 class="text-lg font-semibold text-gray-700 dark:text-gray-300 mb-3 flex items-center">
+                                        <i class="fas fa-ban mr-2"></i>
+                                        None模式
+                                    </h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                                        <code class="bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded">--net=none</code>
+                                    </p>
+                                    <p class="text-gray-600 dark:text-gray-400">网络模式为空，即仅保留网络命名空间，但是不做任何网络相关的配置</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Docker网络详解 -->
+                <section id="docker-network-detail" class="content-section rounded-xl p-8 mb-12">
+                    <h2 class="section-title text-3xl font-bold mb-6">
+                        <i class="fas fa-network-wired mr-3 text-indigo-500"></i>
+                        Docker网络详解
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        <!-- Bridge模式 -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-bridge mr-2 text-blue-500"></i>
+                                Bridge模式（默认）
+                            </h3>
+                            <p class="mb-4">Docker默认的网络模式，容器通过虚拟网桥连接到宿主机网络。</p>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="font-semibold mb-2">Bridge网络原理</h4>
+                                    <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg mb-4">
+                                        <p class="text-blue-700 dark:text-blue-300 text-sm">
+                                            1. Docker创建一个名为docker0的虚拟网桥<br>
+                                            2. 每个容器都会创建一对veth设备<br>
+                                            3. 一端连接到容器内部，一端连接到docker0网桥<br>
+                                            4. 通过iptables规则实现NAT转换
+                                        </p>
+                                    </div>
+                                    
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 查看网桥信息
+$ ip addr show docker0
+$ brctl show docker0
+
+# 运行容器并查看网络
+$ docker run -d --name web nginx
+$ docker exec web ip addr
+
+# 查看容器的网络配置
+$ docker inspect web | grep -A 20 "NetworkSettings"</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">容器间通信</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 启动两个容器
+$ docker run -d --name web1 nginx
+$ docker run -d --name web2 nginx
+
+# 容器间可以通过IP通信
+$ docker exec web1 ping $(docker inspect web2 | grep IPAddress | head -1 | awk '{print $2}' | tr -d '",')
+
+# 通过容器名通信（需要自定义网络）
+$ docker network create mynet
+$ docker run -d --name web1 --network mynet nginx
+$ docker run -d --name web2 --network mynet nginx
+$ docker exec web1 ping web2</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">端口映射</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 端口映射
+$ docker run -d -p 8080:80 --name web nginx
+
+# 查看端口映射
+$ docker port web
+$ netstat -tlnp | grep 8080
+
+# 查看iptables规则
+$ iptables -t nat -L -n</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Host模式 -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-server mr-2 text-green-500"></i>
+                                Host模式
+                            </h3>
+                            <p class="mb-4">容器直接使用宿主机的网络栈，性能最好但隔离性最差。</p>
+                            
+                            <div class="code-block p-4 overflow-x-auto">
+                                <pre class="text-sm"><code># 使用host网络模式
+$ docker run -d --network host --name web nginx
+
+# 查看容器网络（与宿主机相同）
+$ docker exec web ip addr
+$ ip addr  # 宿主机网络
+
+# 直接访问宿主机IP的80端口
+$ curl localhost:80</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- Container模式 -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-link mr-2 text-purple-500"></i>
+                                Container模式
+                            </h3>
+                            <p class="mb-4">这个模式指定新创建的容器和已经存在的一个容器共享一个 Network Namespace，而不是和宿主机共享。新创建的容器不会创建自己的网卡，配置自己的 IP，而是和一个指定的容器共享 IP、端口范围等。同样，两个容器除了网络方面，其他的如文件系统、进程列表等还是隔离的。两个容器的进程可以通过 lo 网卡设备通信。</p>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="font-semibold mb-2">基本使用</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code>## 启动测试容器，共享mysql的网络空间
+$ docker run -ti --rm --net=container:mysql busybox sh
+/ # ip a
+/ # netstat -tlp|grep 3306
+/ # telnet localhost 3306</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">应用场景</h4>
+                                    <div class="bg-purple-50 dark:bg-purple-900 p-4 rounded-lg">
+                                        <p class="text-purple-700 dark:text-purple-300 text-sm">
+                                            <i class="fas fa-info-circle mr-2"></i>
+                                            在一些特殊的场景中非常有用，例如，<strong>kubernetes的pod</strong>，kubernetes为pod创建一个基础设施容器，同一pod下的其他容器都以container模式共享这个基础设施容器的网络命名空间，相互之间以localhost访问，构成一个统一的整体。
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">完整示例</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 启动MySQL容器
+$ docker run --net host -d --name mysql -e MYSQL_ROOT_PASSWORD=123456 mysql:5.7
+
+# 启动第二个容器，共享mysql的网络
+$ docker run -d --network container:mysql --name web2 busybox sleep 3600
+
+# 查看两个容器的网络（IP相同）
+$ docker exec mysql ip addr
+$ docker exec web2 ip addr</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- None模式 -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-ban mr-2 text-red-500"></i>
+                                None模式
+                            </h3>
+                            <p class="mb-4">只会创建对应的网络空间，不会配置网络堆栈（网卡、路由等）。</p>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="font-semibold mb-2">创建None模式容器</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 创建none的容器
+$ docker run -it --name=network-none --net=none nginx:alpine sh
+# ifconfig</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">手动配置网络</h4>
+                                    <p class="mb-2 text-sm text-gray-600 dark:text-gray-400">在宿主机中操作：</p>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 创建虚拟网卡对
+$ ip link add A type veth peer name B
+# A端插入到docker0网桥
+$ brctl addif docker0 A
+$ ip link set A up
+
+# B端插入到network-none容器中，需要借助ip netns,因此需要显示的创建命名network namespace
+$ PID=$(docker inspect -f '{{.State.Pid}}' network-none)
+$ mkdir -p /var/run/netns
+$ ln -s /proc/$PID/ns/net /var/run/netns/$PID
+
+# B端放到容器的命名空间
+$ ip link set B netns $PID
+$ ip netns exec $PID ip link set dev B name eth0  # 修改设备名称为eth0，和docker默认行为一致
+$ ip netns exec $PID ip link set eth0 up
+
+# 设置ip
+$ ip netns exec $PID ip addr add 172.17.0.100/16 dev eth0
+# 添加默认路由，指定给docker0网桥
+$ ip netns exec $PID ip route add default via 172.17.0.1
+
+# 测试容器间通信</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">前置知识</h4>
+                                    <div class="bg-yellow-50 dark:bg-yellow-900 p-4 rounded-lg">
+                                        <ul class="text-yellow-700 dark:text-yellow-300 text-sm space-y-2">
+                                            <li>• ip netns 命令用来管理 network namespace。它可以创建命名的 network namespace，然后通过名字来引用 network namespace</li>
+                                            <li>• network namespace 在逻辑上是网络堆栈的一个副本，它有自己的路由、防火墙规则和网络设备</li>
+                                            <li>• 默认情况下，子进程继承其父进程的 network namespace。也就是说，如果不显式创建新的 network namespace，所有进程都从 init 进程继承相同的默认 network namespace</li>
+                                            <li>• 根据约定，命名的 network namespace 是可以打开的 <strong>/var/run/netns/</strong> 目录下的一个对象</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 自定义网络 -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-cog mr-2 text-orange-500"></i>
+                                自定义网络
+                            </h3>
+                            <p class="mb-4">创建自定义网络，提供更好的隔离和服务发现。</p>
+                            
+                            <div class="code-block p-4 overflow-x-auto">
+                                <pre class="text-sm"><code># 创建自定义网络
+$ docker network create --driver bridge mynetwork
+$ docker network create --driver bridge --subnet=172.20.0.0/16 mynetwork
+
+# 查看网络列表
+$ docker network ls
+
+# 查看网络详情
+$ docker network inspect mynetwork
+
+# 在自定义网络中运行容器
+$ docker run -d --network mynetwork --name web1 nginx
+$ docker run -d --network mynetwork --name web2 nginx
+
+# 容器间可以通过名称通信
+$ docker exec web1 ping web2
+
+# 连接容器到网络
+$ docker network connect mynetwork existing_container
+
+# 断开容器网络连接
+$ docker network disconnect mynetwork existing_container
+
+# 删除网络
+$ docker network rm mynetwork</code></pre>
+                            </div>
+                        </div>
+
+                        <!-- 实用技巧 -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-lightbulb mr-2 text-yellow-500"></i>
+                                实用技巧
+                            </h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="font-semibold mb-2">1. 清理主机上所有退出的容器</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code>$ docker rm $(docker ps -aq)</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">2. 调试或者排查容器启动错误</h4>
+                                    <div class="bg-yellow-50 dark:bg-yellow-900 p-4 rounded-lg mb-3">
+                                        <p class="text-yellow-700 dark:text-yellow-300 text-sm">
+                                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                                            若有时遇到容器启动失败的情况，可以先使用相同的镜像启动一个临时容器，先进入容器
+                                        </p>
+                                    </div>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code>## 若有时遇到容器启动失败的情况，可以先使用相同的镜像启动一个临时容器，先进入容器
+$ docker run --rm -ti &lt;image_id&gt; sh
+## 进入容器后，手动执行该容器对应的ENTRYPOINT或者CMD命令，这样即使出错，容器也不会退出，因为bash作为1号进程，我们只要不退出容器，该容器就不会自动退出</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Django应用容器化实践 -->
+                <section id="django-practice" class="content-section rounded-xl p-8 mb-12">
+                    <h2 class="section-title text-3xl font-bold mb-6">
+                        <i class="fas fa-rocket mr-3 text-green-500"></i>
+                        Django应用容器化实践
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        <!-- 项目介绍 -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-info-circle mr-2 text-blue-500"></i>
+                                项目介绍
+                            </h3>
+                            <p class="mb-4">我们将通过一个Django博客项目来演示如何将Python Web应用容器化。</p>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="font-semibold mb-2">项目信息</h4>
+                                    <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
+                                        <ul class="text-blue-700 dark:text-blue-300 text-sm space-y-2">
+                                            <li><strong>项目地址：</strong>https://gitee.com/agagin/python-demo.git</li>
+                                            <li><strong>技术栈：</strong>python3 + django + uwsgi + nginx + mysql</li>
+                                            <li><strong>内部服务端口：</strong>8002</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">项目结构</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code>myblog/
+├── myblog/
+│   ├── __init__.py
+│   ├── settings.py
+│   ├── urls.py
+│   └── wsgi.py
+├── blog/
+│   ├── models.py
+│   ├── views.py
+│   └── urls.py
+├── requirements.txt
+├── Dockerfile
+├── run.sh
+├── myblog.conf
+└── manage.py</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">requirements.txt</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code>Django==3.2.13
+PyMySQL==1.0.2
+gunicorn==20.1.0
+django-cors-headers==3.11.0</code></pre>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dockerfile -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-file-code mr-2 text-orange-500"></i>
+                                Dockerfile编写
+                            </h3>
+                            
+                            <div class="code-block p-4 overflow-x-auto">
+                                <pre class="text-sm"><code># This my first django Dockerfile
+# Version 1.0
+
+# Base images 基础镜像
+FROM centos:centos7.5.1804
+
+#MAINTAINER 维护者信息
+LABEL maintainer="inspur_lyx@hotmail.com"
+
+#ENV 设置环境变量
+ENV LANG en_US.UTF-8
+ENV LC_ALL en_US.UTF-8
+
+#RUN 执行以下命令
+RUN curl -so /etc/yum.repos.d/Centos-7.repo http://mirrors.aliyun.com/repo/Centos-7.repo && rpm -Uvh http://nginx.org/packages/centos/7/noarch/RPMS/nginx-release-centos-7-0.el7.ngx.noarch.rpm
+RUN yum install -y  python36 python3-devel gcc pcre-devel zlib-devel make net-tools nginx
+
+#工作目录
+WORKDIR /opt/myblog
+
+#拷贝文件至工作目录
+COPY . .
+
+# 拷贝nginx配置文件
+COPY myblog.conf /etc/nginx
+
+#安装依赖的插件
+RUN pip3 install -i http://mirrors.aliyun.com/pypi/simple/ --trusted-host mirrors.aliyun.com -r requirements.txt
+
+RUN chmod +x run.sh && rm -rf ~/.cache/pip
+
+#EXPOSE 映射端口
+EXPOSE 8002
+
+#容器启动时执行命令
+CMD ["./run.sh"]</code></pre>
+                            </div>
+                            
+                            <div class="bg-yellow-50 dark:bg-yellow-900 p-4 rounded-lg mt-4">
+                                <p class="text-yellow-700 dark:text-yellow-300 text-sm">
+                                    <i class="fas fa-exclamation-triangle mr-2"></i>
+                                    <strong>构建镜像：</strong>
+                                </p>
+                                <div class="code-block p-3 mt-2">
+                                    <code>$ docker build . -t myblog:v1 -f Dockerfile</code>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 构建和运行 -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-play mr-2 text-green-500"></i>
+                                构建和运行
+                            </h3>
+                            
+                            <div class="space-y-4">
+                                <div>
+                                    <h4 class="font-semibold mb-2">1. 构建镜像</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 构建Django应用镜像
+$ docker build -t myblog:v1 .
+
+# 查看构建的镜像
+$ docker images | grep myblog</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">2. 启动MySQL数据库</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 启动MySQL容器
+$ docker run -d -p 3306:3306 --name mysql \
+  -v /opt/mysql:/var/lib/mysql \
+  -e MYSQL_DATABASE=myblog \
+  -e MYSQL_ROOT_PASSWORD=123456 \
+  mysql:5.7 \
+  --character-set-server=utf8mb4 \
+  --collation-server=utf8mb4_unicode_ci
+
+# 查看MySQL容器状态
+$ docker ps | grep mysql
+
+# 进入MySQL容器查看数据库
+$ docker exec -ti mysql bash
+#/ mysql -uroot -p123456
+#/ show databases;
+
+## navicator连接</code></pre>
+                                    </div>
+                                    
+                                    <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg mt-4">
+                                        <p class="text-blue-700 dark:text-blue-300 text-sm">
+                                            <i class="fas fa-info-circle mr-2"></i>
+                                            <strong>参数说明：</strong>
+                                        </p>
+                                        <ul class="text-blue-700 dark:text-blue-300 text-sm mt-2 space-y-1">
+                                            <li>• <code>-v /opt/mysql:/var/lib/mysql</code>：数据持久化</li>
+                                            <li>• <code>--character-set-server=utf8mb4</code>：设置字符集</li>
+                                            <li>• <code>--collation-server=utf8mb4_unicode_ci</code>：设置排序规则</li>
+                                        </ul>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">3. 启动Django应用</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 启动Django容器
+$ docker run -d \
+  --name myblog \
+  -p 8002:8002 \
+  -e MYSQL_HOST=172.21.51.143 \
+  -e MYSQL_USER=root \
+  -e MYSQL_PASSWD=123456 \
+  myblog:v1
+
+# 查看容器日志
+$ docker logs -f myblog</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">4. 数据库迁移</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 进入Django容器
+$ docker exec -ti myblog bash
+#/ python3 manage.py makemigrations
+#/ python3 manage.py migrate
+#/ python3 manage.py createsuperuser
+
+# 创建超级用户（也可以直接执行）
+$ docker exec -ti myblog python3 manage.py createsuperuser
+
+# 收集静态文件
+## $ docker exec -ti myblog python3 manage.py collectstatic</code></pre>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <h4 class="font-semibold mb-2">5. 访问应用</h4>
+                                    <div class="code-block p-4 overflow-x-auto">
+                                        <pre class="text-sm"><code># 访问Django应用
+访问172.21.51.143:8002/admin
+
+# 或使用curl测试
+$ curl http://localhost:8002
+$ curl http://localhost:8002/admin/</code></pre>
+                                    </div>
+                                    
+                                    <div class="bg-green-50 dark:bg-green-900 p-4 rounded-lg mt-4">
+                                        <p class="text-green-700 dark:text-green-300 text-sm">
+                                            <i class="fas fa-check-circle mr-2"></i>
+                                            <strong>访问地址：</strong>http://172.21.51.143:8002/admin
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Docker Compose -->
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-layer-group mr-2 text-purple-500"></i>
+                                使用Docker Compose
+                            </h3>
+                            <p class="mb-4">使用Docker Compose可以更方便地管理多容器应用。</p>
+                            
+                            <div class="code-block p-4 overflow-x-auto">
+                                <pre class="text-sm"><code># docker-compose.yml
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: 123456
+      MYSQL_DATABASE: myblog
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+  web:
+    build: .
+    ports:
+      - "8002:8002"
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_USER: root
+      MYSQL_PASSWD: 123456
+    depends_on:
+      - mysql
+    volumes:
+      - .:/app
+
+volumes:
+  mysql_data:
+
+# 启动所有服务
+$ docker-compose up -d
+
+# 查看服务状态
+$ docker-compose ps
+
+# 查看日志
+$ docker-compose logs -f web
+
+# 停止所有服务
+$ docker-compose down</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 本章小结 -->
+                <section id="summary" class="content-section rounded-xl p-8 mb-12">
+                    <h2 class="section-title text-3xl font-bold mb-6">
+                        <i class="fas fa-check-circle mr-3 text-green-500"></i>
+                        本章小结
+                    </h2>
+                    
+                    <div class="space-y-6">
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="section-card p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-4 flex items-center">
+                                    <span class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm mr-3">1</span>
+                                    Docker的诞生背景
+                                </h3>
+                                <p class="text-gray-600 dark:text-gray-400">
+                                    为了解决软件交付过程中的环境依赖，同时提供一种更加轻量的虚拟化技术，Docker出现了。
+                                </p>
+                            </div>
+
+                            <div class="section-card p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-4 flex items-center">
+                                    <span class="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center text-sm mr-3">2</span>
+                                    发展历程
+                                </h3>
+                                <p class="text-gray-600 dark:text-gray-400">
+                                    2013年诞生，15年开始迅速发展，从17.03月开始，使用时间日期管理版本，稳定版以每季度为准。
+                                </p>
+                            </div>
+
+                            <div class="section-card p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-4 flex items-center">
+                                    <span class="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm mr-3">3</span>
+                                    核心概念
+                                </h3>
+                                <p class="text-gray-600 dark:text-gray-400">
+                                    Docker是一种CS架构的软件产品，可以把代码及依赖打包成镜像，作为交付介质，并且把镜像启动成为容器，提供容器生命周期的管理。
+                                </p>
+                            </div>
+
+                            <div class="section-card p-6 rounded-lg">
+                                <h3 class="text-lg font-semibold mb-4 flex items-center">
+                                    <span class="w-8 h-8 bg-gray-500 text-white rounded-full flex items-center justify-center text-sm mr-3">4</span>
+                                    基本操作
+                                </h3>
+                                <p class="text-gray-600 dark:text-gray-400">
+                                    使用yum部署docker，启动后通过操作docker这个命令行，自动调用docker daemon完成容器相关操作。
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="highlight-box p-6 rounded-lg">
+                            <h3 class="text-xl font-semibold mb-4 flex items-center">
+                                <i class="fas fa-key mr-2 text-yellow-500"></i>
+                                核心要素操作
+                            </h3>
+                            <span class="w-8 h-8 bg-read-500 text-black rounded-full flex items-center justify-center text-sm mr-3">5</span>
+                            <p class="mb-4">常用操作，围绕<strong>镜像|容器|仓库</strong>三大核心要素：</p>
+                            <div class="grid md:grid-cols-2 gap-4 text-sm">
+                                <div class="code-block p-3">
+                                    <code>systemctl start|stop|restart docker</code>
+                                </div>
+                                <div class="code-block p-3">
+                                    <code>docker build | pull -> docker tag -> docker push</code>
+                                </div>
+                                <div class="code-block p-3">
+                                    <code>docker run --name my-demo -d -p 8080:80 -v /opt/data:/data demo:v20200327 ping xx.com</code>
+                                </div>
+                                <div class="code-block p-3">
+                                    <code>docker cp /path/a.txt mycontainer:/opt</code>
+                                </div>
+                                <div class="code-block p-3">
+                                    <code>docker exec -ti mycontainer /bin/sh</code>
+                                </div>
+                                <div class="code-block p-3">
+                                    <code>docker logs -f --tail=100 mycontainer</code>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-lg font-semibold mb-4 flex items-center">
+                                <span class="w-8 h-8 bg-indigo-500 text-white rounded-full flex items-center justify-center text-sm mr-3">6</span>
+                                Dockerfile构建
+                            </h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">
+                                通过dockerfile构建业务镜像，先使用基础镜像，然后通过一系列的指令把我们的业务应用所需要的运行环境和依赖都打包到镜像中，
+                                然后通过CMD或者ENTRYPOINT指令把镜像启动时的入口制定好，完成封装即可。
+                            </p>
+                            <div class="bg-blue-50 dark:bg-blue-900 p-4 rounded-lg">
+                                <p class="text-blue-700 dark:text-blue-300 text-sm">
+                                    <i class="fas fa-lightbulb mr-2"></i>
+                                    <strong>类比：</strong>有点类似于，先找来一个集装箱模板(基础镜像)，然后把项目依赖的服务都扔到集装箱中，
+                                    然后设置好服务的启动入口，关闭箱门，即完成了业务镜像的制作。
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-lg font-semibold mb-4 flex items-center">
+                                <span class="w-8 h-8 bg-red-500 text-white rounded-full flex items-center justify-center text-sm mr-3">7</span>
+                                实现原理
+                            </h3>
+                            <p class="text-gray-600 dark:text-gray-400">
+                                容器的实现依赖于内核模块提供的namespace和control-group的功能，通过namespace创建一块虚拟空间，
+                                空间内实现了各类资源(进程、网络、文件系统)的隔离，提供control-group实现了对隔离的空间的资源使用的限制。
+                            </p>
+                        </div>
+
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-lg font-semibold mb-4 flex items-center">
+                                <span class="w-8 h-8 bg-purple-500 text-white rounded-full flex items-center justify-center text-sm mr-3">8</span>
+                                镜像存储
+                            </h3>
+                            <p class="text-gray-600 dark:text-gray-400">
+                                docker镜像使用分层的方式进行存储，根据主机的存储驱动的不同，实现方式会不同，kernel在3.10.0-514以上自动支持overlay2 存储驱动，也是目前Docker推荐的方式。
+                            </p>
+                        </div>
+
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-lg font-semibold mb-4 flex items-center">
+                                <span class="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center text-sm mr-3">9</span>
+                                分层存储优势
+                            </h3>
+                            <p class="text-gray-600 dark:text-gray-400">
+                                得益于分层存储的模式，多个容器可以通过copy-on-write的策略，在镜像的最上层加一个可写层，同时利用存储驱动的UnionFS的能力，实现一个镜像快速启动多个容器的场景。
+                            </p>
+                        </div>
+
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-lg font-semibold mb-4 flex items-center">
+                                <span class="w-8 h-8 bg-pink-500 text-white rounded-full flex items-center justify-center text-sm mr-3">10</span>
+                                网络模式
+                            </h3>
+                            <p class="text-gray-600 dark:text-gray-400">
+                                docker的网络模式分为4种，最常用的为bridge和host模式。bridge模式通过docker0网桥，启动容器的时候通过创建一对虚拟网卡，将容器连接在桥上，同时维护了虚拟网卡与网桥端口的关系，实现容器间的通信。容器与宿主机之间的通信通过iptables端口映射的方式，docker利用iptables的PREROUTING和POSTROUTING的nat功能，实现了SNAT与DNAT，使得容器内部的服务被完美的保护起来。
+                            </p>
+                        </div>
+
+                        <div class="section-card p-6 rounded-lg">
+                            <h3 class="text-lg font-semibold mb-4 flex items-center">
+                                <span class="w-8 h-8 bg-gray-500 text-white rounded-full flex items-center justify-center text-sm mr-3">11</span>
+                                学习重点
+                            </h3>
+                            <p class="text-gray-600 dark:text-gray-400">
+                                本章重点内容是docker的核心要素及基础的操作，实现原理以及docker的网络模式为选修包，目的为了帮助有docker基础及经验的同学更好的进一步理解docker。
+                            </p>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button id="backToTop" class="fixed bottom-6 right-6 w-12 h-12 bg-blue-500 text-white rounded-full shadow-lg hover:bg-blue-600 transition-all duration-300 opacity-0 pointer-events-none">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        const themeIcon = document.getElementById('themeIcon');
+        const html = document.documentElement;
+
+        // Check for saved theme preference or default to system preference
+        const savedTheme = localStorage.getItem('theme');
+        const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        const currentTheme = savedTheme || systemTheme;
+
+        // Apply theme
+        function applyTheme(theme) {
+            if (theme === 'dark') {
+                html.setAttribute('data-theme', 'dark');
+                html.classList.add('dark');
+                themeIcon.className = 'fas fa-sun';
+            } else {
+                html.removeAttribute('data-theme');
+                html.classList.remove('dark');
+                themeIcon.className = 'fas fa-moon';
+            }
+        }
+
+        // Initialize theme
+        applyTheme(currentTheme);
+
+        // Theme toggle event
+        themeToggle.addEventListener('click', () => {
+            const isDark = html.hasAttribute('data-theme');
+            const newTheme = isDark ? 'light' : 'dark';
+            applyTheme(newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+
+        // Mobile Menu
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const sidebar = document.getElementById('sidebar');
+        const mobileOverlay = document.getElementById('mobileOverlay');
+
+        function toggleMobileMenu() {
+            sidebar.classList.toggle('open');
+            mobileOverlay.classList.toggle('hidden');
+        }
+
+        mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+        mobileOverlay.addEventListener('click', toggleMobileMenu);
+
+        // Navigation
+        const navItems = document.querySelectorAll('.nav-item');
+        const sections = document.querySelectorAll('section[id]');
+
+        // Smooth scrolling
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const targetId = item.getAttribute('href').substring(1);
+                const targetSection = document.getElementById(targetId);
+                
+                if (targetSection) {
+                    const headerHeight = 80;
+                    const targetPosition = targetSection.offsetTop - headerHeight;
+                    
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+
+                // Close mobile menu if open
+                if (!sidebar.classList.contains('hidden')) {
+                    toggleMobileMenu();
+                }
+            });
+        });
+
+        // Active navigation highlighting
+        function updateActiveNav() {
+            const scrollPosition = window.scrollY + 100;
+            
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                const sectionHeight = section.offsetHeight;
+                const sectionId = section.getAttribute('id');
+                
+                if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+                    navItems.forEach(item => item.classList.remove('active'));
+                    const activeItem = document.querySelector(`a[href="#${sectionId}"]`);
+                    if (activeItem) {
+                        activeItem.classList.add('active');
+                    }
+                }
+            });
+        }
+
+        // Back to top button
+        const backToTopBtn = document.getElementById('backToTop');
+
+        function updateBackToTop() {
+            if (window.scrollY > 300) {
+                backToTopBtn.classList.remove('opacity-0', 'pointer-events-none');
+                backToTopBtn.classList.add('opacity-100');
+            } else {
+                backToTopBtn.classList.add('opacity-0', 'pointer-events-none');
+                backToTopBtn.classList.remove('opacity-100');
+            }
+        }
+
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+
+        // Scroll events
+        let ticking = false;
+        function onScroll() {
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    updateActiveNav();
+                    updateBackToTop();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }
+
+        window.addEventListener('scroll', onScroll);
+
+        // Initialize
+        updateActiveNav();
+        updateBackToTop();
+        updateProgressBar();
+        enhanceCodeBlocks();
+        
+        // Add structured data for SEO
+        const structuredData = {
+            "@context": "https://schema.org",
+            "@type": "Course",
+            "name": "Docker学习教程 - 第一天：走进Docker的世界",
+            "description": "Docker容器技术完整教程，包含基础概念、安装配置、Dockerfile编写、网络原理等",
+            "provider": {
+                "@type": "Organization",
+                "name": "Docker学习教程"
+            },
+            "courseMode": "online",
+            "educationalLevel": "beginner"
+        };
+        
+        const script = document.createElement('script');
+        script.type = 'application/ld+json';
+        script.textContent = JSON.stringify(structuredData);
+        document.head.appendChild(script);
+
+        // Fade in animation for sections
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        sections.forEach(section => {
+            observer.observe(section);
+        });
+
+        // Progress bar functionality
+        function updateProgressBar() {
+            const scrollTop = window.pageYOffset;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            document.getElementById('progressFill').style.width = scrollPercent + '%';
+        }
+
+        // Search functionality
+        const searchBox = document.getElementById('searchBox');
+        const searchResults = document.getElementById('searchResults');
+        let searchTimeout;
+
+        function performSearch(query) {
+            if (query.length < 2) {
+                searchResults.style.display = 'none';
+                return;
+            }
+
+            const results = [];
+            const sections = document.querySelectorAll('section[id], h2, h3, h4');
+            
+            sections.forEach(section => {
+                const text = section.textContent.toLowerCase();
+                const id = section.id || section.closest('section[id]')?.id;
+                const title = section.textContent.trim();
+                
+                if (text.includes(query.toLowerCase()) && id && title) {
+                    results.push({ id, title: title.substring(0, 100) });
+                }
+            });
+
+            displaySearchResults(results.slice(0, 5));
+        }
+
+        function displaySearchResults(results) {
+            if (results.length === 0) {
+                searchResults.innerHTML = '<div class="search-result-item text-gray-500">未找到相关内容</div>';
+            } else {
+                searchResults.innerHTML = results.map(result => 
+                    `<div class="search-result-item" data-target="${result.id}">
+                        <i class="fas fa-link mr-2 text-blue-500"></i>
+                        ${result.title}
+                    </div>`
+                ).join('');
+            }
+            searchResults.style.display = 'block';
+        }
+
+        searchBox.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => performSearch(e.target.value), 300);
+        });
+
+        searchBox.addEventListener('focus', () => {
+            if (searchBox.value.length >= 2) {
+                searchResults.style.display = 'block';
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.search-box')) {
+                searchResults.style.display = 'none';
+            }
+        });
+
+        searchResults.addEventListener('click', (e) => {
+            const item = e.target.closest('.search-result-item');
+            if (item) {
+                const targetId = item.dataset.target;
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    targetElement.scrollIntoView({ behavior: 'smooth' });
+                    searchResults.style.display = 'none';
+                    searchBox.value = '';
+                }
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                searchBox.focus();
+            }
+            if ((e.ctrlKey || e.metaKey) && e.key === 'd') {
+                e.preventDefault();
+                toggleTheme();
+            }
+            if (e.key === 'Escape') {
+                searchResults.style.display = 'none';
+                searchBox.blur();
+            }
+        });
+
+        // Enhanced copy code functionality
+        function enhanceCodeBlocks() {
+            document.querySelectorAll('.code-block').forEach(block => {
+                if (block.querySelector('.code-header')) return; // Already enhanced
+                
+                const container = document.createElement('div');
+                container.className = 'code-container';
+                
+                const header = document.createElement('div');
+                header.className = 'code-header';
+                
+                const language = block.querySelector('code')?.className.match(/language-(\w+)/)?.[1] || 'bash';
+                header.innerHTML = `
+                    <span><i class="fas fa-code mr-2"></i>${language}</span>
+                    <button class="copy-button" data-copy="code">
+                        <i class="fas fa-copy mr-1"></i>复制
+                    </button>
+                `;
+                
+                block.parentNode.insertBefore(container, block);
+                container.appendChild(header);
+                container.appendChild(block);
+                
+                const copyBtn = header.querySelector('.copy-button');
+                copyBtn.addEventListener('click', () => {
+                    const code = block.querySelector('code') || block.querySelector('pre');
+                    navigator.clipboard.writeText(code.textContent).then(() => {
+                        copyBtn.innerHTML = '<i class="fas fa-check mr-1"></i>已复制';
+                        copyBtn.classList.add('copied');
+                        setTimeout(() => {
+                            copyBtn.innerHTML = '<i class="fas fa-copy mr-1"></i>复制';
+                            copyBtn.classList.remove('copied');
+                        }, 2000);
+                    }).catch(() => {
+                        // Fallback for older browsers
+                        const textArea = document.createElement('textarea');
+                        textArea.value = code.textContent;
+                        document.body.appendChild(textArea);
+                        textArea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textArea);
+                        
+                        copyBtn.innerHTML = '<i class="fas fa-check mr-1"></i>已复制';
+                        copyBtn.classList.add('copied');
+                        setTimeout(() => {
+                            copyBtn.innerHTML = '<i class="fas fa-copy mr-1"></i>复制';
+                            copyBtn.classList.remove('copied');
+                        }, 2000);
+                    });
+                });
+            });
+        }
+
+        // Update scroll events to include progress bar
+        function onScroll() {
+            if (!ticking) {
+                requestAnimationFrame(() => {
+                    updateActiveNav();
+                    updateBackToTop();
+                    updateProgressBar();
+                    ticking = false;
+                });
+                ticking = true;
+            }
+        }
+    </script>
+    
+    <!-- Prism.js for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-docker.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
+</body>
+</html>
